@@ -5,22 +5,84 @@
   --foreground: #171717;
 }
 
+/* Anima 브랜드 컬러 (Tailwind v4는 config 파일 대신 @theme으로 등록) */
+@theme {
+  --color-primary: #ff8a00;
+  --color-accent: #ff8a36;
+  --color-dot-blue: #36bcff;
+  --color-gray-light: #d9d9d9;
+  /* 순백색은 눈이 부셔서 아주 옅은 웜톤을 바탕색으로 씁니다 */
+  --color-cream: #fdf8f3;
+
+  /* 배경에서 천천히 떠다니는 블러 덩어리 */
+  --animate-drift-a: drift-a 26s ease-in-out infinite;
+  --animate-drift-b: drift-b 34s ease-in-out infinite;
+  --animate-drift-c: drift-c 44s ease-in-out infinite;
+
+  @keyframes drift-a {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    33% {
+      transform: translate3d(8%, -6%, 0) scale(1.15);
+    }
+    66% {
+      transform: translate3d(-6%, 7%, 0) scale(0.92);
+    }
+  }
+
+  @keyframes drift-b {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1.05);
+    }
+    40% {
+      transform: translate3d(-9%, 8%, 0) scale(0.9);
+    }
+    70% {
+      transform: translate3d(7%, 5%, 0) scale(1.12);
+    }
+  }
+
+  @keyframes drift-c {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(0.95);
+    }
+    50% {
+      transform: translate3d(5%, -9%, 0) scale(1.2);
+    }
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* 제목용 명조 — 부분적으로 쓰고 싶을 때의 클래스: font-display */
+  --font-display: var(--font-nanum-myeongjo), serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* 제목은 나눔명조, 본문·버튼·입력폼은 고딕 (작은 글씨 가독성 때문) */
+h1,
+h2,
+h3 {
+  font-family: var(--font-nanum-myeongjo), serif;
+}
+
+/* 움직임에 민감한 사용자는 배경을 정지시킵니다 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-drift-a,
+  .animate-drift-b,
+  .animate-drift-c {
+    animation: none;
+  }
 }

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "subset:fonts": "python scripts/subset-fonts.py"
   },
   "dependencies": {
     "next": "16.3.0",

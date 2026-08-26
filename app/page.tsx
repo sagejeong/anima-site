@@ -1,68 +1,40 @@
-import Image from "next/image";
+import AuroraBackground from "@/components/AuroraBackground";
+import Header from "@/components/Header";
+import RecordButton from "@/components/RecordButton";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="flex min-h-screen flex-1 flex-col bg-cream">
+      <Header />
+
+      <main className="flex flex-1 flex-col">
+        {/* Hero — 제목 / 설명 / 버튼, 그 외에는 두지 않습니다 */}
+        <section className="relative flex min-h-[100svh] items-center overflow-hidden">
+          <AuroraBackground />
+
+          <div className="relative mx-auto flex w-full max-w-4xl flex-col items-center px-5 py-28 text-center sm:px-8">
+            <h1 className="text-[2.5rem] font-bold leading-[1.2] tracking-tight text-neutral-900 sm:text-6xl sm:leading-[1.15]">
+              <span className="block">보통의 기침과 얼마나 다른지,</span>
+              <span className="block">3초면 알 수 있습니다.</span>
+            </h1>
+
+            <p className="mt-8 text-lg leading-relaxed text-neutral-700 sm:text-2xl sm:leading-relaxed">
+              <span className="block">
+                여러 사람의 기침 데이터와 비교해 지금 상태를 알려드립니다.
+              </span>
+              <span className="block">
+                기록이 쌓이면, 나만의 기준선이 만들어집니다.
+              </span>
+            </p>
+
+            <div className="mt-12 flex flex-col items-center gap-4">
+              <RecordButton />
+              <p className="text-sm text-neutral-600">
+                이름도 연락처도 묻지 않습니다.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

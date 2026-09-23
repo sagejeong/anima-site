@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AccountStep from "@/components/signup/AccountStep";
 import BasicInfoStep from "@/components/signup/BasicInfoStep";
 import ConsentStep from "@/components/signup/ConsentStep";
@@ -131,7 +132,7 @@ export default function SignupFlow() {
       {submitError && (
         <p
           role="alert"
-          className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700"
+          className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-400"
         >
           {submitError}
         </p>
@@ -143,7 +144,7 @@ export default function SignupFlow() {
             type="button"
             onClick={goPrev}
             disabled={isSubmitting}
-            className="rounded-full border border-gray-light px-6 py-3 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-400 disabled:opacity-50 sm:text-base"
+            className="rounded-full border border-gray-light px-6 py-3 text-sm font-medium text-ink-soft transition-colors hover:border-line disabled:opacity-50 sm:text-base"
           >
             이전
           </button>
@@ -161,7 +162,7 @@ export default function SignupFlow() {
         </button>
       </div>
 
-      <p className="mt-8 text-center text-sm text-neutral-500">
+      <p className="mt-8 text-center text-sm text-ink-soft">
         다른 기기에서 만든 계정이 있으신가요?{" "}
         <Link
           href="/login"
@@ -191,7 +192,7 @@ function StepIndicator({ currentStep }: { currentStep: StepIndex }) {
             />
             <span
               className={`text-xs font-medium sm:text-sm ${
-                isCurrent ? "text-primary" : "text-neutral-400"
+                isCurrent ? "text-primary" : "text-ink-soft"
               }`}
               aria-current={isCurrent ? "step" : undefined}
             >
@@ -214,12 +215,10 @@ type SignupCompleteProps = {
 
 type AccountLinkStatus = "idle" | "submitting" | "done";
 
-/**
- * 참여 정보 저장은 이미 끝난 뒤의 화면입니다.
- * 계정 만들기는 완전히 선택 사항 — 안 만들어도 지금까지의 기록은 이미 저장돼 있습니다.
- * 다른 기기에서도 이어보고 싶을 때만 아이디를 만들면 됩니다.
- */
+// 참여 정보 저장 끝난 뒤 화면. 계정은 완전 선택, 안 만들어도 기록은 이미 저장됨.
+// 다른 기기에서 이어보고 싶을 때만 아이디 만들면 됨
 function SignupComplete({ data, onChange }: SignupCompleteProps) {
+  const router = useRouter();
   const [showAccountForm, setShowAccountForm] = useState<boolean>(false);
   const [accountErrors, setAccountErrors] = useState<FormErrors>({});
   const [accountStatus, setAccountStatus] = useState<AccountLinkStatus>("idle");
@@ -258,6 +257,7 @@ function SignupComplete({ data, onChange }: SignupCompleteProps) {
       }
 
       setAccountStatus("done");
+      router.refresh();
     } catch {
       setAccountError("네트워크에 연결하지 못했습니다.");
       setAccountStatus("idle");
@@ -284,17 +284,17 @@ function SignupComplete({ data, onChange }: SignupCompleteProps) {
         </svg>
       </div>
 
-      <h2 className="mt-6 text-2xl font-bold text-neutral-900">
+      <h2 className="mt-6 text-2xl font-bold text-ink">
         참여해 주셔서 감사합니다
       </h2>
-      <p className="mt-3 text-base leading-relaxed text-neutral-600">
+      <p className="mt-3 text-base leading-relaxed text-ink-soft">
         입력하신 내용이 저장되었습니다.
         <br />
         이제 첫 기침 녹음을 시작할 수 있습니다.
       </p>
 
       {accountStatus === "done" ? (
-        <p className="mx-auto mt-8 max-w-md rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm leading-relaxed text-neutral-700">
+        <p className="mx-auto mt-8 max-w-md rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm leading-relaxed text-ink-soft">
           계정이 만들어졌습니다. 다른 기기에서도 같은 아이디로 로그인하면 지금
           기록을 이어서 볼 수 있어요.
         </p>
@@ -318,14 +318,14 @@ function SignupComplete({ data, onChange }: SignupCompleteProps) {
           </button>
         </div>
       ) : (
-        <div className="mx-auto mt-8 max-w-md rounded-2xl border border-gray-light bg-neutral-50 p-5">
-          <p className="text-sm font-medium text-neutral-700">
+        <div className="mx-auto mt-8 max-w-md rounded-2xl border border-gray-light bg-steel-surface p-5">
+          <p className="text-sm font-medium text-ink-soft">
             이 브라우저가 아닌 곳에서도 기록을 이어보고 싶으신가요?
           </p>
           <button
             type="button"
             onClick={() => setShowAccountForm(true)}
-            className="mt-3 rounded-full border border-neutral-300 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+            className="mt-3 rounded-full border border-line bg-steel-surface px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-primary hover:text-primary"
           >
             아이디 만들기 (선택)
           </button>
@@ -341,7 +341,7 @@ function SignupComplete({ data, onChange }: SignupCompleteProps) {
         </Link>
         <Link
           href="/"
-          className="text-sm font-medium text-neutral-500 underline underline-offset-4"
+          className="text-sm font-medium text-ink-soft underline underline-offset-4"
         >
           홈으로
         </Link>

@@ -204,12 +204,8 @@ export default function CoughRecorder() {
     router.push("/result");
   };
 
-  /**
-   * "분석 요청하기"를 누르면 곧바로 업로드합니다. 기침이 감지되지 않았거나
-   * 실패하면 복용 약을 묻지 않고 바로 결과(실패 카드)로 넘어갑니다 — 안 될
-   * 녹음에 시간을 더 쓰게 만들지 않기 위해서입니다. 기침이 제대로 감지된
-   * 경우에만 복용 약을 묻고, 그 답을 붙여서 결과로 넘어갑니다.
-   */
+  // "분석 요청하기" 누르면 바로 업로드. 기침 미감지/실패면 복용 약 안 묻고 바로 실패 카드로,
+  // 감지 성공한 경우에만 복용 약 물어서 답 붙여 결과로 넘어감
   const uploadRecording = async (): Promise<void> => {
     const blob = audioBlobRef.current;
     if (!blob) return;
@@ -351,7 +347,7 @@ export default function CoughRecorder() {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+      <h1 className="text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
         {headline}
       </h1>
 
@@ -361,7 +357,7 @@ export default function CoughRecorder() {
           {RECORDING_TIPS.map((tip) => (
             <li
               key={tip}
-              className="flex items-center gap-2 text-sm text-neutral-600"
+              className="flex items-center gap-2 text-sm text-ink-soft"
             >
               <span
                 className="h-1.5 w-1.5 rounded-full bg-primary"
@@ -376,8 +372,8 @@ export default function CoughRecorder() {
       {/* 파형 */}
       <div className="mt-10 w-full max-w-md">
         {status === "recorded" ? (
-          <div className="rounded-2xl border border-gray-light bg-white p-5">
-            <p className="text-sm font-medium text-neutral-700">
+          <div className="rounded-2xl border border-gray-light bg-steel-surface p-5">
+            <p className="text-sm font-medium text-ink-soft">
               녹음한 소리를 들어보세요
             </p>
             {audioUrl && (
@@ -388,7 +384,7 @@ export default function CoughRecorder() {
                 aria-label="녹음한 기침 소리"
               />
             )}
-            <p className="mt-3 text-sm text-neutral-500">
+            <p className="mt-3 text-sm text-ink-soft">
               길이 {formatDuration(recordedMs)}
             </p>
           </div>
@@ -400,7 +396,7 @@ export default function CoughRecorder() {
       {/* 경과 시간 */}
       {isRecording && (
         <p
-          className="mt-6 text-2xl font-semibold tabular-nums text-neutral-900"
+          className="mt-6 text-2xl font-semibold tabular-nums text-ink"
           role="timer"
           aria-live="off"
         >
@@ -422,7 +418,7 @@ export default function CoughRecorder() {
               <button
                 type="button"
                 onClick={resetRecording}
-                className="rounded-full border border-neutral-300 px-6 py-3.5 text-base font-medium text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+                className="rounded-full border border-line px-6 py-3.5 text-base font-medium text-ink-soft transition-colors hover:border-primary hover:text-primary"
               >
                 다시 녹음
               </button>
@@ -433,7 +429,7 @@ export default function CoughRecorder() {
                 disabled={isTooShort || isUploading}
                 className={`rounded-full px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-colors ${
                   isTooShort || isUploading
-                    ? "bg-neutral-300 shadow-none"
+                    ? "bg-line text-ink-soft shadow-none"
                     : "bg-primary hover:bg-accent"
                 }`}
               >
@@ -445,13 +441,13 @@ export default function CoughRecorder() {
               <a
                 href={audioUrl}
                 download={`anima-cough.${fileExtensionFor(mimeType)}`}
-                className="text-sm font-medium text-neutral-500 underline underline-offset-4 hover:text-primary"
+                className="text-sm font-medium text-ink-soft underline underline-offset-4 hover:text-primary"
               >
                 녹음 파일 내려받기
               </a>
             )}
 
-            <p className="max-w-sm text-center text-xs leading-relaxed text-neutral-500">
+            <p className="max-w-sm text-center text-xs leading-relaxed text-ink-soft">
               계정을 만들지 않아도 분석을 요청할 수 있습니다. 이 브라우저에서
               바로 결과를 보여드립니다.
             </p>
@@ -464,7 +460,7 @@ export default function CoughRecorder() {
               disabled={status === "requesting"}
               className={`flex h-28 w-28 flex-col items-center justify-center gap-1.5 rounded-full text-white shadow-xl transition-all disabled:opacity-60 ${
                 isRecording
-                  ? "bg-neutral-900 shadow-neutral-900/20"
+                  ? "bg-critical shadow-critical/30"
                   : "bg-primary shadow-primary/30 hover:bg-accent"
               }`}
             >
@@ -474,7 +470,7 @@ export default function CoughRecorder() {
               </span>
             </button>
 
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-ink-soft">
               {status === "requesting"
                 ? "마이크 사용을 허용해 주세요"
                 : isRecording
@@ -496,9 +492,9 @@ function Notice({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-gray-light bg-white p-6 text-center">
-      <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
-      <div className="mt-3 text-sm leading-relaxed text-neutral-600">
+    <div className="mx-auto max-w-md rounded-2xl border border-gray-light bg-steel-surface p-6 text-center">
+      <h2 className="text-lg font-bold text-ink">{title}</h2>
+      <div className="mt-3 text-sm leading-relaxed text-ink-soft">
         {children}
       </div>
     </div>

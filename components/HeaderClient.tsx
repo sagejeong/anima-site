@@ -62,7 +62,7 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         hasBackground
-          ? "bg-white/70 shadow-[0_1px_16px_rgba(0,0,0,0.06)] backdrop-blur-xl"
+          ? "bg-steel-surface/80 shadow-[0_1px_16px_rgba(36,31,26,0.1)] backdrop-blur-xl"
           : "bg-transparent"
       }`}
     >
@@ -90,7 +90,7 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm font-medium text-neutral-700 transition-colors hover:text-primary"
+                className="text-sm font-medium text-ink-soft transition-colors hover:text-primary"
               >
                 {item.label}
               </Link>
@@ -98,7 +98,7 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
           </nav>
         </div>
 
-        {/* 중앙: 핵심 CTA — 어느 페이지에서든 바로 녹음으로 갈 수 있게 */}
+        {/* 중앙: 핵심 CTA, 어느 페이지에서든 바로 녹음으로 */}
         <div className="justify-self-center">
           <RecordButton size="sm" />
         </div>
@@ -109,7 +109,7 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
             <div className="hidden items-center gap-3 md:flex">
               <Link
                 href="/settings"
-                className="rounded-full px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:text-primary"
+                className="rounded-full px-2 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary"
               >
                 {userId}님
               </Link>
@@ -117,7 +117,7 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
                 type="button"
                 onClick={() => void handleLogout()}
                 disabled={isLoggingOut}
-                className="rounded-full px-3 py-2 text-sm font-medium text-neutral-500 transition-colors hover:text-primary disabled:opacity-60"
+                className="rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary disabled:opacity-60"
               >
                 {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
               </button>
@@ -126,13 +126,13 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
             <div className="hidden items-center gap-2 md:flex">
               <Link
                 href="/login"
-                className="rounded-full px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:text-primary"
+                className="rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary"
               >
                 로그인
               </Link>
               <Link
                 href="/signup"
-                className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:border-primary hover:text-primary"
+                className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
               >
                 회원가입
               </Link>
@@ -142,7 +142,7 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
           <button
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
-            className="-mr-2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-neutral-800 transition-colors hover:bg-black/5 md:hidden"
+            className="-mr-2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink transition-colors hover:bg-primary/10 md:hidden"
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
             aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
@@ -180,19 +180,19 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
                 key={item.href}
                 href={item.href}
                 onClick={closeMenu}
-                className="rounded-lg px-3 py-2.5 text-base font-medium text-neutral-800 transition-colors hover:bg-black/5 hover:text-primary"
+                className="rounded-lg px-3 py-2.5 text-base font-medium text-ink transition-colors hover:bg-primary/10 hover:text-primary"
               >
                 {item.label}
               </Link>
             ))}
 
-            <div className="mt-3 flex flex-col gap-2 border-t border-neutral-200 pt-4">
+            <div className="mt-3 flex flex-col gap-2 border-t border-line pt-4">
               {userId ? (
                 <>
                   <Link
                     href="/settings"
                     onClick={closeMenu}
-                    className="rounded-lg px-3 py-2.5 text-base font-medium text-neutral-800 transition-colors hover:bg-black/5 hover:text-primary"
+                    className="rounded-lg px-3 py-2.5 text-base font-medium text-ink transition-colors hover:bg-primary/10 hover:text-primary"
                   >
                     {userId}님 · 설정
                   </Link>
@@ -200,7 +200,7 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
                     type="button"
                     onClick={() => void handleLogout()}
                     disabled={isLoggingOut}
-                    className="rounded-full border border-neutral-300 px-4 py-2.5 text-center text-sm font-medium text-neutral-800 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+                    className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
                   >
                     {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
                   </button>
@@ -210,14 +210,14 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
                   <Link
                     href="/login"
                     onClick={closeMenu}
-                    className="rounded-full border border-neutral-300 px-4 py-2.5 text-center text-sm font-medium text-neutral-800 transition-colors hover:border-primary hover:text-primary"
+                    className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
                   >
                     로그인
                   </Link>
                   <Link
                     href="/signup"
                     onClick={closeMenu}
-                    className="rounded-full border border-neutral-300 px-4 py-2.5 text-center text-sm font-medium text-neutral-800 transition-colors hover:border-primary hover:text-primary"
+                    className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
                   >
                     회원가입
                   </Link>

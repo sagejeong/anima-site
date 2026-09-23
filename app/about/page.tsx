@@ -3,32 +3,32 @@ import Header from "@/components/Header";
 import RecordButton from "@/components/RecordButton";
 
 export const metadata: Metadata = {
-  title: "ANiMA 소개 — 기침 소리로 만드는 나만의 호흡기 기준선",
+  title: "ANiMA 소개 · 기침 소리로 만드는 나만의 호흡기 기준선",
   description:
     "ANiMA는 한국인 기침 데이터셋을 기반으로, 마할라노비스 거리를 이용해 개인별 기침 소리의 변화를 분석하는 연구 프로젝트입니다.",
 };
 
-// TODO: 문구 검수 필요 — 연구 내용에 맞게 표현/수치 확인 후 수정
+// TODO: 문구 검수 필요, 연구 내용에 맞게 표현/수치 확인 후 수정
 export default function AboutPage() {
   return (
-    <div className="flex min-h-screen flex-1 flex-col bg-white">
+    <div className="flex min-h-screen flex-1 flex-col bg-steel-surface">
       <Header />
 
       <main className="flex flex-1 flex-col">
         {/* 페이지 히어로 */}
-        <section className="relative overflow-hidden bg-linear-to-b from-primary/5 via-white to-white">
+        <section className="relative overflow-hidden bg-linear-to-b from-primary/10 via-steel-surface to-steel-surface">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -top-32 left-1/2 h-105 w-105 -translate-x-1/2 rounded-full bg-accent/10 blur-3xl"
           />
 
           <div className="relative mx-auto w-full max-w-3xl px-5 pb-20 pt-28 text-center sm:px-8 sm:pb-28 sm:pt-40">
-            <h1 className="text-3xl font-bold leading-tight tracking-tight text-neutral-900 sm:text-5xl sm:leading-tight">
+            <h1 className="text-3xl font-bold leading-tight tracking-tight text-ink sm:text-5xl sm:leading-tight">
               <span className="block">기침 소리로 만드는</span>
               <span className="block">나만의 호흡기 기준선</span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-neutral-600 sm:text-lg sm:leading-relaxed">
+            <p className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-ink-soft sm:text-lg sm:leading-relaxed">
               ANiMA는 기침 소리를 녹음해 그 사람의 평소 기침이 어떤 모습인지
               기록하고, 오늘의 기침이 그 평소와 얼마나 달라졌는지를 숫자로
               보여주는 연구용 앱입니다.
@@ -94,7 +94,7 @@ export default function AboutPage() {
               {ANALYSIS_STEPS.map((step, index) => (
                 <li
                   key={step.title}
-                  className="flex gap-4 rounded-2xl border border-gray-light/70 bg-white p-5 sm:gap-5 sm:p-6"
+                  className="flex gap-4 rounded-2xl border border-gray-light/70 bg-steel-surface p-5 sm:gap-5 sm:p-6"
                 >
                   <span
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary"
@@ -103,10 +103,10 @@ export default function AboutPage() {
                     {index + 1}
                   </span>
                   <div>
-                    <h3 className="text-base font-semibold text-neutral-900 sm:text-lg">
+                    <h3 className="text-base font-semibold text-ink sm:text-lg">
                       {step.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-600 sm:text-base sm:leading-relaxed">
+                    <p className="mt-2 text-sm leading-relaxed text-ink-soft sm:text-base sm:leading-relaxed">
                       {step.description}
                     </p>
                   </div>
@@ -116,14 +116,14 @@ export default function AboutPage() {
 
             {/* 마할라노비스 거리 쉬운 설명 */}
             <div className="mt-8 rounded-2xl border border-dot-blue/30 bg-dot-blue/5 p-5 sm:p-6">
-              <h3 className="flex items-center gap-2 text-base font-semibold text-neutral-900 sm:text-lg">
+              <h3 className="flex items-center gap-2 text-base font-semibold text-ink sm:text-lg">
                 <span
                   className="h-2 w-2 rounded-full bg-dot-blue"
                   aria-hidden="true"
                 />
                 마할라노비스 거리가 뭔가요?
               </h3>
-              <div className="mt-3 space-y-3 text-sm leading-relaxed text-neutral-700 sm:text-base sm:leading-relaxed">
+              <div className="mt-3 space-y-3 text-sm leading-relaxed text-ink-soft sm:text-base sm:leading-relaxed">
                 <p>
                   두 값이 얼마나 떨어져 있는지를 재는 방법 중 하나입니다. 자로
                   재듯 단순히 거리를 재면, 원래부터 들쭉날쭉한 항목이든 늘
@@ -135,7 +135,7 @@ export default function AboutPage() {
                   변동이 큰 특징이 조금 달라진 것은 대수롭지 않게 보고, 늘
                   일정하던 특징이 흔들린 것은 크게 반영합니다.
                 </p>
-                <p className="font-medium text-neutral-900">
+                <p className="font-medium text-ink">
                   한 문장으로 줄이면, 내 기침이 기준 패턴으로부터 몇 걸음이나
                   떨어져 있는지를 재는 자입니다.
                 </p>
@@ -156,7 +156,7 @@ export default function AboutPage() {
               {RECORDING_TIPS.map((tip) => (
                 <li
                   key={tip}
-                  className="flex gap-3 rounded-xl border border-gray-light/70 bg-white p-4 text-sm leading-relaxed text-neutral-700 sm:text-base"
+                  className="flex gap-3 rounded-xl border border-gray-light/70 bg-steel-surface p-4 text-sm leading-relaxed text-ink-soft sm:text-base"
                 >
                   <CheckIcon />
                   <span>{tip}</span>
@@ -185,10 +185,10 @@ export default function AboutPage() {
 
           {/* 의료 면책 */}
           <div className="mt-14 rounded-2xl border border-primary/25 bg-primary/5 p-5 sm:p-6">
-            <h2 className="text-base font-semibold text-neutral-900 sm:text-lg">
+            <h2 className="text-base font-semibold text-ink sm:text-lg">
               알아두실 점
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-neutral-700 sm:text-base sm:leading-relaxed">
+            <p className="mt-3 text-sm leading-relaxed text-ink-soft sm:text-base sm:leading-relaxed">
               현재 ANiMA는 의료적 진단을 제공하지 않습니다. 지금 제공되는 것은 내
               기침이 기준 패턴과 얼마나 달라졌는지에 대한 참고 기록이며, 더
               정교한 비교 도구는 연구가 진행된 뒤 추후 앱에 통합될 예정입니다.
@@ -198,16 +198,16 @@ export default function AboutPage() {
           </div>
 
           {/* 문의 + CTA */}
-          <div className="mt-14 flex flex-col items-center gap-5 rounded-3xl border border-gray-light/70 bg-neutral-50 px-6 py-12 text-center">
-            <h2 className="text-xl font-bold text-neutral-900 sm:text-2xl">
+          <div className="mt-14 flex flex-col items-center gap-5 rounded-3xl border border-gray-light/70 bg-steel-surface px-6 py-12 text-center">
+            <h2 className="text-xl font-bold text-ink sm:text-2xl">
               연구에 참여해 주시겠어요?
             </h2>
-            <p className="max-w-md text-pretty text-sm leading-relaxed text-neutral-600 sm:text-base">
+            <p className="max-w-md text-pretty text-sm leading-relaxed text-ink-soft sm:text-base">
               첫 녹음 전에 연구 목적과 데이터 이용에 대한 동의 안내를 한 번 더
               보여드립니다.
             </p>
             <RecordButton className="mt-2" />
-            <p className="text-xs text-neutral-500 sm:text-sm">
+            <p className="text-xs text-ink-soft sm:text-sm">
               문의{" "}
               <a
                 href="mailto:anima.with@gmail.com"
@@ -269,10 +269,10 @@ function Section({ eyebrow, title, children }: SectionProps) {
   return (
     <section className="mt-16 first:mt-4 sm:mt-20">
       <p className="text-sm font-semibold text-primary">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-bold leading-snug tracking-tight text-neutral-900 sm:text-3xl">
+      <h2 className="mt-2 text-2xl font-bold leading-snug tracking-tight text-ink sm:text-3xl">
         {title}
       </h2>
-      <div className="mt-5 space-y-4 text-base leading-relaxed text-neutral-600 sm:text-lg sm:leading-relaxed">
+      <div className="mt-5 space-y-4 text-base leading-relaxed text-ink-soft sm:text-lg sm:leading-relaxed">
         {children}
       </div>
     </section>
@@ -281,7 +281,7 @@ function Section({ eyebrow, title, children }: SectionProps) {
 
 /** 본문 중 강조 표현 */
 function Em({ children }: { children: React.ReactNode }) {
-  return <strong className="font-semibold text-neutral-900">{children}</strong>;
+  return <strong className="font-semibold text-ink">{children}</strong>;
 }
 
 function CheckIcon() {

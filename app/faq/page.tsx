@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 
 export const metadata: Metadata = {
-  title: "자주 묻는 질문 — ANiMA",
+  title: "자주 묻는 질문 · ANiMA",
   description: "ANiMA 이용에 대해 자주 나오는 질문과 답변입니다.",
 };
 
@@ -52,7 +52,7 @@ export default function FaqPage() {
 
       <main className="flex flex-1 flex-col">
         <div className="mx-auto w-full max-w-2xl px-5 pb-20 pt-28 sm:px-8 sm:pt-36">
-          <h1 className="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+          <h1 className="text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             자주 묻는 질문
           </h1>
 
@@ -60,19 +60,19 @@ export default function FaqPage() {
             {FAQ_ITEMS.map((item) => (
               <div
                 key={item.question}
-                className="rounded-2xl border border-gray-light bg-white p-5 sm:p-6"
+                className="rounded-2xl border border-gray-light bg-steel-surface p-5 sm:p-6"
               >
-                <dt className="text-base font-semibold text-neutral-900 sm:text-lg">
+                <dt className="text-base font-semibold text-ink sm:text-lg">
                   Q. {item.question}
                 </dt>
-                <dd className="mt-2 text-sm leading-relaxed text-neutral-600 sm:text-base sm:leading-relaxed">
+                <dd className="mt-2 text-sm leading-relaxed text-ink-soft sm:text-base sm:leading-relaxed">
                   {item.answer}
                 </dd>
               </div>
             ))}
           </dl>
 
-          <p className="mt-10 text-center text-sm text-neutral-500">
+          <p className="mt-10 text-center text-sm text-ink-soft">
             더 궁금한 점이 있으면{" "}
             <a
               href="mailto:anima.with@gmail.com"

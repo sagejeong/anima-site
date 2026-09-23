@@ -24,7 +24,7 @@ export function Field({
     <div>
       <label
         htmlFor={htmlFor}
-        className="flex items-center gap-1.5 text-sm font-semibold text-neutral-900"
+        className="flex items-center gap-1.5 text-sm font-semibold text-ink"
       >
         {label}
         {required && (
@@ -33,7 +33,7 @@ export function Field({
           </span>
         )}
       </label>
-      {hint && <p className="mt-1 text-xs text-neutral-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-ink-soft">{hint}</p>}
       <div className="mt-2">{children}</div>
       {error && (
         <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">
@@ -45,7 +45,7 @@ export function Field({
 }
 
 const INPUT_BASE =
-  "w-full rounded-xl border bg-white px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30";
+  "w-full rounded-xl border bg-steel-surface px-4 py-3 text-base text-ink placeholder:text-ink-soft transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30";
 
 function inputClass(hasError: boolean): string {
   return `${INPUT_BASE} ${
@@ -169,7 +169,7 @@ export function RadioGroupField({
 }: RadioGroupFieldProps) {
   return (
     <fieldset>
-      <legend className="flex items-center gap-1.5 text-sm font-semibold text-neutral-900">
+      <legend className="flex items-center gap-1.5 text-sm font-semibold text-ink">
         {label}
         {required && (
           <span className="text-primary" aria-label="필수 입력">
@@ -177,7 +177,7 @@ export function RadioGroupField({
           </span>
         )}
       </legend>
-      {hint && <p className="mt-1 text-xs text-neutral-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-ink-soft">{hint}</p>}
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => (
           <label key={option.value} className="cursor-pointer">
@@ -189,7 +189,7 @@ export function RadioGroupField({
               onChange={() => onChange(option.value)}
               className="peer sr-only"
             />
-            <span className="inline-flex items-center rounded-full border border-gray-light px-4 py-2 text-sm text-neutral-700 transition-colors hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:font-semibold peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">
+            <span className="inline-flex items-center rounded-full border border-gray-light px-4 py-2 text-sm text-ink-soft transition-colors hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:font-semibold peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">
               {option.label}
             </span>
           </label>
@@ -230,8 +230,8 @@ export function CheckboxGroupField({
 
   return (
     <fieldset>
-      <legend className="text-sm font-semibold text-neutral-900">{label}</legend>
-      {hint && <p className="mt-1 text-xs text-neutral-500">{hint}</p>}
+      <legend className="text-sm font-semibold text-ink">{label}</legend>
+      {hint && <p className="mt-1 text-xs text-ink-soft">{hint}</p>}
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => (
           <label key={option.value} className="cursor-pointer">
@@ -241,7 +241,7 @@ export function CheckboxGroupField({
               onChange={() => toggle(option.value)}
               className="peer sr-only"
             />
-            <span className="inline-flex items-center rounded-full border border-gray-light px-4 py-2 text-sm text-neutral-700 transition-colors hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:font-semibold peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">
+            <span className="inline-flex items-center rounded-full border border-gray-light px-4 py-2 text-sm text-ink-soft transition-colors hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:font-semibold peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30">
               {option.label}
             </span>
           </label>

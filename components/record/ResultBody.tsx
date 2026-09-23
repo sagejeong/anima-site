@@ -44,20 +44,20 @@ export default function ResultBody({
   // 기침이 감지되지 않았거나 품질 기준에 못 미치면 게이지 자체를 보여주지 않습니다.
   if (isCough === false || failReason) {
     return (
-      <div className="w-full max-w-md rounded-2xl border border-gray-light bg-white p-8 text-center sm:p-8">
+      <div className="w-full max-w-md rounded-2xl border border-gray-light bg-steel-surface p-8 text-center sm:p-8">
         {measuredAt && <DateLine measuredAt={measuredAt} />}
         <div
-          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100"
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-ink/5"
           aria-hidden="true"
         >
           <RetryIcon />
         </div>
-        <h2 className="mt-5 text-lg font-bold text-neutral-900">
+        <h2 className="mt-5 text-lg font-bold text-ink">
           {isCough === false
             ? "기침 소리가 감지되지 않았어요"
             : "녹음을 다시 확인해 주세요"}
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
           {failReason
             ? qualityFailMessage(failReason)
             : "조용한 곳에서 기기를 얼굴에 가까이 두고 다시 녹음해 주세요."}
@@ -71,10 +71,10 @@ export default function ResultBody({
 
   if (typeof distance !== "number") {
     return (
-      <div className="w-full max-w-md rounded-2xl border border-gray-light bg-white p-8 text-center sm:p-8">
+      <div className="w-full max-w-md rounded-2xl border border-gray-light bg-steel-surface p-8 text-center sm:p-8">
         {measuredAt && <DateLine measuredAt={measuredAt} />}
-        <h2 className="text-lg font-bold text-neutral-900">분석에 실패했어요</h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+        <h2 className="text-lg font-bold text-ink">분석에 실패했어요</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
           {message ?? "다시 녹음해 주세요."}
         </p>
         <div className="mt-6 flex justify-center">
@@ -88,25 +88,25 @@ export default function ResultBody({
   const percent = Math.round(toDisplayPercent(distance));
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-gray-light bg-white p-6 text-center sm:p-8">
+    <div className="w-full max-w-md rounded-2xl border border-gray-light bg-steel-surface p-6 text-center sm:p-8">
       {measuredAt && <DateLine measuredAt={measuredAt} />}
 
       <div className="flex flex-wrap items-center justify-center gap-2">
         <RiskBadge risk={risk} />
         {medicationTaken && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-500">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink-soft">
             <span aria-hidden="true">💊</span>
             약 복용 중
           </span>
         )}
       </div>
 
-      <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+      <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-ink-soft">
         기침 이탈도
       </p>
-      <p className="mt-1 text-6xl font-bold tabular-nums text-neutral-900">
+      <p className="mt-1 text-6xl font-bold tabular-nums text-ink">
         {percent}
-        <span className="text-3xl font-semibold text-neutral-400">%</span>
+        <span className="text-3xl font-semibold text-ink-soft">%</span>
       </p>
 
       <div className="mt-8 flex items-center justify-center gap-8">
@@ -114,7 +114,7 @@ export default function ResultBody({
         <RiskLegend risk={risk} />
       </div>
 
-      <p className="mt-8 text-pretty text-sm leading-relaxed text-neutral-600 sm:text-base sm:leading-relaxed">
+      <p className="mt-8 text-pretty text-sm leading-relaxed text-ink-soft sm:text-base sm:leading-relaxed">
         {RESULT_EXPLANATION}
       </p>
 
@@ -127,7 +127,7 @@ export default function ResultBody({
 
       {audioUrl && <AudioPlayback audioUrl={audioUrl} />}
 
-      <p className="mt-6 border-t border-gray-light pt-4 text-[11px] leading-relaxed text-neutral-400">
+      <p className="mt-6 border-t border-gray-light pt-4 text-[11px] leading-relaxed text-ink-soft">
         {MEDICAL_DISCLAIMER}
       </p>
     </div>
@@ -136,7 +136,7 @@ export default function ResultBody({
 
 function DateLine({ measuredAt }: { measuredAt: string }) {
   return (
-    <p className="mb-5 text-xs font-medium text-neutral-400">
+    <p className="mb-5 text-xs font-medium text-ink-soft">
       {formatMeasuredAt(measuredAt)}
     </p>
   );
@@ -144,8 +144,8 @@ function DateLine({ measuredAt }: { measuredAt: string }) {
 
 function AudioPlayback({ audioUrl }: { audioUrl: string }) {
   return (
-    <div className="mt-6 rounded-xl border border-gray-light bg-neutral-50 p-4 text-left">
-      <p className="text-xs font-medium text-neutral-600">기침 소리 듣기</p>
+    <div className="mt-6 rounded-xl border border-gray-light bg-steel-surface p-4 text-left">
+      <p className="text-xs font-medium text-ink-soft">기침 소리 듣기</p>
       <audio
         src={audioUrl}
         controls
@@ -158,9 +158,9 @@ function AudioPlayback({ audioUrl }: { audioUrl: string }) {
 
 function RiskBadge({ risk }: { risk: RiskLevel }) {
   const styles: Record<RiskLevel, string> = {
-    GOOD: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    CAUTION: "bg-amber-50 text-amber-700 border-amber-200",
-    RISK: "bg-red-50 text-red-700 border-red-200",
+    GOOD: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    CAUTION: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    RISK: "bg-red-500/10 text-red-400 border-red-500/30",
   };
 
   return (
@@ -190,16 +190,16 @@ function VerticalGauge({ percent, risk }: { percent: number; risk: RiskLevel }) 
 
   return (
     <div
-      className="relative w-4 shrink-0 overflow-visible rounded-full bg-neutral-100"
+      className="relative w-4 shrink-0 overflow-visible rounded-full bg-ink/5"
       style={{ height: `${GAUGE_HEIGHT_PX}px` }}
       role="img"
       aria-label={`기침 이탈도 ${clampedPercent}% · 판정 결과 ${RISK_COPY[risk].label}`}
     >
       <div className="absolute inset-0 overflow-hidden rounded-full">
         {/* 위에서부터 경고(빨강 75~100%) → 주의(노랑 50~75%) → 양호(초록 0~50%) */}
-        <div className="w-full bg-red-200" style={{ height: "25%" }} />
-        <div className="w-full bg-amber-200" style={{ height: "25%" }} />
-        <div className="w-full bg-emerald-200" style={{ height: "50%" }} />
+        <div className="w-full bg-red-500/20" style={{ height: "25%" }} />
+        <div className="w-full bg-amber-500/20" style={{ height: "25%" }} />
+        <div className="w-full bg-emerald-500/20" style={{ height: "50%" }} />
       </div>
       <div
         className={`absolute left-1/2 h-4 w-7 -translate-x-1/2 translate-y-1/2 rounded-full border-2 border-white shadow ${markerColor[risk]}`}
@@ -216,12 +216,8 @@ const LEGEND_ITEMS: readonly { level: RiskLevel; dot: string }[] = [
   { level: "GOOD", dot: "bg-emerald-500" },
 ];
 
-/**
- * 색상·판정 이름·퍼센트 기준을 나란히 보여주는 범례.
- * 경고 → 주의 → 양호 순(위→아래)으로 게이지와 나란합니다.
- * 여기 쓰는 퍼센트(50%/75%)는 화면 표시용 값이라 그대로 보여줘도 됩니다 —
- * raw distance(5.5149 등)와 달리 사용자에게 의미가 통하는 숫자입니다.
- */
+// 색상·판정 이름·퍼센트 범례. 경고→주의→양호 순(위→아래)으로 게이지랑 나란히 둠.
+// 퍼센트(50%/75%)는 화면 표시용이라 그대로 보여줘도 됨, raw distance는 안 보여줌
 function RiskLegend({ risk }: { risk: RiskLevel }) {
   return (
     <ul
@@ -235,12 +231,12 @@ function RiskLegend({ risk }: { risk: RiskLevel }) {
             <span className={`h-2 w-2 rounded-full ${item.dot}`} aria-hidden="true" />
             <span
               className={`text-sm ${
-                isCurrent ? "font-semibold text-neutral-900" : "text-neutral-400"
+                isCurrent ? "font-semibold text-ink" : "text-ink-soft"
               }`}
             >
               {RISK_COPY[item.level].label}
             </span>
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-ink-soft">
               {RISK_COPY[item.level].threshold}
             </span>
           </li>
@@ -260,7 +256,7 @@ function RetryIcon() {
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-6 w-6 text-neutral-500"
+      className="h-6 w-6 text-ink-soft"
       aria-hidden="true"
     >
       <path d="M3 12a9 9 0 1 1 3 6.7" />

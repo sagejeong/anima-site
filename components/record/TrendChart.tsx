@@ -25,13 +25,8 @@ function yForPercent(percent: number): number {
   return PLOT_BOTTOM - (clamped / 100) * (PLOT_BOTTOM - PLOT_TOP);
 }
 
-/**
- * 순수 표시용 선 그래프. 데이터를 어디서 가져오는지는 모르고, 그저 points를
- * 그립니다 — SVG와 <title>만 쓰기 때문에 클라이언트 컴포넌트일 필요가 없습니다.
- *
- * 기록이 0~1개일 때도 같은 틀(축·기준선)을 그대로 보여주고, 선·점·평균선만
- * 생략합니다 — 기록이 없다고 카드 자체가 사라지지 않도록 하기 위해서입니다.
- */
+// 순수 표시용 선 그래프. points만 그림, SVG+title뿐이라 클라이언트 컴포넌트 아님.
+// 기록 0~1개일 때도 틀(축·기준선)은 그대로 두고 선·점·평균선만 생략함
 export default function TrendChart({
   points,
   average,
@@ -71,7 +66,7 @@ export default function TrendChart({
               x2={PLOT_RIGHT}
               y1={yForPercent(percent)}
               y2={yForPercent(percent)}
-              className="stroke-neutral-200"
+              className="stroke-line"
               strokeWidth={1}
             />
             <text
@@ -79,7 +74,7 @@ export default function TrendChart({
               y={yForPercent(percent)}
               textAnchor="end"
               dominantBaseline="middle"
-              className="fill-neutral-400 text-[9px]"
+              className="fill-ink-soft text-[9px]"
             >
               {percent}
             </text>
@@ -94,7 +89,7 @@ export default function TrendChart({
               x2={PLOT_RIGHT}
               y1={yForPercent(average)}
               y2={yForPercent(average)}
-              className="stroke-neutral-400"
+              className="stroke-ink-soft"
               strokeWidth={1.5}
               strokeDasharray="4 3"
             />
@@ -103,7 +98,7 @@ export default function TrendChart({
             <path
               d={linePath}
               fill="none"
-              className="stroke-neutral-300"
+              className="stroke-ink-soft"
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -111,7 +106,7 @@ export default function TrendChart({
           </>
         )}
 
-        {/* 데이터 점 — 판정 색으로 표시 */}
+        {/* 데이터 점, 판정 색으로 표시 */}
         {points.map((point, index) => (
           <circle
             key={point.time}
@@ -133,7 +128,7 @@ export default function TrendChart({
               x={PLOT_LEFT}
               y={VIEW_HEIGHT - 6}
               textAnchor="start"
-              className="fill-neutral-400 text-[9px]"
+              className="fill-ink-soft text-[9px]"
             >
               {points[0].shortDateLabel}
             </text>
@@ -142,7 +137,7 @@ export default function TrendChart({
                 x={PLOT_RIGHT}
                 y={VIEW_HEIGHT - 6}
                 textAnchor="end"
-                className="fill-neutral-400 text-[9px]"
+                className="fill-ink-soft text-[9px]"
               >
                 {points[points.length - 1].shortDateLabel}
               </text>
@@ -151,7 +146,7 @@ export default function TrendChart({
         )}
       </svg>
 
-      <ul className="mt-3 flex items-center justify-center gap-4 text-xs text-neutral-500">
+      <ul className="mt-3 flex items-center justify-center gap-4 text-xs text-ink-soft">
         {(Object.keys(RISK_COPY) as RiskLevel[])
           .slice()
           .reverse()

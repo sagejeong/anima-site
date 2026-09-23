@@ -43,11 +43,11 @@ export default function ResultView() {
 
   if (!stored) {
     return (
-      <div className="rounded-2xl border border-gray-light bg-white p-8 text-center">
-        <h2 className="text-lg font-bold text-neutral-900">
+      <div className="rounded-2xl border border-gray-light bg-steel-surface p-8 text-center">
+        <h2 className="text-lg font-bold text-ink">
           아직 확인할 결과가 없어요
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
           기침을 녹음하고 분석을 요청하면 여기에 결과가 나타납니다.
         </p>
         <div className="mt-6 flex justify-center">

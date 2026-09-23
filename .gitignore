@@ -42,3 +42,6 @@ next-env.d.ts
 
 # claude code
 .claude/
+
+# HUB 임시 파일 저장소, 진짜 DB 생기면 삭제 (README "서버 연동" 참고)
+/data/

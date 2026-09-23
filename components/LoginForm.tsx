@@ -100,7 +100,7 @@ export default function LoginForm() {
       {errors.form && (
         <p
           role="alert"
-          className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700"
+          className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-400"
         >
           {errors.form}
         </p>
@@ -114,7 +114,7 @@ export default function LoginForm() {
         {isSubmitting ? "로그인하는 중..." : "로그인"}
       </button>
 
-      <p className="mt-6 text-center text-sm text-neutral-500">
+      <p className="mt-6 text-center text-sm text-ink-soft">
         아직 계정이 없으신가요?{" "}
         <Link
           href="/signup"

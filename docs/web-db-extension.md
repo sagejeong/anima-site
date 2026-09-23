@@ -8,7 +8,7 @@
 
 ---
 
-## 0. 배경 — 왜 확장이 필요한가
+## 0. 배경: 왜 확장이 필요한가
 
 **웹에는 로컬 DB가 없습니다.** 앱이 로컬 SQLite를 두는 이유는 오프라인 대응(지하철에서 녹음 → 나중에 동기화)인데, 브라우저는 인터넷이 끊기면 페이지 자체가 열리지 않습니다. 따라서 웹은 녹음 즉시 서버로 전송하며, `sync_status` · `local_audio_path` 같은 동기화 컬럼이 필요 없습니다. 브라우저가 보관하는 것은 `user_uuid` 값 하나뿐입니다.
 
@@ -17,12 +17,12 @@
 **(1) 웹은 UUID만으로 같은 사용자를 계속 추적할 수 없습니다.**
 앱은 기기에 저장한 `user_uuid`가 안정적으로 유지됩니다. 그러나 브라우저 저장소는 사용자가 "쿠키 및 사이트 데이터 삭제"를 하면 사라지고, **iOS 사파리는 7일간 해당 사이트 미방문 시 자동 삭제**합니다. UUID가 끊기면 한 사람의 기록이 여러 명으로 쪼개져, V8에서 준비 중인 **개인화 기준 분포(embedding_vector 누적)를 만들 수 없습니다.**
 
-→ 해결: 처음에는 UUID로 바로 시작하되, 원하는 사용자는 아이디를 만들어 UUID를 계정에 묶을 수 있게 합니다. (게스트 → 계정 승급 방식)
+해결책: 처음에는 UUID로 바로 시작하되, 원하는 사용자는 아이디를 만들어 UUID를 계정에 묶을 수 있게 합니다. (게스트에서 계정 승급하는 방식)
 
 **(2) 웹은 앱이 받지 않는 참여자 정보를 받습니다.**
 나이·성별·흡연 여부·생활 환경 등 20개 항목을 수집하는데, 이는 측정마다 반복되는 값이 아니라 사람에 1건인 정보입니다. MRRecord(측정 1건 = 1행)에도, User(UUID와 OS만 존재)에도 넣을 자리가 없습니다.
 
-→ 해결: `UserProfile` 테이블을 신설합니다.
+해결책: `UserProfile` 테이블을 신설합니다.
 
 ---
 
@@ -121,10 +121,10 @@
 
 웹이 채우지 못하는 컬럼은 NULL로 전송됩니다. 참고용으로 정리하면 아래와 같습니다.
 
-- **채울 수 있음** — `record_uuid`, `user_uuid`, `source_device_type`, `measured_at`, `record_date`, `audio_duration_sec`, `client_app_version`
-- **서버 응답으로 채워짐** — `cough_detected`, `cough_confidence`, `quality_*`, `final_*`, `healthy_distance`, `embedding_vector`, `risk_level`
-- **웹에서 채울 수 없음** — `pm10`, `pm25`, `temperature`, `humidity`, `weather_desc` 등 환경 정보. 브라우저는 위치 권한을 따로 요구해야 하고 거부율이 높아, 1차에서는 수집하지 않습니다. 필요하시면 방법을 검토하겠습니다.
-- **웹에 해당 없음** — `local_audio_path`, `sync_status`, `sync_retry_count`, `last_sync_attempt_at` 등 오프라인 동기화 컬럼
+- **채울 수 있음**: `record_uuid`, `user_uuid`, `source_device_type`, `measured_at`, `record_date`, `audio_duration_sec`, `client_app_version`
+- **서버 응답으로 채워짐**: `cough_detected`, `cough_confidence`, `quality_*`, `final_*`, `healthy_distance`, `embedding_vector`, `risk_level`
+- **웹에서 채울 수 없음**: `pm10`, `pm25`, `temperature`, `humidity`, `weather_desc` 등 환경 정보. 브라우저는 위치 권한을 따로 요구해야 하고 거부율이 높아, 1차에서는 수집하지 않습니다. 필요하시면 방법을 검토하겠습니다.
+- **웹에 해당 없음**: `local_audio_path`, `sync_status`, `sync_retry_count`, `last_sync_attempt_at` 등 오프라인 동기화 컬럼
 
 ---
 
@@ -146,11 +146,11 @@
 
 ## 6. 저장 흐름
 
-1. **첫 접속** — 웹이 UUID를 생성해 브라우저 쿠키에 1년 만료로 저장합니다. 이 시점에는 서버에 아무것도 보내지 않습니다.
-2. **첫 녹음** — `POST /upload`에 `file`과 `user_uuid`를 함께 전송합니다. 이때 서버에 User 행이 없으면 `device_os='WEB'`으로 생성해 주십시오.
-3. **참여 정보 입력** — 동의 후 `POST /profile`로 UserProfile을 저장합니다. 건너뛴 항목은 NULL로 전송됩니다.
-4. **계정 만들기(선택)** — 결과 화면에서 안내하며, `POST /account/register`로 기존 `user_uuid`에 아이디·비밀번호를 붙입니다. **UUID가 그대로이므로 이전 기록이 전부 유지됩니다.**
-5. **다른 기기에서 로그인** — `POST /account/login`으로 `user_uuid`를 받아 쿠키에 심으면, 그 브라우저도 같은 사용자로 동작합니다.
+1. **첫 접속**: 웹이 UUID를 생성해 브라우저 쿠키에 1년 만료로 저장합니다. 이 시점에는 서버에 아무것도 보내지 않습니다.
+2. **첫 녹음**: `POST /upload`에 `file`과 `user_uuid`를 함께 전송합니다. 이때 서버에 User 행이 없으면 `device_os='WEB'`으로 생성해 주십시오.
+3. **참여 정보 입력**: 동의 후 `POST /profile`로 UserProfile을 저장합니다. 건너뛴 항목은 NULL로 전송됩니다.
+4. **계정 만들기(선택)**: 결과 화면에서 안내하며, `POST /account/register`로 기존 `user_uuid`에 아이디·비밀번호를 붙입니다. **UUID가 그대로이므로 이전 기록이 전부 유지됩니다.**
+5. **다른 기기에서 로그인**: `POST /account/login`으로 `user_uuid`를 받아 쿠키에 심으면, 그 브라우저도 같은 사용자로 동작합니다.
 
 ---
 

@@ -5,7 +5,7 @@ import EmailForm from "@/components/settings/EmailForm";
 import { animaUrl, callAnimaApi, readDisplayUserId, readUserUuid } from "@/lib/anima-api";
 
 export const metadata: Metadata = {
-  title: "복구용 이메일 변경 — ANiMA",
+  title: "복구용 이메일 변경 · ANiMA",
 };
 
 type AccountInfoResponse = {
@@ -34,21 +34,21 @@ export default async function EmailSettingsPage() {
         <div className="mx-auto w-full max-w-md px-5 pb-20 pt-28 sm:px-8 sm:pt-36">
           <Link
             href="/settings"
-            className="text-sm font-medium text-neutral-500 underline underline-offset-4 hover:text-primary"
+            className="text-sm font-medium text-ink-soft underline underline-offset-4 hover:text-primary"
           >
             ← 설정으로
           </Link>
 
-          <h1 className="mt-6 text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+          <h1 className="mt-6 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             복구용 이메일 변경
           </h1>
 
           {!userId ? (
-            <div className="mt-12 rounded-2xl border border-gray-light bg-white p-8 text-center">
-              <h2 className="text-lg font-bold text-neutral-900">
+            <div className="mt-12 rounded-2xl border border-gray-light bg-steel-surface p-8 text-center">
+              <h2 className="text-lg font-bold text-ink">
                 로그인이 필요해요
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                 계정이 있는 경우에만 이메일을 바꿀 수 있어요.
               </p>
               <Link

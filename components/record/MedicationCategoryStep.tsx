@@ -36,7 +36,7 @@ export default function MedicationCategoryStep({
 }: MedicationCategoryStepProps) {
   return (
     <div className="mx-auto w-full max-w-md">
-      <h2 className="text-lg font-bold text-neutral-900">
+      <h2 className="text-lg font-bold text-ink">
         어떤 약을 복용 중인가요?
       </h2>
 
@@ -62,7 +62,7 @@ export default function MedicationCategoryStep({
           type="button"
           onClick={onBack}
           disabled={isSubmitting}
-          className="rounded-full border border-neutral-300 px-6 py-3 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-400 disabled:opacity-50"
+          className="rounded-full border border-line px-6 py-3 text-sm font-medium text-ink-soft transition-colors hover:border-line disabled:opacity-50"
         >
           이전
         </button>

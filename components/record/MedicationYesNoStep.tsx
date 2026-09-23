@@ -20,10 +20,10 @@ export default function MedicationYesNoStep({
 }: MedicationYesNoStepProps) {
   return (
     <div className="mx-auto w-full max-w-md text-center">
-      <h2 className="text-xl font-bold text-neutral-900">
+      <h2 className="text-xl font-bold text-ink">
         복용 중인 약이 있나요?
       </h2>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
         일부 약은 기침 소리에 영향을 줄 수 있어요.
       </p>
 
@@ -32,7 +32,7 @@ export default function MedicationYesNoStep({
           type="button"
           onClick={onNo}
           disabled={isSubmitting}
-          className="w-28 rounded-full border border-neutral-300 px-6 py-3 text-base font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+          className="w-28 rounded-full border border-line px-6 py-3 text-base font-semibold text-ink-soft transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
         >
           아니오
         </button>
@@ -47,14 +47,14 @@ export default function MedicationYesNoStep({
       </div>
 
       {isSubmitting && (
-        <p className="mt-4 text-sm text-neutral-500">분석 요청하는 중...</p>
+        <p className="mt-4 text-sm text-ink-soft">분석 요청하는 중...</p>
       )}
 
       <button
         type="button"
         onClick={onBack}
         disabled={isSubmitting}
-        className="mt-8 text-sm font-medium text-neutral-500 underline underline-offset-4 hover:text-primary disabled:opacity-60"
+        className="mt-8 text-sm font-medium text-ink-soft underline underline-offset-4 hover:text-primary disabled:opacity-60"
       >
         이전
       </button>

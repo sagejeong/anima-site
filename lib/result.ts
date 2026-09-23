@@ -66,7 +66,7 @@ export const MEDICAL_DISCLAIMER =
  * distance/maxDist*100 로 단순 환산하면 p50(5.5149)이 39.6%, p75(6.6988)가
  * 48.1%가 되어 "50% 미만 양호 / 50~75% 주의 / 75% 이상 경고"라는 판정 기준과
  * 화면 숫자가 어긋납니다. 앱은 p50을 정확히 50%, p75를 정확히 75%에 두는
- * 구간별 선형 환산을 씁니다 — 이 함수는 그 방식을 그대로 따릅니다.
+ * 구간별 선형 환산을 씁니다. 이 함수는 그 방식을 그대로 따릅니다.
  */
 export function toDisplayPercent(distance: number): number {
   const { p50, p75, max } = DISTANCE_QUANTILES;

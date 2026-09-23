@@ -32,23 +32,23 @@ export default function HealthInfoStep({
 }: HealthInfoStepProps) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-neutral-900 sm:text-2xl">
+      <h2 className="text-xl font-bold text-ink sm:text-2xl">
         건강 정보
       </h2>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
         답해 주시면 분석이 더 정확해지지만, 지금 하지 않으셔도 됩니다. 나중에
         마이페이지에서 언제든 추가할 수 있습니다.
       </p>
 
       {/* 선택 입력이라는 걸 맨 위에서 바로 알리고 빠져나갈 길을 함께 둡니다 */}
-      <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-gray-light bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <p className="text-sm font-medium text-neutral-700">
+      <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-gray-light bg-steel-surface p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <p className="text-sm font-medium text-ink-soft">
           여기서부터는 전부 <span className="text-primary">선택 입력</span>이에요.
         </p>
         <button
           type="button"
           onClick={onSkip}
-          className="shrink-0 rounded-full border border-neutral-300 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+          className="shrink-0 rounded-full border border-line bg-steel-surface px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-primary hover:text-primary"
         >
           건너뛰고 가입 완료
         </button>
@@ -105,7 +105,7 @@ export default function HealthInfoStep({
         />
       </div>
 
-      <p className="mt-6 rounded-xl border border-gray-light bg-neutral-50 p-4 text-xs leading-relaxed text-neutral-600 sm:text-sm">
+      <p className="mt-6 rounded-xl border border-gray-light bg-steel-surface p-4 text-xs leading-relaxed text-ink-soft sm:text-sm">
         입력하신 건강 정보는 기침 소리 분석의 배경 자료로만 사용되며, 진단이나
         의학적 판단에 쓰이지 않습니다.
       </p>

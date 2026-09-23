@@ -5,7 +5,7 @@ import SettingsMenu from "@/components/settings/SettingsMenu";
 import { readDisplayUserId } from "@/lib/anima-api";
 
 export const metadata: Metadata = {
-  title: "설정 — ANiMA",
+  title: "설정 · ANiMA",
 };
 
 export default async function SettingsPage() {
@@ -17,7 +17,7 @@ export default async function SettingsPage() {
 
       <main className="flex flex-1 flex-col">
         <div className="mx-auto w-full max-w-md px-5 pb-20 pt-28 sm:px-8 sm:pt-36">
-          <h1 className="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+          <h1 className="text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             설정
           </h1>
 
@@ -25,11 +25,11 @@ export default async function SettingsPage() {
             {userId ? (
               <SettingsMenu userId={userId} />
             ) : (
-              <div className="rounded-2xl border border-gray-light bg-white p-8 text-center">
-                <h2 className="text-lg font-bold text-neutral-900">
+              <div className="rounded-2xl border border-gray-light bg-steel-surface p-8 text-center">
+                <h2 className="text-lg font-bold text-ink">
                   로그인이 필요해요
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                   계정이 있는 경우에만 설정을 볼 수 있어요.
                 </p>
                 <Link

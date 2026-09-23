@@ -53,7 +53,7 @@ export default function PasswordForm() {
   };
 
   return (
-    <div className="rounded-2xl border border-gray-light bg-white p-6 sm:p-8">
+    <div className="rounded-2xl border border-gray-light bg-steel-surface p-6 sm:p-8">
       <div className="space-y-4">
         <TextField
           id="settingsCurrentPassword"
@@ -93,7 +93,7 @@ export default function PasswordForm() {
       </div>
 
       {state === "unavailable" && (
-        <p className="mt-3 text-sm text-neutral-500">
+        <p className="mt-3 text-sm text-ink-soft">
           아직 서버에서 지원하지 않는 기능이에요. 곧 지원할 예정이에요.
         </p>
       )}

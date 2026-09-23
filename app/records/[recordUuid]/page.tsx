@@ -12,7 +12,7 @@ import {
 } from "@/lib/result";
 
 export const metadata: Metadata = {
-  title: "기록 상세 — ANiMA",
+  title: "기록 상세 · ANiMA",
 };
 
 type RecordDetailPageProps = {
@@ -44,22 +44,22 @@ export default async function RecordDetailPage({
         <div className="mx-auto flex w-full max-w-2xl flex-col items-center px-5 pb-20 pt-28 sm:px-8 sm:pt-36">
           <Link
             href="/records"
-            className="self-start text-sm font-medium text-neutral-500 underline underline-offset-4 hover:text-primary"
+            className="self-start text-sm font-medium text-ink-soft underline underline-offset-4 hover:text-primary"
           >
             ← 내 기록으로
           </Link>
 
-          <h1 className="mt-6 text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+          <h1 className="mt-6 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             분석 결과
           </h1>
 
           <div className="mt-12 flex flex-col items-center gap-6">
             {!record ? (
-              <div className="w-full max-w-md rounded-2xl border border-gray-light bg-white p-8 text-center">
-                <h2 className="text-lg font-bold text-neutral-900">
+              <div className="w-full max-w-md rounded-2xl border border-gray-light bg-steel-surface p-8 text-center">
+                <h2 className="text-lg font-bold text-ink">
                   기록을 찾을 수 없어요
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                   삭제되었거나 이 브라우저의 기록이 아닐 수 있습니다.
                 </p>
                 <div className="mt-6 flex justify-center">

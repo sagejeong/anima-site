@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf6ef;
+  --foreground: #241f1a;
 }
 
 /* Anima 브랜드 컬러 (Tailwind v4는 config 파일 대신 @theme으로 등록) */
@@ -10,14 +10,35 @@
   --color-primary: #ff8a00;
   --color-accent: #ff8a36;
   --color-dot-blue: #36bcff;
-  --color-gray-light: #d9d9d9;
-  /* 순백색은 눈이 부셔서 아주 옅은 웜톤을 바탕색으로 씁니다 */
-  --color-cream: #fdf8f3;
+  /* 아래 --color-line/--color-steel과 같은 값으로 맞춤 (기존 클래스명은 그대로 둠) */
+  --color-gray-light: #e9e1d2;
+  --color-cream: #faf6ef;
+
+  /* ANiMA 사이트 색상. 화이트 톤 배경에 브랜드 주황 포인트, 순백 대신 톤 다운된
+     아이보리 배경 + 부드러운 잉크색 글자. 상태색(양호/주의/경고)은 주황이랑 안 겹치게 따로 뺌 */
+  --color-steel: #faf6ef;
+  --color-steel-surface: #ffffff;
+  --color-ink: #241f1a;
+  --color-ink-soft: #7d7566;
+  --color-line: #e9e1d2;
+  --color-charcoal: #fdf0dc;
+  --color-charcoal-soft: #fff8ee;
+  --color-good: #1f9d55;
+  --color-caution: #b7791f;
+  --color-critical: #dc2626;
+
+  /* 마케팅 페이지의 "반전 대비" 섹션(어두운 구간)에서만 쓰는 색 */
+  --color-inverted: #211b14;
+  --color-inverted-surface: #16120d;
+  --color-inverted-ink: #f6efe2;
+  --color-inverted-line: #3a3226;
 
   /* 배경에서 천천히 떠다니는 블러 덩어리 */
   --animate-drift-a: drift-a 26s ease-in-out infinite;
   --animate-drift-b: drift-b 34s ease-in-out infinite;
   --animate-drift-c: drift-c 44s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.7s ease-out both;
 
   @keyframes drift-a {
     0%,
@@ -54,6 +75,41 @@
       transform: translate3d(5%, -9%, 0) scale(1.2);
     }
   }
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.55;
+      transform: scale(0.85);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  --animate-wave: wave 1.6s ease-in-out infinite;
+
+  @keyframes wave {
+    0%,
+    100% {
+      transform: scaleY(0.25);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
 }
 
 @theme inline {
@@ -61,28 +117,62 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  /* 제목용 명조 — 부분적으로 쓰고 싶을 때의 클래스: font-display */
+  /* 제목용 명조, 부분적으로 쓰고 싶을 때 클래스: font-display */
   --font-display: var(--font-nanum-myeongjo), serif;
+
+  /* ANiMA 사이트 서체. 기존 앱 폰트(font-sans, font-display)랑 안 섞이게 따로 둠.
+     Calistoga/Inter는 한글이 없어서, 같은 톤의 한글 폰트를 뒤에 이어붙임 */
+  --font-hub-display: var(--font-calistoga), var(--font-gothic-a1), sans-serif;
+  --font-hub-body: var(--font-inter), var(--font-noto-sans-kr), sans-serif;
+  /* 라벨/숫자·타임스탬프도 같은 두 서체 조합만 씀, 세 번째 서체는 안 더함 */
+  --font-hub-label: var(--font-inter), var(--font-noto-sans-kr), sans-serif;
+  --font-hub-mono: var(--font-inter), var(--font-noto-sans-kr), sans-serif;
+}
+
+/* 브랜드 그라디언트, 히어로 강조/버튼 글로우/그래프 포인트 등에 씀 */
+:root {
+  --gradient-brand: linear-gradient(135deg, #ffc233 0%, #ff8a00 55%, #ff3d1f 100%);
+}
+
+.gradient-brand-text {
+  background-image: var(--gradient-brand);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.gradient-brand-bg {
+  background-image: var(--gradient-brand);
+}
+
+/* 얇은 그라디언트 바, 페이지 상단/구간을 가르는 시그니처 장식 */
+.gradient-bar {
+  background-image: var(--gradient-brand);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-kr), system-ui, sans-serif;
 }
 
-/* 제목은 나눔명조, 본문·버튼·입력폼은 고딕 (작은 글씨 가독성 때문) */
+/* 제목은 Calistoga(한글은 Gothic A1), 본문은 Inter(한글은 Noto Sans KR) */
 h1,
 h2,
 h3 {
-  font-family: var(--font-nanum-myeongjo), serif;
+  font-family: var(--font-calistoga), var(--font-gothic-a1), serif;
 }
 
 /* 움직임에 민감한 사용자는 배경을 정지시킵니다 */
 @media (prefers-reduced-motion: reduce) {
   .animate-drift-a,
   .animate-drift-b,
-  .animate-drift-c {
+  .animate-drift-c,
+  .animate-pulse-dot,
+  .animate-fade-up,
+  .animate-wave {
     animation: none;
+    opacity: 1;
+    transform: none;
   }
 }

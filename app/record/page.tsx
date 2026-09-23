@@ -3,7 +3,7 @@ import CoughRecorder from "@/components/record/CoughRecorder";
 import Header from "@/components/Header";
 
 export const metadata: Metadata = {
-  title: "기침 녹음 — ANiMA",
+  title: "기침 녹음 · ANiMA",
   description:
     "조용한 곳에서 3초간 기침 소리를 녹음하세요. 로그인 없이 바로 시작할 수 있습니다.",
 };

@@ -39,15 +39,15 @@ export default function EmailForm({ currentEmail }: EmailFormProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-gray-light bg-white p-6 sm:p-8">
+    <div className="rounded-2xl border border-gray-light bg-steel-surface p-6 sm:p-8">
       <div className="flex items-center justify-between border-b border-gray-light pb-4">
-        <span className="text-sm text-neutral-500">현재 이메일</span>
-        <span className="text-sm font-medium text-neutral-900">
+        <span className="text-sm text-ink-soft">현재 이메일</span>
+        <span className="text-sm font-medium text-ink">
           {currentEmail ?? "확인할 수 없어요"}
         </span>
       </div>
 
-      <p className="mt-4 text-sm leading-relaxed text-neutral-600">
+      <p className="mt-4 text-sm leading-relaxed text-ink-soft">
         비밀번호를 잊었을 때 계정을 되찾는 데만 쓰여요.
       </p>
 
@@ -69,7 +69,7 @@ export default function EmailForm({ currentEmail }: EmailFormProps) {
       </div>
 
       {state === "unavailable" && (
-        <p className="mt-3 text-sm text-neutral-500">
+        <p className="mt-3 text-sm text-ink-soft">
           아직 서버에서 지원하지 않는 기능이에요. 곧 지원할 예정이에요.
         </p>
       )}

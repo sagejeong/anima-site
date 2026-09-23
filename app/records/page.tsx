@@ -18,7 +18,7 @@ import {
 } from "@/lib/result";
 
 export const metadata: Metadata = {
-  title: "내 기록 — ANiMA",
+  title: "내 기록 · ANiMA",
   description: "이 브라우저에서 녹음한 기침 분석 기록입니다.",
 };
 
@@ -77,10 +77,10 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
 
       <main className="flex flex-1 flex-col">
         <div className="mx-auto w-full max-w-2xl px-5 pb-20 pt-28 sm:px-8 sm:pt-36">
-          <h1 className="text-center text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+          <h1 className="text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             내 기록
           </h1>
-          <p className="mt-3 text-center text-sm text-neutral-600 sm:text-base">
+          <p className="mt-3 text-center text-sm text-ink-soft sm:text-base">
             이 브라우저에서 녹음한 기록이에요.
           </p>
 
@@ -134,15 +134,15 @@ function TrendDashboard({ trend }: { trend: ReturnType<typeof computeTrend> }) {
   const changeText = hasEnoughData ? describeTrendChange(trend) : "";
 
   return (
-    <div className="mt-8 rounded-2xl border border-gray-light bg-white p-6 sm:p-8">
+    <div className="mt-8 rounded-2xl border border-gray-light bg-steel-surface p-6 sm:p-8">
       <div className="flex items-baseline justify-between">
-        <p className="text-sm font-semibold text-neutral-900">
+        <p className="text-sm font-semibold text-ink">
           최근 7일 이탈도 추이
         </p>
         {average !== null && (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-ink-soft">
             평균{" "}
-            <span className="font-semibold tabular-nums text-neutral-900">
+            <span className="font-semibold tabular-nums text-ink">
               {average}%
             </span>
           </p>
@@ -155,10 +155,10 @@ function TrendDashboard({ trend }: { trend: ReturnType<typeof computeTrend> }) {
 
       {hasEnoughData ? (
         changeText && (
-          <p className="mt-3 text-center text-xs text-neutral-500">{changeText}</p>
+          <p className="mt-3 text-center text-xs text-ink-soft">{changeText}</p>
         )
       ) : (
-        <p className="mt-3 text-center text-xs text-neutral-500">
+        <p className="mt-3 text-center text-xs text-ink-soft">
           기록이 2개 이상 쌓이면 추이를 보여드려요.
         </p>
       )}
@@ -186,7 +186,7 @@ function Pagination({
         label="이전"
       />
 
-      <span className="px-3 text-sm text-neutral-500">
+      <span className="px-3 text-sm text-ink-soft">
         {currentPage} / {totalPages}
       </span>
 
@@ -210,7 +210,7 @@ function PageLink({
 }) {
   if (disabled) {
     return (
-      <span className="cursor-not-allowed rounded-full border border-gray-light px-4 py-2 text-sm font-medium text-neutral-300">
+      <span className="cursor-not-allowed rounded-full border border-gray-light px-4 py-2 text-sm font-medium text-ink-soft">
         {label}
       </span>
     );
@@ -219,7 +219,7 @@ function PageLink({
   return (
     <Link
       href={href}
-      className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-primary hover:text-primary"
+      className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-primary hover:text-primary"
     >
       {label}
     </Link>
@@ -241,10 +241,10 @@ function RecordRow({ record }: { record: MRRecordSummary }) {
   const content = (
     <>
       <div className="min-w-0">
-        <p className="text-sm font-medium text-neutral-900 sm:text-base">
+        <p className="text-sm font-medium text-ink sm:text-base">
           {dateValue ? formatMeasuredAt(dateValue) : "날짜 미상"}
         </p>
-        <p className="mt-1 text-xs text-neutral-500 sm:text-sm">
+        <p className="mt-1 text-xs text-ink-soft sm:text-sm">
           {summaryText}
         </p>
       </div>
@@ -253,10 +253,10 @@ function RecordRow({ record }: { record: MRRecordSummary }) {
         <span
           className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
             risk === "GOOD"
-              ? "bg-emerald-50 text-emerald-700"
+              ? "bg-emerald-500/10 text-emerald-400"
               : risk === "CAUTION"
-                ? "bg-amber-50 text-amber-700"
-                : "bg-red-50 text-red-700"
+                ? "bg-amber-500/10 text-amber-400"
+                : "bg-red-500/10 text-red-400"
           }`}
         >
           {RISK_COPY[risk].label}
@@ -266,7 +266,7 @@ function RecordRow({ record }: { record: MRRecordSummary }) {
   );
 
   const className =
-    "flex items-center justify-between gap-4 rounded-2xl border border-gray-light bg-white p-4 sm:p-5";
+    "flex items-center justify-between gap-4 rounded-2xl border border-gray-light bg-steel-surface p-4 sm:p-5";
 
   if (!record.record_uuid) {
     return <li className={className}>{content}</li>;
@@ -292,9 +292,9 @@ function EmptyState({
   description: string;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-light bg-white p-8 text-center">
-      <h2 className="text-lg font-bold text-neutral-900">{title}</h2>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+    <div className="rounded-2xl border border-gray-light bg-steel-surface p-8 text-center">
+      <h2 className="text-lg font-bold text-ink">{title}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
         {description}
       </p>
       <div className="mt-6 flex justify-center">

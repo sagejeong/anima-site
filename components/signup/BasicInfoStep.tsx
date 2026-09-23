@@ -38,10 +38,10 @@ export default function BasicInfoStep({
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-neutral-900 sm:text-2xl">
+      <h2 className="text-xl font-bold text-ink sm:text-2xl">
         기본 정보
       </h2>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
         기침 소리는 나이·흡연 여부·생활 환경에 따라 다르게 나타납니다. 정확한
         분석을 위해 사용되며, 개인을 특정하는 데는 쓰이지 않습니다.
       </p>

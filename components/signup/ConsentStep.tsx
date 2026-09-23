@@ -14,17 +14,17 @@ export default function ConsentStep({
 }: ConsentStepProps) {
   return (
     <div>
-      <h2 className="text-xl font-bold text-neutral-900 sm:text-2xl">
+      <h2 className="text-xl font-bold text-ink sm:text-2xl">
         연구 참여 안내 및 동의
       </h2>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
         아래 내용을 읽고 동의해 주셔야 가입을 진행할 수 있습니다.
       </p>
 
-      {/* TODO: 문구 검수 필요 — 최종 동의문 확정 시 이 영역만 교체 */}
-      <div className="mt-6 max-h-96 space-y-5 overflow-y-auto rounded-2xl border border-gray-light bg-neutral-50 p-5 text-sm leading-relaxed text-neutral-700 sm:p-6 sm:text-base sm:leading-relaxed">
+      {/* TODO: 문구 검수 필요, 최종 동의문 확정되면 이 영역만 교체 */}
+      <div className="mt-6 max-h-96 space-y-5 overflow-y-auto rounded-2xl border border-gray-light bg-steel-surface p-5 text-sm leading-relaxed text-ink-soft sm:p-6 sm:text-base sm:leading-relaxed">
         <section>
-          <h3 className="font-semibold text-neutral-900">연구 목적</h3>
+          <h3 className="font-semibold text-ink">연구 목적</h3>
           <p className="mt-2">
             본 연구는 사람의 목소리를 통해 호흡기 상태를 분석하는 데 높은
             민감도를 보인 기존 연구들을 기반으로 합니다. ANiMA는 의료기기가
@@ -34,7 +34,7 @@ export default function ConsentStep({
         </section>
 
         <section>
-          <h3 className="font-semibold text-neutral-900">참여와 개인정보</h3>
+          <h3 className="font-semibold text-ink">참여와 개인정보</h3>
           <p className="mt-2">
             연구 참여는 전적으로 자발적이며, 분석을 요청하지 않으시면 개인 식별
             정보가 포함되지 않습니다. 분석을 요청하셔도 가입 시 ID 정도의 정보만
@@ -44,7 +44,7 @@ export default function ConsentStep({
         </section>
 
         <section>
-          <h3 className="font-semibold text-neutral-900">녹음 절차 안내</h3>
+          <h3 className="font-semibold text-ink">녹음 절차 안내</h3>
           <p className="mt-2">
             전체 녹음 및 데이터 수집은 약 5분 정도 소요됩니다. 녹음 중에는 기기를
             얼굴에서 약 20cm 정도 떨어뜨려 주시고, 조용한 환경에서 녹음해
@@ -58,7 +58,7 @@ export default function ConsentStep({
         </section>
 
         <section>
-          <h3 className="font-semibold text-neutral-900">데이터 이용 범위</h3>
+          <h3 className="font-semibold text-ink">데이터 이용 범위</h3>
           <p className="mt-2">
             동의하시면 귀하의 데이터를 연구·개발 목적으로만 사용할 수 있도록
             허락하는 것이며, 당사의 이용약관에 동의하는 것입니다.
@@ -83,7 +83,7 @@ export default function ConsentStep({
           onChange={(event) => onAgreedChange(event.target.checked)}
           className="mt-0.5 h-5 w-5 shrink-0 accent-primary"
         />
-        <span className="text-sm leading-relaxed text-neutral-800 sm:text-base">
+        <span className="text-sm leading-relaxed text-ink sm:text-base">
           <span className="font-semibold text-primary">[필수]</span> 위 내용을
           모두 읽었으며, 연구·개발 목적의 데이터 이용에 동의합니다.
         </span>

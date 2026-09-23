@@ -24,6 +24,7 @@ export default function WorkersPage() {
   const [name, setName] = useState("");
   const [team, setTeam] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadWorkers = () => {
     fetch("/api/hub/workers")
@@ -57,6 +58,21 @@ export default function WorkersPage() {
     setTeam("");
     setIsFormOpen(false);
     loadWorkers();
+  };
+
+  const handleDelete = async (worker: WorkerRow) => {
+    if (!window.confirm(`${worker.name} 님을 명단에서 지울까요? 체크인 기록도 같이 지워집니다.`)) {
+      return;
+    }
+    setDeletingId(worker.id);
+    try {
+      const response = await fetch(`/api/hub/workers/${worker.id}`, { method: "DELETE" });
+      if (response.ok) {
+        loadWorkers();
+      }
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -145,12 +161,22 @@ export default function WorkersPage() {
                       )}
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <Link
-                        href={`/dashboard/workers/${worker.id}`}
-                        className="text-sm font-bold text-primary underline underline-offset-4"
-                      >
-                        상세보기
-                      </Link>
+                      <div className="flex items-center justify-end gap-4">
+                        <Link
+                          href={`/dashboard/workers/${worker.id}`}
+                          className="text-sm font-bold text-primary underline underline-offset-4"
+                        >
+                          상세보기
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => void handleDelete(worker)}
+                          disabled={deletingId === worker.id}
+                          className="text-sm font-bold text-critical underline underline-offset-4 disabled:opacity-60"
+                        >
+                          {deletingId === worker.id ? "삭제 중..." : "삭제"}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

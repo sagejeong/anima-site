@@ -110,6 +110,18 @@ export function addWorkerPlaceholder(params: { name: string; team: string }): Ro
   return worker;
 }
 
+/** 관리자가 잘못 등록했거나 더 이상 필요 없는 입소자를 명단에서 지울 때 씀. 체크인 기록도 같이 지움 */
+export function removeWorker(id: string): boolean {
+  const store = readStore();
+  const nextWorkers = store.workers.filter((worker) => worker.id !== id);
+  if (nextWorkers.length === store.workers.length) return false;
+
+  store.workers = nextWorkers;
+  store.checkins = store.checkins.filter((checkin) => checkin.workerId !== id);
+  writeStore(store);
+  return true;
+}
+
 export function addCheckin(entry: Omit<Checkin, "id">): Checkin {
   const store = readStore();
   const checkin: Checkin = { id: makeId("c"), ...entry };

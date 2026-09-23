@@ -61,10 +61,7 @@ export default function CheckinPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-steel px-5 py-10 font-hub-body text-ink sm:px-8">
-      <div className="flex items-center gap-2">
-        <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
-        <span className="text-xs font-bold tracking-[0.3em] text-primary">HUB</span>
-      </div>
+      <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
 
       <div className="mt-10 w-full max-w-md flex-1">
         {step === "loading" && <p className="text-center text-sm text-ink-soft">확인 중...</p>}

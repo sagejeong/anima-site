@@ -4,7 +4,7 @@ import GradientBar from "@/components/hub/GradientBar";
 
 type AuthLayoutProps = {
   eyebrow: string;
-  title: string;
+  title: React.ReactNode;
   description: string;
   children: React.ReactNode;
 };

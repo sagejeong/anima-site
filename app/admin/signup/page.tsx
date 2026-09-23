@@ -21,7 +21,11 @@ export default function AdminSignupPage() {
   return (
     <AuthLayout
       eyebrow="계정 생성"
-      title="시설에 ANiMA를 연결하세요."
+      title={
+        <>
+          시설에 <span className="font-hub-body">ANiMA</span>를 연결하세요.
+        </>
+      }
       description="관리자 계정 하나로 시설 전체를 관리할 수 있습니다."
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">

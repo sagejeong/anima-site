@@ -5,6 +5,7 @@ import LineChart from "@/components/hub/LineChart";
 import StatusPill from "@/components/hub/StatusPill";
 import { BellIcon, PeopleIcon, ShieldIcon, WarningIcon } from "@/components/hub/icons";
 import type { Checkin, CheckinStatus, RosterWorker } from "@/lib/hub-roster";
+import { parseServerDate } from "@/lib/result";
 
 type WorkerRow = RosterWorker & { latest: Checkin | null };
 
@@ -45,13 +46,23 @@ function sortByLatest(rows: readonly WorkerRow[]): WorkerRow[] {
   });
 }
 
-function formatElapsed(measuredAt: string): string {
-  const diffMs = Date.now() - new Date(measuredAt).getTime();
-  const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "방금 측정됨";
-  if (minutes < 60) return `${minutes}분 전 측정`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}시간 전 측정`;
+// 날짜+시각(평소 굵기)과 "n초/분 전"(굵게, now가 매초 갱신되면서 같이 움직임)을 따로 반환
+function formatMeasuredPair(measuredAt: string, now: number): { dateTime: string; elapsed: string } {
+  const date = parseServerDate(measuredAt);
+  const mm = date.getMonth() + 1;
+  const dd = date.getDate();
+  const hh = date.getHours().toString().padStart(2, "0");
+  const mi = date.getMinutes().toString().padStart(2, "0");
+  const dateTime = `${mm}/${dd} ${hh}:${mi}`;
+
+  const diffSec = Math.max(0, Math.floor((now - date.getTime()) / 1000));
+  let elapsed: string;
+  if (diffSec < 5) elapsed = "방금";
+  else if (diffSec < 60) elapsed = `${diffSec}초 전`;
+  else if (diffSec < 3600) elapsed = `${Math.floor(diffSec / 60)}분 전`;
+  else elapsed = `${Math.floor(diffSec / 3600)}시간 전`;
+
+  return { dateTime, elapsed };
 }
 
 // 예시 데이터가 전혀 없는 실제 대시보드. 등록된 팀원의 앱 UUID로 FastAPI 기록을
@@ -67,6 +78,7 @@ export default function LiveDashboardPage() {
   const [userUuid, setUserUuid] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const latestIdsRef = useRef<Map<string, string>>(new Map());
   const alertSeqRef = useRef(0);
@@ -131,6 +143,11 @@ export default function LiveDashboardPage() {
     }, POLL_MS);
 
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const tick = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(tick);
   }, []);
 
   useLayoutEffect(() => {
@@ -331,7 +348,9 @@ export default function LiveDashboardPage() {
             </div>
           ) : (
             <div className="flex flex-col divide-y divide-line px-2">
-              {rows.map((row) => (
+              {rows.map((row) => {
+                const measured = row.latest ? formatMeasuredPair(row.latest.measuredAt, now) : null;
+                return (
                 <div
                   key={row.id}
                   ref={(el) => {
@@ -345,7 +364,16 @@ export default function LiveDashboardPage() {
                   <div>
                     <p className="text-sm font-bold text-ink">{row.name}</p>
                     <p className="text-xs text-ink-soft">
-                      {row.team} · {row.latest ? formatElapsed(row.latest.measuredAt) : "측정 전"}
+                      {row.team}
+                      {measured && (
+                        <>
+                          {" · "}
+                          {measured.dateTime}
+                          {" · "}
+                          <span className="font-bold text-ink">{measured.elapsed}</span>
+                        </>
+                      )}
+                      {!measured && " · 측정 전"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -368,7 +396,8 @@ export default function LiveDashboardPage() {
                     </button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

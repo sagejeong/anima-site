@@ -167,8 +167,12 @@ export function hasCheckinFromRecord(workerId: string, sourceRecordUuid: string)
   );
 }
 
+// 문자열 비교(localeCompare)가 아니라 실제 시각으로 비교합니다. 타임존 표기가
+// 없던 옛 기록(수정 전에 들어온 것)과 지금 형식이 섞여 있어도 순서가 안 틀어지도록 함
 export function listCheckins(): Checkin[] {
-  return [...readStore().checkins].sort((a, b) => a.measuredAt.localeCompare(b.measuredAt));
+  return [...readStore().checkins].sort(
+    (a, b) => new Date(a.measuredAt).getTime() - new Date(b.measuredAt).getTime(),
+  );
 }
 
 export function listCheckinsForWorker(workerId: string): Checkin[] {

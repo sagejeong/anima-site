@@ -29,20 +29,25 @@ export async function POST() {
     if (!result.ok) continue;
 
     for (const record of result.data.records ?? []) {
-      if (!record.record_uuid || typeof record.healthy_distance !== "number") continue;
-      if (hasCheckinFromRecord(worker.id, record.record_uuid)) continue;
+      if (typeof record.healthy_distance !== "number") continue;
+
+      const recordDate = pickRecordDate(record);
+      const measuredAt = recordDate ? parseServerDate(recordDate).toISOString() : new Date().toISOString();
+      // record_uuid가 없는 경우를 대비해, 없으면 측정 시각으로 대신 중복을 가린다
+      // (record_uuid가 없다고 그냥 건너뛰면 새 기록이 계속 무시되는 문제가 있었음)
+      const dedupKey = record.record_uuid ?? `ts:${measuredAt}`;
+      if (hasCheckinFromRecord(worker.id, dedupKey)) continue;
 
       const distance = record.healthy_distance;
-      const recordDate = pickRecordDate(record);
       addCheckin({
         workerId: worker.id,
         session: "app",
-        measuredAt: recordDate ? parseServerDate(recordDate).toISOString() : new Date().toISOString(),
+        measuredAt,
         isCough: true,
         percent: Math.round(toDisplayPercent(distance)),
         status: RISK_COPY[classifyRisk(distance)].label as CheckinStatus,
         failReason: null,
-        sourceRecordUuid: record.record_uuid,
+        sourceRecordUuid: dedupKey,
       });
     }
   }

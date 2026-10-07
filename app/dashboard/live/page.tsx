@@ -2,12 +2,24 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import StatusPill from "@/components/hub/StatusPill";
+import { BellIcon, PeopleIcon, ShieldIcon, WarningIcon } from "@/components/hub/icons";
 import type { Checkin, CheckinStatus, RosterWorker } from "@/lib/hub-roster";
 
 type WorkerRow = RosterWorker & { latest: Checkin | null };
 
+type Alert = {
+  id: string;
+  workerId: string;
+  name: string;
+  team: string;
+  percent: number;
+  status: CheckinStatus;
+  when: string;
+};
+
 const POLL_MS = 3000;
 const FLASH_MS = 10000;
+const MAX_ALERTS = 8;
 
 function sortByLatest(rows: readonly WorkerRow[]): WorkerRow[] {
   return [...rows].sort((a, b) => {
@@ -17,10 +29,20 @@ function sortByLatest(rows: readonly WorkerRow[]): WorkerRow[] {
   });
 }
 
-// 앱에서 실제로 녹음한 기록이 대시보드에 그대로 들어오는지 보여주는 화면.
-// 예시 데이터 없음, 등록된 사람의 FastAPI 기록을 주기적으로 끌어와서 반영함
-export default function LiveSyncPage() {
+function formatElapsed(measuredAt: string): string {
+  const diffMs = Date.now() - new Date(measuredAt).getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "방금 측정됨";
+  if (minutes < 60) return `${minutes}분 전 측정`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}시간 전 측정`;
+}
+
+// 예시 데이터가 전혀 없는 실제 대시보드. 등록된 팀원의 앱 UUID로 FastAPI 기록을
+// 주기적으로 끌어와서, 전체 현황(KPI)·실시간 목록·이상 감지를 그 데이터로만 채움
+export default function LiveDashboardPage() {
   const [rows, setRows] = useState<readonly WorkerRow[]>([]);
+  const [alerts, setAlerts] = useState<readonly Alert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [name, setName] = useState("");
@@ -30,11 +52,13 @@ export default function LiveSyncPage() {
   const [flashId, setFlashId] = useState<string | null>(null);
 
   const latestIdsRef = useRef<Map<string, string>>(new Map());
+  const alertSeqRef = useRef(0);
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const prevTops = useRef<Map<string, number>>(new Map());
 
   const applyRows = (next: WorkerRow[]) => {
     const sorted = sortByLatest(next);
+    const newAlerts: Alert[] = [];
 
     for (const row of sorted) {
       const prevLatestId = latestIdsRef.current.get(row.id);
@@ -42,17 +66,38 @@ export default function LiveSyncPage() {
       if (currentLatestId && currentLatestId !== prevLatestId) {
         setFlashId(row.id);
         window.setTimeout(() => setFlashId((cur) => (cur === row.id ? null : cur)), FLASH_MS);
+
+        if (row.latest && row.latest.status && row.latest.status !== "양호" && prevLatestId !== undefined) {
+          alertSeqRef.current += 1;
+          newAlerts.push({
+            id: `a-${alertSeqRef.current}`,
+            workerId: row.id,
+            name: row.name,
+            team: row.team,
+            percent: row.latest.percent ?? 0,
+            status: row.latest.status,
+            when: "방금",
+          });
+        }
       }
       if (currentLatestId) latestIdsRef.current.set(row.id, currentLatestId);
     }
 
+    if (newAlerts.length > 0) {
+      setAlerts((prev) => [...newAlerts, ...prev].slice(0, MAX_ALERTS));
+    }
     setRows(sorted);
   };
 
   const loadRows = async () => {
     const res = await fetch("/api/hub/workers");
     const body: { workers: WorkerRow[] } = await res.json();
-    applyRows(body.workers.filter((w) => w.userUuid));
+    const liveRows = body.workers.filter((w) => w.userUuid);
+    // 처음 불러올 때는 "새 기록" 알림을 띄우지 않고, 현재 상태만 기준점으로 잡아둠
+    for (const row of liveRows) {
+      if (row.latest?.id) latestIdsRef.current.set(row.id, row.latest.id);
+    }
+    setRows(sortByLatest(liveRows));
     setIsLoading(false);
   };
 
@@ -121,19 +166,24 @@ export default function LiveSyncPage() {
     if (response.ok) void loadRows();
   };
 
+  const counts: Record<CheckinStatus, number> = { 양호: 0, 주의: 0, 경고: 0 };
+  for (const row of rows) {
+    if (row.latest?.status) counts[row.latest.status] += 1;
+  }
+
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="font-hub-label text-sm font-bold uppercase tracking-[0.25em] text-ink-soft">
             실시간 연동
           </p>
           <h1 className="mt-1 font-hub-display text-3xl font-black tracking-tight text-ink">
-            앱 녹음 결과 실시간 반영
+            앱 연동 실시간 대시보드
           </h1>
           <p className="mt-2 text-sm text-ink-soft">
-            예시 데이터 없이, 등록한 사람이 앱에서 기침을 녹음하면 그 결과가 몇 초 안에 그대로
-            여기 반영됩니다.
+            예시 데이터가 섞여 있지 않습니다. 등록한 팀원이 앱에서 기침을 녹음하면, 그 결과가 몇
+            초 안에 그대로 반영됩니다.
           </p>
         </div>
         <button
@@ -190,80 +240,134 @@ export default function LiveSyncPage() {
         </form>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-line bg-steel-surface">
-        <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
-          <p className="text-sm font-bold text-ink">연동된 팀원</p>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
-            <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
-            LIVE
-          </span>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <KpiTile label="연동 인원" value={rows.length} icon={PeopleIcon} />
+        <KpiTile label="양호" value={counts.양호} tone="양호" icon={ShieldIcon} />
+        <KpiTile label="주의" value={counts.주의} tone="주의" icon={WarningIcon} />
+        <KpiTile label="경고" value={counts.경고} tone="경고" icon={BellIcon} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="overflow-hidden rounded-2xl border border-line bg-steel-surface lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+            <p className="text-sm font-bold text-ink">연동된 팀원</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
+              <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+              LIVE
+            </span>
+          </div>
+
+          {isLoading ? (
+            <p className="px-5 py-8 text-center text-sm text-ink-soft">불러오는 중...</p>
+          ) : rows.length === 0 ? (
+            <div className="px-5 py-10 text-center">
+              <p className="font-hub-display text-lg font-extrabold text-ink">
+                등록된 팀원이 없습니다
+              </p>
+              <p className="mt-2 text-sm text-ink-soft">
+                위에서 이름·소속·앱 UUID를 등록하면, 그 사람이 앱으로 녹음한 결과가 여기 실시간으로
+                쌓입니다.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col divide-y divide-line px-2">
+              {rows.map((row) => (
+                <div
+                  key={row.id}
+                  ref={(el) => {
+                    if (el) nodeRefs.current.set(row.id, el);
+                    else nodeRefs.current.delete(row.id);
+                  }}
+                  className={`flex items-center justify-between gap-3 px-3 py-4 transition-colors duration-500 ${
+                    flashId === row.id ? "bg-critical/10" : ""
+                  }`}
+                >
+                  <div>
+                    <p className="text-sm font-bold text-ink">{row.name}</p>
+                    <p className="text-xs text-ink-soft">
+                      {row.team} · {row.latest ? formatElapsed(row.latest.measuredAt) : "측정 전"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {row.latest?.status ? (
+                      <div className="flex items-center gap-2.5">
+                        <span className="font-hub-mono text-sm font-semibold tabular-nums text-ink-soft">
+                          {row.latest.percent}%
+                        </span>
+                        <StatusPill status={row.latest.status} />
+                      </div>
+                    ) : (
+                      <span className="text-xs text-ink-soft">측정 전</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => void handleDelete(row)}
+                      className="text-xs font-bold text-critical underline underline-offset-4"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {isLoading ? (
-          <p className="px-5 py-8 text-center text-sm text-ink-soft">불러오는 중...</p>
-        ) : rows.length === 0 ? (
-          <div className="px-5 py-10 text-center">
-            <p className="font-hub-display text-lg font-extrabold text-ink">
-              등록된 팀원이 없습니다
-            </p>
-            <p className="mt-2 text-sm text-ink-soft">
-              위에서 이름·소속·앱 UUID를 등록하면, 그 사람이 앱으로 녹음한 결과가 여기 실시간으로
-              쌓입니다.
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col divide-y divide-line px-2">
-            {rows.map((row) => (
-              <div
-                key={row.id}
-                ref={(el) => {
-                  if (el) nodeRefs.current.set(row.id, el);
-                  else nodeRefs.current.delete(row.id);
-                }}
-                className={`flex items-center justify-between gap-3 px-3 py-4 transition-colors duration-500 ${
-                  flashId === row.id ? "bg-critical/10" : ""
-                }`}
-              >
-                <div>
-                  <p className="text-sm font-bold text-ink">{row.name}</p>
-                  <p className="text-xs text-ink-soft">
-                    {row.team} ·{" "}
-                    {row.latest ? formatElapsed(row.latest.measuredAt) : "측정 전"}
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-steel-surface p-5">
+          <p className="text-sm font-bold text-ink">최근 이상 감지</p>
+          {alerts.length === 0 ? (
+            <p className="text-sm text-ink-soft">아직 주의·경고 기록이 없습니다.</p>
+          ) : (
+            <ul className="flex flex-col gap-2.5">
+              {alerts.map((alert) => (
+                <li key={alert.id} className="rounded-xl border border-line px-3.5 py-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-bold text-ink">{alert.name}</p>
+                    <StatusPill status={alert.status} />
+                  </div>
+                  <p className="mt-1 text-xs text-ink-soft">
+                    {alert.team} · {alert.percent}% · {alert.when}
                   </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {row.latest?.status ? (
-                    <div className="flex items-center gap-2.5">
-                      <span className="font-hub-mono text-sm font-semibold tabular-nums text-ink-soft">
-                        {row.latest.percent}%
-                      </span>
-                      <StatusPill status={row.latest.status as CheckinStatus} />
-                    </div>
-                  ) : (
-                    <span className="text-xs text-ink-soft">측정 전</span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => void handleDelete(row)}
-                    className="text-xs font-bold text-critical underline underline-offset-4"
-                  >
-                    삭제
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-function formatElapsed(measuredAt: string): string {
-  const diffMs = Date.now() - new Date(measuredAt).getTime();
-  const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "방금 측정됨";
-  if (minutes < 60) return `${minutes}분 전 측정`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}시간 전 측정`;
+function KpiTile({
+  label,
+  value,
+  tone,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  tone?: CheckinStatus;
+  icon: (props: { className?: string }) => React.ReactElement;
+}) {
+  const toneClass: Record<CheckinStatus, string> = {
+    양호: "text-good bg-good/10",
+    주의: "text-caution bg-caution/10",
+    경고: "text-critical bg-critical/10",
+  };
+
+  return (
+    <div className="rounded-2xl border border-line bg-steel-surface px-5 py-5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">{label}</p>
+        <span
+          className={`flex h-8 w-8 items-center justify-center rounded-full ${
+            tone ? toneClass[tone] : "bg-ink/5 text-ink-soft"
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+        </span>
+      </div>
+      <p className="mt-3 font-hub-label text-4xl font-extrabold tabular-nums text-ink">{value}</p>
+    </div>
+  );
 }

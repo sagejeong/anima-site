@@ -122,11 +122,9 @@ data/                     hub-roster.ts가 쓰는 JSON 파일 저장소 (.gitign
 
 ### 왜 브라우저가 FastAPI를 직접 안 부르는가
 
-1. **Mixed content 문제**: 사이트가 `https`인데 FastAPI가 `http`면, 브라우저가 그 요청을 차단합니다.
-2. **CORS 문제**: 브라우저에서 직접 부르면 FastAPI 쪽에 CORS 허용 설정이 필요합니다.
-
-그래서 `app/api/*` (Next.js **Route Handler**, 서버에서 실행됨)가 중간에서 FastAPI를 대신
-호출합니다. 이 구조는 [lib/anima-api.ts](lib/anima-api.ts)의 `callAnimaApi()`가 담당합니다.
+브라우저에서 직접 부르면 FastAPI 쪽에 CORS 허용 설정이 필요합니다. 그래서 `app/api/*`
+(Next.js **Route Handler**, 서버에서 실행됨)가 중간에서 FastAPI를 대신 호출합니다. 이 구조는
+`lib/anima-api.ts`의 `callAnimaApi()`가 담당합니다.
 
 ```
 브라우저 → Next.js 서버 (app/api/*) → FastAPI 서버
@@ -137,14 +135,15 @@ data/                     hub-roster.ts가 쓰는 JSON 파일 저장소 (.gitign
 ```ts
 // lib/anima-api.ts
 export const ANIMA_API_BASE_URL =
-  process.env.ANIMA_API_BASE_URL ?? "http://158.101.89.133:8000";
+  process.env.ANIMA_API_BASE_URL ?? "https://api.animawith.cloud";
 ```
 
-- 코드에 박혀있는 기본값 `http://158.101.89.133:8000`은 **분석 서버(FastAPI) 주소가 맞습니다.**
-  `ANIMA_API_BASE_URL`은 이 주소를 가리켜야 합니다.
-- 참고로 `161.33.138.96` / `anima-with.duckdns.org`는 **분석 서버가 아니라 별도의 웹 서버**
-  (Next.js 사이트 자체를 올리는 곳) 주소입니다. `ANIMA_API_BASE_URL`이랑은 무관하니 헷갈리지
-  말 것. 이건 "6. 배포할 때" 항목에서 다루는 배포 대상 서버입니다.
+- 2026-10월부터 분석 서버와 웹 서버 둘 다 같은 개인 서버로 옮겨졌습니다. 분석 서버는
+  `https://api.animawith.cloud`, 웹 사이트 자체는 `https://animawith.cloud`로 분리된
+  서브도메인을 씁니다. 둘 다 https라 예전에 있던 mixed content 문제(사이트는 https인데
+  FastAPI가 http라 브라우저가 막던 문제)는 더 이상 없습니다.
+- 예전에 쓰던 `158.101.89.133:8000`(분석 서버), `161.33.138.96` / `anima-with.duckdns.org`
+  (웹 서버) 주소는 더 이상 쓰지 않습니다.
 
 ### 로그인 상태 (기존 소비자 앱 기준)
 
@@ -177,7 +176,7 @@ FastAPI 쪽 DB(`DB 설계 및 저장로직 V8`)엔 "시설/입소자/오전오�
 저장합니다. 같은 폰으로 다시 접속하면 등록 화면을 건너뜁니다.
 
 **중요한 한계, 반드시 읽어주세요**: `lib/hub-roster.ts`는 `data/hub-roster.json` 파일을
-직접 읽고 씁니다. 로컬 개발이나 지금 쓰는 VPS(Node 프로세스가 계속 떠 있는 방식)에서는 문제없이
+직접 읽고 씁니다. 로컬 개발이나 지금 쓰는 서버(Node 프로세스가 계속 떠 있는 방식)에서는 문제없이
 동작하지만, **Vercel 같은 서버리스에 배포하면 요청마다 파일시스템이 초기화돼서 등록·체크인
 기록이 저장되지 않습니다.** 정식 서비스 전에는 이 파일 저장소를 실제 DB(FastAPI에 입소자/체크인
 테이블을 추가하거나, 별도 DB)로 옮겨야 합니다. 지금은 "서버 연동이 실제로 되는지" 빨리
@@ -211,7 +210,7 @@ FastAPI 쪽 DB(`DB 설계 및 저장로직 V8`)엔 "시설/입소자/오전오�
 
 ### 권장: Vercel 배포
 
-지금 쓰는 VPS(FastAPI와 같은 서버 또는 별도 서버)에 Next.js까지 같이 올리면, 서버 프로세스가
+지금 쓰는 서버(FastAPI랑 같은 개인 서버)에 Next.js까지 같이 올리면, 서버 프로세스가
 죽었을 때 사이트 전체가 먹통이 되는 문제가 반복됩니다. Next.js를 만든 회사가 만든 호스팅인
 [Vercel](https://vercel.com)에 프론트만 분리 배포하면 이 문제 자체가 사라집니다
 (서버리스라 죽는 프로세스가 없음, GitHub 연결만 하면 push마다 자동 배포, https 자동 적용).

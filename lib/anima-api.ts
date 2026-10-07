@@ -6,7 +6,7 @@ import { USER_UUID_COOKIE } from "@/proxy";
  * 배포 환경에서는 ANIMA_API_BASE_URL 환경변수로 덮어쓸 수 있습니다.
  */
 export const ANIMA_API_BASE_URL =
-  process.env.ANIMA_API_BASE_URL ?? "http://158.101.89.133:8000";
+  process.env.ANIMA_API_BASE_URL ?? "https://api.animawith.cloud";
 
 /** 서버 응답을 기다리는 최대 시간 (분석에 시간이 걸릴 수 있어 넉넉히 잡습니다) */
 const REQUEST_TIMEOUT_MS = 60_000;

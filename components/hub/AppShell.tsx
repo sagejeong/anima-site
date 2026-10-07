@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BellIcon, ChartIcon, GearIcon, GridIcon, MenuIcon, PeopleIcon } from "@/components/hub/icons";
+import { BellIcon, ChartIcon, GearIcon, GridIcon, MenuIcon, PeopleIcon, PulseIcon } from "@/components/hub/icons";
 
 type NavItem = {
   label: string;
@@ -14,6 +14,7 @@ type NavItem = {
 
 const NAV_ITEMS: readonly NavItem[] = [
   { label: "전체 현황", href: "/dashboard", icon: GridIcon },
+  { label: "실시간 연동", href: "/dashboard/live", icon: PulseIcon },
   { label: "입소자 관리", href: "/dashboard/workers", icon: PeopleIcon },
   { label: "알림 이력", href: "/dashboard/alerts", icon: BellIcon },
   { label: "보고서", href: "/dashboard/reports", icon: ChartIcon },
@@ -28,6 +29,7 @@ type AppShellProps = {
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const isLivePage = pathname.startsWith("/dashboard/live");
 
   const isActive = (href: string): boolean =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
@@ -66,12 +68,21 @@ export default function AppShell({ children }: AppShellProps) {
           </button>
 
           <span className="hidden text-sm font-semibold text-ink-soft lg:block">
-            예시 데이터로 동작 방식을 보여주는 데모 화면입니다
+            {isLivePage
+              ? "앱에서 실제로 녹음한 결과가 그대로 반영되는 화면입니다"
+              : "예시 데이터로 동작 방식을 보여주는 데모 화면입니다"}
           </span>
 
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
-            DEMO
-          </span>
+          {isLivePage ? (
+            <span className="inline-flex items-center gap-2 rounded-full bg-good/10 px-3 py-1.5 text-xs font-bold text-good">
+              <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+              LIVE
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
+              DEMO
+            </span>
+          )}
         </header>
 
         <main className="flex-1 px-5 py-8 sm:px-8 sm:py-10">{children}</main>

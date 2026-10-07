@@ -8,7 +8,8 @@ import path from "path";
 const DATA_DIR = path.join(process.cwd(), "data");
 const STORE_PATH = path.join(DATA_DIR, "hub-roster.json");
 
-export type CheckinSession = "before" | "after";
+/** "app"은 요양시설 오전/오후 체크인이 아니라, 앱에서 바로 들어온 실시간 연동 기록 */
+export type CheckinSession = "before" | "after" | "app";
 export type CheckinStatus = "양호" | "주의" | "경고";
 
 export type RosterWorker = {
@@ -30,6 +31,8 @@ export type Checkin = {
   percent: number | null;
   status: CheckinStatus | null;
   failReason: string | null;
+  /** FastAPI 기록을 그대로 가져온 경우 그 record_uuid. 중복 수집 방지용, 아니면 null */
+  sourceRecordUuid: string | null;
 };
 
 type Store = {
@@ -95,6 +98,33 @@ export function registerWorkerForUuid(params: {
   return worker;
 }
 
+/** 관리자가 앱 설정 화면에서 복사해온 UUID로 바로 등록 (실시간 연동용, /checkin 안 거침) */
+export function addWorkerWithUuid(params: {
+  name: string;
+  team: string;
+  userUuid: string;
+}): RosterWorker {
+  const store = readStore();
+  const existing = store.workers.find((worker) => worker.userUuid === params.userUuid);
+  if (existing) {
+    existing.name = params.name;
+    existing.team = params.team;
+    writeStore(store);
+    return existing;
+  }
+
+  const worker: RosterWorker = {
+    id: makeId("w"),
+    name: params.name,
+    team: params.team,
+    userUuid: params.userUuid,
+    registeredAt: new Date().toISOString(),
+  };
+  store.workers.push(worker);
+  writeStore(store);
+  return worker;
+}
+
 /** 관리자가 대시보드에서 미리 이름만 등록해두는 경우 (아직 그 사람 폰이랑 안 연결됨) */
 export function addWorkerPlaceholder(params: { name: string; team: string }): RosterWorker {
   const store = readStore();
@@ -128,6 +158,13 @@ export function addCheckin(entry: Omit<Checkin, "id">): Checkin {
   store.checkins.push(checkin);
   writeStore(store);
   return checkin;
+}
+
+/** FastAPI에서 폴링해온 기록을 이미 저장했는지 확인 (같은 record_uuid 중복 수집 방지) */
+export function hasCheckinFromRecord(workerId: string, sourceRecordUuid: string): boolean {
+  return readStore().checkins.some(
+    (checkin) => checkin.workerId === workerId && checkin.sourceRecordUuid === sourceRecordUuid,
+  );
 }
 
 export function listCheckins(): Checkin[] {

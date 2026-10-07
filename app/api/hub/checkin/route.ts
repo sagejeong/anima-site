@@ -70,6 +70,7 @@ export async function POST(request: Request) {
     percent: hasValidResult ? Math.round(toDisplayPercent(distance as number)) : null,
     status: hasValidResult ? (RISK_COPY[classifyRisk(distance as number)].label as CheckinStatus) : null,
     failReason: hasValidResult ? null : failReason ?? "NO_COUGH",
+    sourceRecordUuid: null,
   });
 
   return Response.json({ checkin, analysis });

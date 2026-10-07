@@ -11,6 +11,7 @@ type WorkerDetailPageProps = {
 function groupByDay(checkins: readonly Checkin[]): Map<string, { before: Checkin | null; after: Checkin | null }> {
   const byDay = new Map<string, { before: Checkin | null; after: Checkin | null }>();
   for (const checkin of checkins) {
+    if (checkin.session !== "before" && checkin.session !== "after") continue;
     const day = checkin.measuredAt.slice(0, 10);
     const entry = byDay.get(day) ?? { before: null, after: null };
     entry[checkin.session] = checkin;

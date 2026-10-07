@@ -9,6 +9,7 @@ import {
 import {
   RISK_COPY,
   classifyRisk,
+  parseServerDate,
   pickRecordDate,
   toDisplayPercent,
   type RecordsListResponse,
@@ -30,10 +31,11 @@ export async function POST() {
       if (hasCheckinFromRecord(worker.id, record.record_uuid)) continue;
 
       const distance = record.healthy_distance;
+      const recordDate = pickRecordDate(record);
       addCheckin({
         workerId: worker.id,
         session: "app",
-        measuredAt: pickRecordDate(record) ?? new Date().toISOString(),
+        measuredAt: recordDate ? parseServerDate(recordDate).toISOString() : new Date().toISOString(),
         isCough: true,
         percent: Math.round(toDisplayPercent(distance)),
         status: RISK_COPY[classifyRisk(distance)].label as CheckinStatus,

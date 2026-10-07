@@ -81,12 +81,25 @@ export function toDisplayPercent(distance: number): number {
 }
 
 /**
+ * 서버(FastAPI)가 타임존 표기 없이 한국 시간을 그대로 보내는 경우가 있어서,
+ * 시간까지 있는데 타임존이 없으면 KST(+09:00)로 간주해서 파싱합니다.
+ * 안 그러면 서버 시간이 UTC로 읽혀서 9시간씩 밀려 보입니다.
+ */
+export function parseServerDate(value: string): Date {
+  const hasTimezone = /(Z|[+-]\d{2}:\d{2})$/i.test(value);
+  if (value.includes("T") && !hasTimezone) {
+    return new Date(`${value}+09:00`);
+  }
+  return new Date(value);
+}
+
+/**
  * "2026년 8월 16일 (일) 17:37" 형식으로 표시합니다.
  * 시각 정보가 없는 "YYYY-MM-DD" 형태(record_date)가 들어오면 시간은 붙이지 않습니다.
  */
 export function formatMeasuredAt(value: string | Date): string {
   const hasTimeComponent = typeof value !== "string" || value.includes("T");
-  const date = typeof value === "string" ? new Date(value) : value;
+  const date = typeof value === "string" ? parseServerDate(value) : value;
   if (Number.isNaN(date.getTime())) return "";
 
   const datePart = date.toLocaleDateString("ko-KR", {
@@ -198,7 +211,7 @@ export function computeTrend(
       const distance = record.healthy_distance;
       if (!dateStr || typeof distance !== "number") return null;
 
-      const time = new Date(dateStr).getTime();
+      const time = parseServerDate(dateStr).getTime();
       if (Number.isNaN(time)) return null;
 
       return {

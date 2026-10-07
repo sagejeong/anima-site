@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { BellIcon, ChartIcon, GearIcon, GridIcon, MenuIcon, PeopleIcon, PulseIcon } from "@/components/hub/icons";
 
 type NavItem = {
@@ -25,7 +25,7 @@ type AppShellProps = {
   children: React.ReactNode;
 };
 
-// 대시보드 레이아웃(사이드바 + 본문). 로그인 붙기 전이라 화면 틀만 있음
+// 대시보드 레이아웃(사이드바 + 본문). 공용 비밀번호 로그인(proxy.ts)으로 /dashboard/* 전체가 막혀 있음
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -126,15 +126,39 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="mt-auto flex items-center gap-3 rounded-xl bg-primary/5 px-3 py-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
-          관
-        </span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-ink">관리자 계정</p>
-          <p className="truncate text-xs text-ink/50">demo@anima.hub</p>
-        </div>
-      </div>
+      <LogoutButton />
     </>
+  );
+}
+
+function LogoutButton() {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } finally {
+      router.push("/admin/login");
+      router.refresh();
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={() => void handleLogout()}
+      disabled={isLoggingOut}
+      className="mt-auto flex items-center gap-3 rounded-xl bg-primary/5 px-3 py-3 text-left transition-colors hover:bg-primary/10 disabled:opacity-60"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
+        관
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-ink">관리자</p>
+        <p className="truncate text-xs text-ink/50">{isLoggingOut ? "로그아웃 중..." : "로그아웃"}</p>
+      </div>
+    </button>
   );
 }

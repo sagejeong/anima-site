@@ -14,6 +14,14 @@ import type { NextRequest } from "next/server";
 
 export const USER_UUID_COOKIE = "anima_uid";
 
+/** 대시보드 공용 비밀번호 확인용 쿠키. 값이 실제 비밀번호와 같을 때만 통과시킴 */
+export const ADMIN_AUTH_COOKIE = "anima_admin_auth";
+
+/** 팀 전체가 같이 쓰는 대시보드 비밀번호. 실서비스 전엔 ANIMA_ADMIN_PASSWORD 환경변수로 바꿔야 함 */
+export function getAdminPassword(): string {
+  return process.env.ANIMA_ADMIN_PASSWORD ?? "anima2026";
+}
+
 const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
 export function proxy(request: NextRequest) {
@@ -27,6 +35,16 @@ export function proxy(request: NextRequest) {
       maxAge: ONE_YEAR_IN_SECONDS,
       secure: process.env.NODE_ENV === "production",
     });
+  }
+
+  // 대시보드는 기침 분석 같은 건강정보를 보여주는 화면이라, 공용 비밀번호로 막아둠
+  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+    const authed = request.cookies.get(ADMIN_AUTH_COOKIE)?.value === getAdminPassword();
+    if (!authed) {
+      const loginUrl = new URL("/admin/login", request.url);
+      loginUrl.searchParams.set("next", request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return response;

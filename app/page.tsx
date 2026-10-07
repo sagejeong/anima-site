@@ -187,10 +187,10 @@ export default function Home() {
                 기침 체크하기
               </Link>
               <Link
-                href="/admin/signup"
+                href="/admin/login"
                 className="inline-flex items-center justify-center rounded-full border-2 border-ink/30 px-8 py-3.5 text-base font-bold text-ink transition-colors hover:border-ink"
               >
-                관리자 계정 생성하기
+                관리자로 로그인
               </Link>
             </div>
           </div>

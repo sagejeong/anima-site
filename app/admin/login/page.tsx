@@ -1,51 +1,84 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthLayout from "@/components/hub/AuthLayout";
 import FormField from "@/components/hub/FormField";
 
-// 관리자 로그인. 인증 서버 아직 없어서 그냥 데모 대시보드로 넘김
-export default function AdminLoginPage() {
+// 관리자 로그인. 팀이 같이 쓰는 공용 비밀번호 하나로 대시보드 전체를 잠가둠
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setErrorMessage(null);
     setIsSubmitting(true);
-    router.push("/dashboard");
+
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        setErrorMessage(body?.error ?? "로그인하지 못했습니다.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      router.push(searchParams.get("next") || "/dashboard");
+      router.refresh();
+    } catch {
+      setErrorMessage("네트워크에 연결하지 못했습니다.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <AuthLayout
       eyebrow="관리자 로그인"
       title="다시 오셨네요."
-      description="시설의 지금 상태를 바로 확인하세요."
+      description="팀이 같이 쓰는 비밀번호로 대시보드에 들어갑니다."
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <FormField label="이메일" type="email" name="email" placeholder="admin@company.com" autoComplete="email" />
-        <FormField label="비밀번호" type="password" name="password" placeholder="••••••••" autoComplete="current-password" />
+      <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-5">
+        <FormField
+          label="비밀번호"
+          type="password"
+          name="password"
+          placeholder="••••••••"
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+
+        {errorMessage && (
+          <p role="alert" className="text-sm font-bold text-critical">
+            {errorMessage}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={isSubmitting}
           className="mt-2 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5 disabled:opacity-60"
         >
-          {isSubmitting ? "이동 중..." : "로그인"}
+          {isSubmitting ? "확인 중..." : "로그인"}
         </button>
-
-        <p className="text-center text-xs leading-relaxed text-ink-soft">
-          지금은 데모입니다. 어떤 정보를 입력하셔도 데모 대시보드로 이동합니다.
-        </p>
       </form>
-
-      <p className="mt-8 text-center text-sm text-ink-soft">
-        계정이 없으신가요?{" "}
-        <Link href="/admin/signup" className="font-bold text-ink underline underline-offset-4">
-          계정 생성하기
-        </Link>
-      </p>
     </AuthLayout>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminLoginForm />
+    </Suspense>
   );
 }

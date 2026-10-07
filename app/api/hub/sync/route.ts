@@ -4,6 +4,8 @@ import {
   hasCheckinFromRecord,
   latestCheckinForWorker,
   listWorkers,
+  recentDailyAveragesForWorkers,
+  todayAverageForWorkers,
   type CheckinStatus,
 } from "@/lib/hub-roster";
 import {
@@ -49,5 +51,12 @@ export async function POST() {
     ...worker,
     latest: latestCheckinForWorker(worker.id),
   }));
-  return Response.json({ workers: updated });
+
+  const liveWorkerIds = workers.map((w) => w.id);
+  const stats = {
+    today: todayAverageForWorkers(liveWorkerIds),
+    weekly: recentDailyAveragesForWorkers(liveWorkerIds, 7),
+  };
+
+  return Response.json({ workers: updated, stats });
 }

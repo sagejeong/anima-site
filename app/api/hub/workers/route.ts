@@ -1,12 +1,27 @@
-import { addWorkerPlaceholder, addWorkerWithUuid, latestCheckinForWorker, listWorkers } from "@/lib/hub-roster";
+import {
+  addWorkerPlaceholder,
+  addWorkerWithUuid,
+  latestCheckinForWorker,
+  listWorkers,
+  recentDailyAveragesForWorkers,
+  todayAverageForWorkers,
+} from "@/lib/hub-roster";
 
-// 대시보드 입소자 목록, 실제 등록된 명단 + 각자 최근 체크인
+// 대시보드 입소자 목록, 실제 등록된 명단 + 각자 최근 체크인 + 앱 연동 인원 기준 통계
 export async function GET() {
-  const workers = listWorkers().map((worker) => ({
+  const all = listWorkers();
+  const workers = all.map((worker) => ({
     ...worker,
     latest: latestCheckinForWorker(worker.id),
   }));
-  return Response.json({ workers });
+
+  const liveWorkerIds = all.filter((w) => w.userUuid).map((w) => w.id);
+  const stats = {
+    today: todayAverageForWorkers(liveWorkerIds),
+    weekly: recentDailyAveragesForWorkers(liveWorkerIds, 7),
+  };
+
+  return Response.json({ workers, stats });
 }
 
 // 관리자가 미리 이름만 등록(아직 체크인 안 한 상태) 또는 앱 UUID를 바로 붙여서 등록

@@ -237,3 +237,64 @@ export function recentAfterAverages(days: number): { date: string; average: numb
     .map(([date, values]) => ({ date, average: average(values) as number }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
+
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+/**
+ * UTC 기준 measuredAt을 한국 시간 기준 날짜(YYYY-MM-DD)·시(0~23)로 바꿔줍니다.
+ * 서버가 돌아가는 시스템 타임존이 UTC든 KST든 상관없이 항상 한국 기준으로 계산하기 위함입니다.
+ */
+function toKst(measuredAt: string): { dateKey: string; hour: number } {
+  const kst = new Date(new Date(measuredAt).getTime() + KST_OFFSET_MS);
+  return { dateKey: kst.toISOString().slice(0, 10), hour: kst.getUTCHours() };
+}
+
+/** 앱 연동(실시간) 화면용. 지정한 입소자들의 오늘 기록을, 세션 구분 없이 측정 시각이
+ * 오전(0~11시)인지 오후(12~23시)인지로 나눠서 평균 이탈도를 낸다 */
+export function todayAverageForWorkers(workerIds: readonly string[]): {
+  morning: number | null;
+  afternoon: number | null;
+  morningCount: number;
+  afternoonCount: number;
+} {
+  const idSet = new Set(workerIds);
+  const todayKey = toKst(new Date().toISOString()).dateKey;
+  const todays = listCheckins().filter((c) => idSet.has(c.workerId) && c.percent !== null);
+
+  const morning: number[] = [];
+  const afternoon: number[] = [];
+  for (const checkin of todays) {
+    const { dateKey, hour } = toKst(checkin.measuredAt);
+    if (dateKey !== todayKey) continue;
+    (hour < 12 ? morning : afternoon).push(checkin.percent as number);
+  }
+
+  return {
+    morning: average(morning),
+    afternoon: average(afternoon),
+    morningCount: morning.length,
+    afternoonCount: afternoon.length,
+  };
+}
+
+/** 앱 연동(실시간) 화면용. 지정한 입소자들의 최근 N일 평균 이탈도(세션 구분 없이 전부) */
+export function recentDailyAveragesForWorkers(
+  workerIds: readonly string[],
+  days: number,
+): { date: string; average: number }[] {
+  const idSet = new Set(workerIds);
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  const byDate = new Map<string, number[]>();
+
+  for (const checkin of listCheckins()) {
+    if (!idSet.has(checkin.workerId) || checkin.percent === null) continue;
+    const time = new Date(checkin.measuredAt).getTime();
+    if (Number.isNaN(time) || time < cutoff) continue;
+    const dateKey = toKst(checkin.measuredAt).dateKey;
+    byDate.set(dateKey, [...(byDate.get(dateKey) ?? []), checkin.percent]);
+  }
+
+  return Array.from(byDate.entries())
+    .map(([date, values]) => ({ date, average: average(values) as number }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}

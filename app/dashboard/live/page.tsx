@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import LineChart from "@/components/hub/LineChart";
 import StatusPill from "@/components/hub/StatusPill";
 import { BellIcon, PeopleIcon, ShieldIcon, WarningIcon } from "@/components/hub/icons";
 import type { Checkin, CheckinStatus, RosterWorker } from "@/lib/hub-roster";
@@ -15,6 +16,21 @@ type Alert = {
   percent: number;
   status: CheckinStatus;
   when: string;
+};
+
+type LiveStats = {
+  today: {
+    morning: number | null;
+    afternoon: number | null;
+    morningCount: number;
+    afternoonCount: number;
+  };
+  weekly: { date: string; average: number }[];
+};
+
+const EMPTY_STATS: LiveStats = {
+  today: { morning: null, afternoon: null, morningCount: 0, afternoonCount: 0 },
+  weekly: [],
 };
 
 const POLL_MS = 3000;
@@ -43,6 +59,7 @@ function formatElapsed(measuredAt: string): string {
 export default function LiveDashboardPage() {
   const [rows, setRows] = useState<readonly WorkerRow[]>([]);
   const [alerts, setAlerts] = useState<readonly Alert[]>([]);
+  const [stats, setStats] = useState<LiveStats>(EMPTY_STATS);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [name, setName] = useState("");
@@ -91,13 +108,14 @@ export default function LiveDashboardPage() {
 
   const loadRows = async () => {
     const res = await fetch("/api/hub/workers");
-    const body: { workers: WorkerRow[] } = await res.json();
+    const body: { workers: WorkerRow[]; stats?: LiveStats } = await res.json();
     const liveRows = body.workers.filter((w) => w.userUuid);
     // 처음 불러올 때는 "새 기록" 알림을 띄우지 않고, 현재 상태만 기준점으로 잡아둠
     for (const row of liveRows) {
       if (row.latest?.id) latestIdsRef.current.set(row.id, row.latest.id);
     }
     setRows(sortByLatest(liveRows));
+    if (body.stats) setStats(body.stats);
     setIsLoading(false);
   };
 
@@ -107,8 +125,9 @@ export default function LiveDashboardPage() {
     const timer = window.setInterval(async () => {
       const res = await fetch("/api/hub/sync", { method: "POST" });
       if (!res.ok) return;
-      const body: { workers: WorkerRow[] } = await res.json();
+      const body: { workers: WorkerRow[]; stats?: LiveStats } = await res.json();
       applyRows(body.workers.filter((w) => w.userUuid));
+      if (body.stats) setStats(body.stats);
     }, POLL_MS);
 
     return () => window.clearInterval(timer);
@@ -240,6 +259,47 @@ export default function LiveDashboardPage() {
         </form>
       )}
 
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-ink">오늘 오전 → 오후</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
+              <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+              LIVE
+            </span>
+          </div>
+          {stats.today.morning === null && stats.today.afternoon === null ? (
+            <p className="mt-6 text-sm text-ink-soft">오늘 측정된 기록이 아직 없습니다.</p>
+          ) : (
+            <div className="mt-5 flex items-center justify-center gap-6">
+              <BigStat label={`오전 (${stats.today.morningCount}건)`} value={stats.today.morning} />
+              <span className="text-2xl text-ink-soft" aria-hidden="true">
+                →
+              </span>
+              <BigStat label={`오후 (${stats.today.afternoonCount}건)`} value={stats.today.afternoon} />
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-ink">최근 7일 평균 이탈도</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
+              <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+              LIVE
+            </span>
+          </div>
+          {stats.weekly.length < 2 ? (
+            <p className="mt-6 text-sm text-ink-soft">추이를 보려면 며칠 더 데이터가 쌓여야 합니다.</p>
+          ) : (
+            <LineChart
+              points={stats.weekly.map((p) => ({ label: p.date.slice(5), value: p.average }))}
+              className="mt-5"
+            />
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <KpiTile label="연동 인원" value={rows.length} icon={PeopleIcon} />
         <KpiTile label="양호" value={counts.양호} tone="양호" icon={ShieldIcon} />
@@ -334,6 +394,17 @@ export default function LiveDashboardPage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function BigStat({ label, value }: { label: string; value: number | null }) {
+  return (
+    <div className="text-center">
+      <p className="font-hub-label text-4xl font-black tabular-nums text-ink">
+        {value === null ? "—" : `${value}%`}
+      </p>
+      <p className="mt-1 text-xs font-semibold text-ink-soft">{label}</p>
     </div>
   );
 }

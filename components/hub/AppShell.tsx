@@ -29,7 +29,8 @@ type AppShellProps = {
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const isLivePage = pathname.startsWith("/dashboard/live");
+  // 전체 현황(개요)만 발표용 예시 데이터로 남겨두고, 나머지 전부는 실제 데이터 화면
+  const isOverview = pathname === "/dashboard";
 
   const isActive = (href: string): boolean =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
@@ -68,19 +69,19 @@ export default function AppShell({ children }: AppShellProps) {
           </button>
 
           <span className="hidden text-sm font-semibold text-ink-soft lg:block">
-            {isLivePage
-              ? "앱에서 실제로 녹음한 결과가 그대로 반영되는 화면입니다"
-              : "예시 데이터로 동작 방식을 보여주는 데모 화면입니다"}
+            {isOverview
+              ? "예시 데이터로 동작 방식을 보여주는 데모 화면입니다"
+              : "실제 등록된 입소자의 데이터만 보여주는 화면입니다"}
           </span>
 
-          {isLivePage ? (
+          {isOverview ? (
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
+              DEMO
+            </span>
+          ) : (
             <span className="inline-flex items-center gap-2 rounded-full bg-good/10 px-3 py-1.5 text-xs font-bold text-good">
               <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
               LIVE
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
-              DEMO
             </span>
           )}
         </header>

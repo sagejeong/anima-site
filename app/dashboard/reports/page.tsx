@@ -1,5 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { DownloadIcon } from "@/components/hub/icons";
-import { DEMO_RESIDENTS } from "@/lib/dashboard-demo";
+import type { Checkin, CheckinStatus, RosterWorker } from "@/lib/hub-roster";
+
+type WorkerRow = RosterWorker & { latest: Checkin | null };
 
 type ReportKind = {
   title: string;
@@ -9,35 +14,41 @@ type ReportKind = {
 const REPORT_KINDS: readonly ReportKind[] = [
   { title: "주간 시설 리포트", description: "지난 7일간 시설 평균 이탈도와 상태 분포를 정리합니다." },
   { title: "병동별 리포트", description: "병동 단위로 양호 · 주의 · 경고 인원을 비교합니다." },
-  { title: "입소자별 리포트", description: "개별 입소자의 오전/오후 체크인 기록을 기간별로 모아 보여줍니다." },
+  { title: "입소자별 리포트", description: "개별 입소자의 체크인 기록을 기간별로 모아 보여줍니다." },
 ] as const;
 
-// 발표용 리포트 화면, 대시보드랑 같은 예시 데이터로 요약 수치 채움
+// 실제 등록된 입소자·체크인 기록 기준 리포트 화면. 예시 데이터 없음
 export default function ReportsPage() {
-  const good = DEMO_RESIDENTS.filter((r) => r.status === "양호").length;
-  const caution = DEMO_RESIDENTS.filter((r) => r.status === "주의").length;
-  const critical = DEMO_RESIDENTS.filter((r) => r.status === "경고").length;
+  const [workers, setWorkers] = useState<readonly WorkerRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/hub/workers")
+      .then((res) => res.json())
+      .then((body: { workers: WorkerRow[] }) => setWorkers(body.workers))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const counts: Record<CheckinStatus, number> = { 양호: 0, 주의: 0, 경고: 0 };
+  for (const worker of workers) {
+    if (worker.latest?.status) counts[worker.latest.status] += 1;
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="font-hub-label text-sm font-bold uppercase tracking-[0.25em] text-ink-soft">
-            보고서
-          </p>
-          <h1 className="mt-1 font-hub-display text-3xl font-black tracking-tight text-ink">
-            시설 리포트
-          </h1>
-        </div>
-        <span className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
-          예시 데이터
-        </span>
+      <div>
+        <p className="font-hub-label text-sm font-bold uppercase tracking-[0.25em] text-ink-soft">
+          보고서
+        </p>
+        <h1 className="mt-1 font-hub-display text-3xl font-black tracking-tight text-ink">
+          시설 리포트
+        </h1>
       </div>
 
       <div className="grid grid-cols-3 gap-4 rounded-2xl border border-line bg-steel-surface p-6">
-        <SummaryStat label="전체 인원" value={DEMO_RESIDENTS.length} />
-        <SummaryStat label="양호" value={good} tone="text-good" />
-        <SummaryStat label="주의 · 경고" value={caution + critical} tone="text-critical" />
+        <SummaryStat label="전체 인원" value={isLoading ? "–" : workers.length} />
+        <SummaryStat label="양호" value={isLoading ? "–" : counts.양호} tone="text-good" />
+        <SummaryStat label="주의 · 경고" value={isLoading ? "–" : counts.주의 + counts.경고} tone="text-critical" />
       </div>
 
       <ul className="flex flex-col gap-3">
@@ -64,13 +75,13 @@ export default function ReportsPage() {
       </ul>
 
       <p className="text-xs text-ink-soft">
-        위 수치는 예시 데이터 기준입니다. 리포트 내보내기(PDF) 기능은 아직 준비 중입니다.
+        위 수치는 실제 등록된 입소자·체크인 기록 기준입니다. 리포트 내보내기(PDF) 기능만 아직 준비 중입니다.
       </p>
     </div>
   );
 }
 
-function SummaryStat({ label, value, tone }: { label: string; value: number; tone?: string }) {
+function SummaryStat({ label, value, tone }: { label: string; value: number | string; tone?: string }) {
   return (
     <div className="text-center">
       <p className={`font-hub-label text-3xl font-extrabold tabular-nums ${tone ?? "text-ink"}`}>

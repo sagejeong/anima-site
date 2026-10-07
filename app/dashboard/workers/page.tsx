@@ -3,26 +3,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import StatusPill from "@/components/hub/StatusPill";
-import { DEMO_RESIDENTS } from "@/lib/dashboard-demo";
 import type { Checkin, RosterWorker } from "@/lib/hub-roster";
 
 type WorkerRow = RosterWorker & { latest: Checkin | null };
 
-const DEMO_ROWS = DEMO_RESIDENTS.map((resident) => ({
-  id: resident.id,
-  name: resident.label,
-  team: resident.team,
-  percent: resident.percent,
-  status: resident.status,
-}));
-
-// 입소자 관리. 등록 폼은 실제로 동작함, 아래 목록엔 예시 입소자도 "예시" 표시로 같이 섞어 보여줌
+// 입소자 관리. 예시 데이터 없음, 실제 등록된 명단만 관리. 앱 UUID를 붙이면
+// 그 사람이 앱으로 녹음한 기록이 실시간 연동으로 자동 반영됨
 export default function WorkersPage() {
   const [workers, setWorkers] = useState<WorkerRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [name, setName] = useState("");
   const [team, setTeam] = useState("");
+  const [userUuid, setUserUuid] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -45,7 +38,7 @@ export default function WorkersPage() {
     const response = await fetch("/api/hub/workers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, team }),
+      body: JSON.stringify({ name, team, userUuid: userUuid.trim() || undefined }),
     });
     const body = await response.json();
 
@@ -56,6 +49,7 @@ export default function WorkersPage() {
 
     setName("");
     setTeam("");
+    setUserUuid("");
     setIsFormOpen(false);
     loadWorkers();
   };
@@ -98,7 +92,7 @@ export default function WorkersPage() {
       {isFormOpen && (
         <form
           onSubmit={(event) => void handleSubmit(event)}
-          className="grid gap-4 rounded-2xl border border-line bg-steel-surface p-6 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+          className="grid gap-4 rounded-2xl border border-line bg-steel-surface p-6 sm:grid-cols-2"
         >
           <label className="block">
             <span className="text-sm font-bold text-ink">이름</span>
@@ -111,7 +105,7 @@ export default function WorkersPage() {
             />
           </label>
           <label className="block">
-            <span className="text-sm font-bold text-ink">소속 병동</span>
+            <span className="text-sm font-bold text-ink">소속</span>
             <input
               value={team}
               onChange={(event) => setTeam(event.target.value)}
@@ -120,21 +114,31 @@ export default function WorkersPage() {
               className="mt-2 block w-full rounded-xl border border-line bg-steel px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
+          <label className="block sm:col-span-2">
+            <span className="text-sm font-bold text-ink">앱 UUID (선택)</span>
+            <input
+              value={userUuid}
+              onChange={(event) => setUserUuid(event.target.value)}
+              placeholder="앱 설정 → 내 정보 → 내 UUID에서 복사한 값. 비워두면 이름만 먼저 등록됩니다"
+              className="mt-2 block w-full rounded-xl border border-line bg-steel px-4 py-2.5 font-hub-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-xl bg-ink px-5 py-2.5 text-sm font-bold text-steel transition-colors hover:bg-primary"
+            className="inline-flex items-center justify-center rounded-xl bg-ink px-5 py-2.5 text-sm font-bold text-steel transition-colors hover:bg-primary sm:w-fit"
           >
             등록
           </button>
-          {errorMessage && <p className="text-sm font-bold text-critical sm:col-span-3">{errorMessage}</p>}
+          {errorMessage && <p className="text-sm font-bold text-critical sm:col-span-2">{errorMessage}</p>}
         </form>
       )}
 
       <div className="overflow-hidden rounded-2xl border border-line bg-steel-surface">
         <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
           <p className="text-sm font-bold text-ink">전체 명단</p>
-          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
-            예시 데이터 포함
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
+            <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+            LIVE
           </span>
         </div>
         <div className="overflow-x-auto">
@@ -180,33 +184,21 @@ export default function WorkersPage() {
                     </td>
                   </tr>
                 ))}
-              {DEMO_ROWS.map((row) => (
-                <tr key={row.id} className="transition-colors hover:bg-steel/60">
-                  <td className="px-5 py-4 text-ink-soft">{row.team}</td>
-                  <td className="px-5 py-4 font-bold text-ink">
-                    {row.name}{" "}
-                    <span className="ml-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-                      예시
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <StatusPill status={row.status} />
-                      <span className="font-hub-mono text-xs text-ink-soft">{row.percent}%</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4" />
-                </tr>
-              ))}
             </tbody>
           </table>
         </div>
+        {!isLoading && workers.length === 0 && (
+          <div className="px-5 py-10 text-center">
+            <p className="font-hub-display text-lg font-extrabold text-ink">
+              등록된 입소자가 없습니다
+            </p>
+            <p className="mt-2 text-sm text-ink-soft">
+              위에서 이름·소속을 등록해 주세요. 앱 UUID를 같이 넣으면 그 사람이 앱으로 녹음한
+              결과가 바로 연동됩니다.
+            </p>
+          </div>
+        )}
       </div>
-
-      <p className="text-xs text-ink-soft">
-        위 목록 중 &ldquo;예시&rdquo; 표시가 붙은 항목은 화면 구성을 보여주기 위한 데모 데이터입니다.
-        나머지는 여기서 직접 등록한 실제 명단입니다.
-      </p>
     </div>
   );
 }

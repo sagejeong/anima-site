@@ -143,8 +143,7 @@ export const ANIMA_API_BASE_URL =
   `https://api.animawith.cloud`, 웹 사이트 자체는 `https://animawith.cloud`로 분리된
   서브도메인을 씁니다. 둘 다 https라 예전에 있던 mixed content 문제(사이트는 https인데
   FastAPI가 http라 브라우저가 막던 문제)는 더 이상 없습니다.
-- 예전에 쓰던 `158.101.89.133:8000`(분석 서버), `161.33.138.96` / `anima-with.duckdns.org`
-  (웹 서버) 주소는 더 이상 쓰지 않습니다.
+- 예전에 쓰던 서버 주소들은 더 이상 쓰지 않습니다.
 
 ### 로그인 상태 (기존 소비자 앱 기준)
 
@@ -153,20 +152,17 @@ export const ANIMA_API_BASE_URL =
 
 ### 대시보드 로그인
 
-`/dashboard/*`는 기침 분석 같은 건강정보를 다뤄서, 팀이 같이 쓰는 공용 비밀번호 하나로
-막아뒀습니다. `/admin/login`에서 비밀번호를 맞히면 `proxy.ts`의 `ADMIN_AUTH_COOKIE` 쿠키가
-심어지고, 그 쿠키가 있어야 `/dashboard/*`에 들어갈 수 있습니다(개인 계정 아님, 팀 전체가
-같은 비밀번호 사용).
+`/dashboard/*`와 그 안에서 쓰는 관리자용 API(`/api/hub/workers`, `/api/hub/sync`,
+`/api/hub/alerts`)는 기침 분석 같은 건강정보를 다뤄서, 팀이 같이 쓰는 공용 비밀번호
+하나로 막아뒀습니다. `/admin/login`에서 비밀번호를 맞히면 `proxy.ts`의
+`ADMIN_AUTH_COOKIE` 쿠키가 심어지고, 그 쿠키가 있어야 들어갈 수 있습니다(개인 계정
+아님, 팀 전체가 같은 비밀번호 사용). 반대로 `/api/hub/checkin` 등 입소자 본인이
+`/checkin`에서 쓰는 주소는 이 비밀번호와 무관하게 그대로 열려 있습니다.
 
-```ts
-// proxy.ts
-export function getAdminPassword(): string {
-  return process.env.ANIMA_ADMIN_PASSWORD ?? "anima2026";
-}
-```
-
-로컬 개발 기본값은 `anima2026`입니다. 실제 배포 서버에는 `ANIMA_ADMIN_PASSWORD` 환경변수로
-다른 값을 반드시 설정해 주세요(기본값 그대로 두면 아무나 추측해서 들어올 수 있습니다).
+비밀번호는 코드에 적어두지 않고 `ANIMA_ADMIN_PASSWORD` 환경변수로만 관리합니다
+(`proxy.ts`의 `getAdminPassword()` 참고). **배포 서버에 이 환경변수가 실제로
+설정돼 있는지 꼭 확인해 주세요** — 안 설정돼 있으면 로컬 개발용 기본값으로
+동작해서 비밀번호를 쉽게 추측당할 수 있습니다.
 
 ---
 

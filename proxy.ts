@@ -24,6 +24,15 @@ export function getAdminPassword(): string {
 
 const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
+/**
+ * 관리자 전용 데이터 API. 화면(/dashboard/*)만 비밀번호로 막고 이 주소들을
+ * 빼먹으면, 비밀번호 없이 이 주소로 직접 요청해서 실명·UUID·건강 상태를
+ * 그대로 읽거나(GET) 명단을 지울 수(DELETE) 있어서 화면 잠금이 무의미해짐.
+ * /api/hub/checkin, /api/hub/register-worker, /api/hub/whoami는 입소자 본인이
+ * /checkin에서 쓰는 주소라 여기 포함하지 않음(관리자 비밀번호를 몰라도 돼야 함).
+ */
+const ADMIN_API_PREFIXES = ["/api/hub/workers", "/api/hub/sync", "/api/hub/alerts"];
+
 export function proxy(request: NextRequest) {
   const response = NextResponse.next();
 
@@ -37,13 +46,19 @@ export function proxy(request: NextRequest) {
     });
   }
 
-  // 대시보드는 기침 분석 같은 건강정보를 보여주는 화면이라, 공용 비밀번호로 막아둠
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
+  const pathname = request.nextUrl.pathname;
+  const isDashboardPage = pathname.startsWith("/dashboard");
+  const isAdminApi = ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
+  if (isDashboardPage || isAdminApi) {
     const authed = request.cookies.get(ADMIN_AUTH_COOKIE)?.value === getAdminPassword();
-    if (!authed) {
+    if (!authed && isDashboardPage) {
       const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("next", request.nextUrl.pathname);
+      loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
+    }
+    if (!authed && isAdminApi) {
+      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
     }
   }
 

@@ -22,6 +22,7 @@ export default function SettingsPage() {
     caution: true,
     daily: false,
   });
+  const [savedAt, setSavedAt] = useState<number | null>(null);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
@@ -76,12 +77,14 @@ export default function SettingsPage() {
 
       <button
         type="button"
+        onClick={() => setSavedAt(Date.now())}
         className="self-start rounded-full bg-ink px-6 py-3 text-sm font-bold text-steel transition-colors hover:bg-primary"
       >
         변경사항 저장
       </button>
-      <p className="-mt-4 text-xs text-ink-soft">
-        데모 화면입니다. 새로고침하면 변경 사항이 초기화됩니다.
+      <p role="status" className="-mt-4 text-xs text-ink-soft">
+        {savedAt ? "저장했어요. " : ""}
+        데모 화면이라 새로고침하면 다시 초기화됩니다.
       </p>
     </div>
   );

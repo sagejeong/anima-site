@@ -69,6 +69,16 @@ export default function WorkersPage() {
     }
   };
 
+  const handleClearAll = async () => {
+    if (workers.length === 0) return;
+    if (!window.confirm(`전체 명단 ${workers.length}명을 다 지울까요? 테스트하면서 등록된 걸 한 번에 정리할 때 씁니다.`)) {
+      return;
+    }
+    setIsLoading(true);
+    await Promise.all(workers.map((worker) => fetch(`/api/hub/workers/${worker.id}`, { method: "DELETE" })));
+    loadWorkers();
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -79,14 +89,29 @@ export default function WorkersPage() {
           <h1 className="mt-1 font-hub-display text-3xl font-black tracking-tight text-ink">
             등록 · 배정 관리
           </h1>
+          <p className="mt-2 max-w-xl text-sm text-ink-soft">
+            예시 데이터가 아니라 실제로 저장되는 명단입니다. 개발 과정에서 테스트로 등록한
+            항목이 섞여 있을 수 있어요, 아래 "전체 비우기"로 언제든 정리할 수 있습니다.
+          </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsFormOpen((open) => !open)}
-          className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5"
-        >
-          {isFormOpen ? "닫기" : "+ 새 입소자 등록"}
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          {workers.length > 0 && (
+            <button
+              type="button"
+              onClick={() => void handleClearAll()}
+              className="inline-flex items-center justify-center rounded-full border border-line px-4 py-2.5 text-sm font-bold text-ink-soft transition-colors hover:border-critical hover:text-critical"
+            >
+              전체 비우기
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsFormOpen((open) => !open)}
+            className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-transform hover:-translate-y-0.5"
+          >
+            {isFormOpen ? "닫기" : "+ 새 입소자 등록"}
+          </button>
+        </div>
       </div>
 
       {isFormOpen && (

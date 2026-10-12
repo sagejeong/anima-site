@@ -218,8 +218,9 @@ export default function LiveDashboardPage() {
             앱 연동 실시간 대시보드
           </h1>
           <p className="mt-2 text-sm text-ink-soft">
-            예시 데이터가 섞여 있지 않습니다. 등록한 팀원이 앱에서 기침을 녹음하면, 그 결과가 몇
-            초 안에 그대로 반영됩니다.
+            예시 데이터가 아니라 실제로 동작하는 기능입니다. 등록한 사람이 ANiMA 앱에서 기침을
+            녹음하면, 그 결과가 몇 초 안에 그대로 반영됩니다. 아래 목록은 개발 과정에서 직접
+            테스트한 기록이라 실제 서비스 데이터는 아닙니다.
           </p>
         </div>
         <button
@@ -343,7 +344,8 @@ export default function LiveDashboardPage() {
               </p>
               <p className="mt-2 text-sm text-ink-soft">
                 위에서 이름·소속·앱 UUID를 등록하면, 그 사람이 앱으로 녹음한 결과가 여기 실시간으로
-                쌓입니다.
+                쌓입니다. 직접 테스트하려면 ANiMA 앱 설치 후 설정 화면에서 UUID를 복사해 등록하면
+                됩니다.
               </p>
             </div>
           ) : (

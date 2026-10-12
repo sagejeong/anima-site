@@ -1,10 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BellIcon, ChartIcon, GearIcon, GridIcon, MenuIcon, PeopleIcon, PulseIcon } from "@/components/hub/icons";
+import { BellIcon, ChartIcon, GearIcon, GridIcon, PeopleIcon, PulseIcon } from "@/components/hub/icons";
+
+/**
+ * 대시보드는 표·실시간 목록 위주로 PC 화면 기준으로 설계돼 있어서, 작은
+ * 화면에서는 억지로 욱여넣는 대신 안내만 보여줌. children(각 페이지)을
+ * 아예 마운트 안 해서, 휴대폰에서 폴링 같은 불필요한 요청도 안 나가게 함.
+ */
+function useIsNarrowScreen(): boolean | null {
+  const [isNarrow, setIsNarrow] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const update = () => setIsNarrow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return isNarrow;
+}
 
 type NavItem = {
   label: string;
@@ -28,47 +47,49 @@ type AppShellProps = {
 // 대시보드 레이아웃(사이드바 + 본문). 공용 비밀번호 로그인(proxy.ts)으로 /dashboard/* 전체가 막혀 있음
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const isNarrowScreen = useIsNarrowScreen();
   // 전체 현황(개요)만 발표용 예시 데이터로 남겨두고, 나머지 전부는 실제 데이터 화면
   const isOverview = pathname === "/dashboard";
 
   const isActive = (href: string): boolean =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
 
+  if (isNarrowScreen === null) {
+    // 화면 폭을 아직 확인 전. 깜빡임 없이 그냥 비워둠(아주 잠깐)
+    return <div className="min-h-screen bg-steel" />;
+  }
+
+  if (isNarrowScreen) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-steel px-6 text-center font-hub-body">
+        <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-7 w-auto" />
+        <p className="font-hub-display text-xl font-black text-ink">
+          이 화면은 PC에서 이용해 주세요
+        </p>
+        <p className="max-w-xs text-sm leading-relaxed text-ink-soft">
+          대시보드는 표와 실시간 목록이 많아 넓은 화면에 맞춰 설계했어요. 노트북이나
+          데스크톱에서 다시 열어주시면 정상적으로 보여요.
+        </p>
+        <Link
+          href="/"
+          className="mt-2 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-accent"
+        >
+          홈으로 돌아가기
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-steel font-hub-body text-ink">
-      {/* 데스크탑 사이드바 */}
-      <aside className="hidden w-64 shrink-0 flex-col bg-charcoal px-5 py-6 lg:flex">
+      {/* PC에서만 이 컴포넌트가 렌더되므로 사이드바는 항상 보임 */}
+      <aside className="flex w-64 shrink-0 flex-col bg-charcoal px-5 py-6">
         <SidebarContent isActive={isActive} />
       </aside>
 
-      {/* 모바일 슬라이드오버 */}
-      {isMobileNavOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            aria-label="메뉴 닫기"
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setIsMobileNavOpen(false)}
-          />
-          <aside className="relative flex h-full w-64 flex-col bg-charcoal px-5 py-6">
-            <SidebarContent isActive={isActive} onNavigate={() => setIsMobileNavOpen(false)} />
-          </aside>
-        </div>
-      )}
-
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-16 items-center justify-between border-b border-line bg-steel-surface px-5 sm:px-8">
-          <button
-            type="button"
-            onClick={() => setIsMobileNavOpen(true)}
-            className="-ml-2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink lg:hidden"
-            aria-label="메뉴 열기"
-          >
-            <MenuIcon className="h-5 w-5" />
-          </button>
-
-          <span className="hidden text-sm font-semibold text-ink-soft lg:block">
+          <span className="text-sm font-semibold text-ink-soft">
             {isOverview
               ? "예시 데이터로 동작 방식을 보여주는 데모 화면입니다"
               : "실제 등록된 입소자의 데이터만 보여주는 화면입니다"}

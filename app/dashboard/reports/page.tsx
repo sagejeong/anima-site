@@ -45,7 +45,7 @@ export default function ReportsPage() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 rounded-2xl border border-line bg-steel-surface p-6">
+      <div className="grid grid-cols-1 gap-4 rounded-2xl border border-line bg-steel-surface p-6 sm:grid-cols-3">
         <SummaryStat label="전체 인원" value={isLoading ? "–" : workers.length} />
         <SummaryStat label="양호" value={isLoading ? "–" : counts.양호} tone="text-good" />
         <SummaryStat label="주의 · 경고" value={isLoading ? "–" : counts.주의 + counts.경고} tone="text-critical" />

@@ -72,7 +72,7 @@ export default function LevelMeter({ analyser }: LevelMeterProps) {
 
   return (
     <div
-      className="flex h-24 items-center justify-center gap-1.5"
+      className="flex h-24 items-center justify-center gap-1"
       aria-hidden="true"
     >
       {Array.from({ length: BAR_COUNT }, (_, index) => (

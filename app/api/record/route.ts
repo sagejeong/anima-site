@@ -3,12 +3,8 @@ import { animaUrl, callAnimaApi, readUserUuid } from "@/lib/anima-api";
 /** 브라우저가 보낼 수 있는 최대 녹음 파일 크기 */
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 
-/**
- * 녹음 파일을 ANiMA 서버의 POST /upload 로 중계합니다.
- *
- * 브라우저는 user_uuid를 모릅니다(httpOnly 쿠키라 읽을 수 없음).
- * 여기서 쿠키를 읽어 대신 붙여 보냅니다.
- */
+// 녹음 파일을 ANiMA 서버 POST /upload로 중계. user_uuid는 httpOnly라 브라우저가
+// 못 읽어서 여기서 쿠키 읽어 대신 붙여 보냄
 export async function POST(request: Request) {
   const userUuid = await readUserUuid();
   if (!userUuid) {

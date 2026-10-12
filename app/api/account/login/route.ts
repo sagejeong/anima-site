@@ -11,11 +11,7 @@ type LoginResponse = {
   user_id: string;
 };
 
-/**
- * 아이디·비밀번호로 로그인하면, 이 브라우저의 UUID를
- * 그 계정이 원래 쓰던 UUID로 바꿔치기합니다.
- * 그래야 다른 기기·브라우저에서도 지금까지의 기록을 이어볼 수 있습니다.
- */
+// 로그인 성공하면 이 브라우저 UUID를 그 계정 UUID로 바꿔치기. 다른 기기 기록 이어보기용
 export async function POST(request: Request) {
   let body: { user_id?: string; password?: string };
   try {

@@ -7,11 +7,7 @@ type MedicationYesNoStepProps = {
   isSubmitting: boolean;
 };
 
-/**
- * 복용 약 확인의 첫 단계. 여기서 "아니오"를 고르면 바로 분석 요청으로
- * 넘어가고, "예"를 고를 때만 다음 화면(MedicationCategoryStep)에서
- * 구체적으로 어떤 약인지 고릅니다.
- */
+// "아니오"면 바로 분석 요청, "예"면 MedicationCategoryStep으로
 export default function MedicationYesNoStep({
   onYes,
   onNo,

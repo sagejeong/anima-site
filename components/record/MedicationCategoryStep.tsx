@@ -21,10 +21,7 @@ type MedicationCategoryStepProps = {
   isSubmitting: boolean;
 };
 
-/**
- * "복용 중인 약이 있나요?"에서 "예"를 골랐을 때만 나오는 다음 화면.
- * MRRecord의 medication_category/medication_name 컬럼에 대응합니다.
- */
+// MRRecord의 medication_category/medication_name 컬럼에 대응
 export default function MedicationCategoryStep({
   values,
   onValuesChange,

@@ -46,14 +46,7 @@ export const RISK_COPY: Record<
   },
 };
 
-/**
- * 결과 카드에 항상 붙는 짧은 한 줄 설명.
- *
- * 매 결과마다 반복해서 보는 문구라 길게 쓰면 안 읽힙니다. "왜 이런 결과가
- * 나왔을까요?" 링크가 /about으로 연결돼 있어, 자세한 설명(여러 사람의
- * 데이터로 만든 기준이라는 것, 개인화는 아직 미구현이라는 것 등)은 거기서
- * 다룹니다. 여기서는 방향(낮을수록 좋다)만 짧게 전달합니다.
- */
+// 결과 카드 한 줄 설명. 자세한 건 /about 링크로 빼뒀으니 여기선 방향(낮을수록 좋음)만
 export const RESULT_EXPLANATION = "숫자가 낮을수록 기준 패턴과 비슷하다는 뜻이에요.";
 
 /** 결과 카드 하단에 항상 붙는 면책 문구. */
@@ -243,13 +236,9 @@ export function describeTrendChange(points: readonly TrendPoint[]): string {
   return "최근 큰 변화 없이 안정적이에요.";
 }
 
-/**
- * 방금 업로드한 결과를 sessionStorage에 저장할 때 쓰는 형태.
- * 서버 응답 자체(response)에 더해, 서버가 알려주지 않는 값을 클라이언트에서 채웁니다:
- * - measuredAt: 녹음이 끝난 시각 (서버 응답엔 없어서 녹음 종료 시점을 그대로 씁니다)
- * - audioDataUrl: 녹음한 소리를 "기침 소리 듣기"로 재생하기 위한 data URL.
- *   blob URL은 새로고침하면 깨지므로 문자열로 안전하게 저장할 수 있는 data URL을 씁니다.
- */
+// 방금 업로드한 결과를 sessionStorage에 저장할 때 쓰는 형태. measuredAt은 서버
+// 응답에 없어서 녹음 끝난 시점을 그대로 씀. audioDataUrl은 blob URL이 새로고침하면
+// 깨져서 data URL로 저장
 export type StoredResult = {
   response: AnimaUploadResponse;
   measuredAt: string;

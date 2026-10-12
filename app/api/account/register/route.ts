@@ -12,10 +12,7 @@ type RegisterResponse = {
   user_id: string;
 };
 
-/**
- * 지금 이 브라우저의 게스트 UUID에 아이디·비밀번호를 붙여 계정으로 승격합니다.
- * 이후 다른 기기에서 로그인하면 이 UUID로 지금까지의 기록을 이어볼 수 있습니다.
- */
+// 지금 브라우저의 게스트 UUID에 아이디·비밀번호를 붙여서 계정으로 승격
 export async function POST(request: Request) {
   const userUuid = await readUserUuid();
   if (!userUuid) {

@@ -1,245 +1,204 @@
-# ANiMA 웹 프로젝트 문서
+# ANiMA 웹
 
-독거노인·1인 가구가 스스로 기침을 체크하고, 요양시설에서는 입소자가 **본인 폰**으로
-오전/오후에 기침을 체크인해서 그 실제 분석 결과를 관리자가 한 화면에서 확인하는 웹
-서비스입니다. (하드웨어 기기는 개발하지 않기로 확정됨, 2026-09-15 방향 전환)
+기침 소리를 녹음하면 평소 기침과 얼마나 달라졌는지 보여주는 서비스입니다. 원래는
+독거노인·1인 가구가 스스로 체크하는 용도로 시작했고, 지금은 요양시설에서 입소자가
+본인 폰으로 오전/오후 체크인하면 관리자가 대시보드에서 전체 현황을 보는 방향으로
+범위를 넓히고 있습니다. (하드웨어 기기는 2026-09-15에 개발 안 하기로 결정, 지금은
+완전히 소프트웨어로만 함)
 
-이 문서는 팀원 전체가 스택, 서버 연동, 배포 방식을 같은 기준으로 이해할 수 있도록
-정리한 것입니다.
+팀원들이 스택이나 배포 방식 헷갈려 할 때마다 여기 와서 확인하면 되게 정리해둔
+문서입니다.
 
-> **현재 상태**: 입소자 체크인(`/checkin`), 앱 UUID 등록 기반 실시간 연동(`/dashboard/live`) →
-> 실제 FastAPI 분석 → 대시보드 표시까지 실제로 동작합니다. 다만 입소자 명단·체크인 기록을
-> 담는 저장소가 아직 파일 기반 임시 저장소(`lib/hub-roster.ts`)라 정식 서비스 전엔 진짜 DB로
-> 옮겨야 합니다. 아래 "체크인 파이프라인" 항목 참고. 대시보드 중 "전체 현황"(`/dashboard`)만
-> 발표·시연용 예시 데이터(`lib/dashboard-demo.ts`)이고, 그 외(실시간 연동/입소자 관리/알림
-> 이력/보고서)는 전부 실제 데이터만 보여줍니다. `/dashboard/*`는 공용 비밀번호
-> (`ANIMA_ADMIN_PASSWORD`)로 잠겨 있고, `/admin/login`에서 로그인합니다.
-
----
-
-## 1. 기술 스택 (정확한 버전)
-
-| 영역 | 기술 | 버전 |
-|---|---|---|
-| 프레임워크 | [Next.js](https://nextjs.org) | **16.3.0** (App Router, Turbopack) |
-| UI 라이브러리 | React / React DOM | **19.2.8** |
-| 언어 | TypeScript | `^5` |
-| 스타일링 | Tailwind CSS | `^4` (`@tailwindcss/postcss`) |
-| 린트 | ESLint / eslint-config-next | `^9` / `16.3.0` |
-| 실행 환경 | **Node.js** | **20.9.0 이상 필수** (Next.js 16이 `package.json`의 `engines.node`에 명시) |
-| 패키지 매니저 | npm | 로컬 개발은 npm 11.x 기준 (yarn/pnpm 써도 무방하나 lock 파일 하나만 유지) |
-
-**Node 버전 확인**
-```bash
-node -v   # v20.9.0 이상이어야 함 (v22, v24 등 최신 LTS도 문제없음)
-```
-
-### 폰트
-
-| 용도 | 서체 | 로드 방식 |
-|---|---|---|
-| 기존 소비자 앱 본문 | Geist / Geist Mono | `next/font/google` |
-| 기존 소비자 앱 제목(h1~h3) | 나눔명조 Bold | `next/font/local`, `app/fonts/NanumMyeongjo-Bold-subset.woff2` (3MB 원본을 `scripts/subset-fonts.py`로 서브셋한 것) |
-| ANiMA 사이트 제목 | Calistoga (한글은 Gothic A1로 대체) | `next/font/google` |
-| ANiMA 사이트 본문·라벨 | Inter (한글은 Noto Sans KR로 대체) | `next/font/google` |
-
-Calistoga/Inter는 한글 글자가 없어서, 같은 톤의 한글 서체를 폰트 스택 뒤에 이어붙였습니다
-(`--font-hub-display`, `--font-hub-body`, `app/globals.css` 참고).
-
-### 스타일 시스템
-
-Tailwind v4라 `tailwind.config.js` 파일이 없습니다. 색상·폰트·애니메이션 전부
-`app/globals.css`의 `@theme { ... }` 블록에서 CSS 변수로 등록합니다. 화이트 톤 배경에
-브랜드 주황(`--color-primary`)을 포인트로 쓰는 밝은 시스템이고, 순백 대신 살짝 톤
-다운된 아이보리 배경을 씁니다. 색을 바꾸려면 이 파일(`--color-steel`, `--color-good`,
-`--gradient-brand` 등)만 고치면 되고, 컴포넌트 코드는 전부 이 토큰만 참조하므로 여기서
-값만 바꿔도 사이트 전체가 같이 바뀝니다.
-
-### 로고
-
-- `public/anima_logo.png`: 일반 소비자 사이트(홈, 기록, 설정 등)에서 씀
-- `public/anima_hub_logo.png`: 대시보드 계열(사이드바, 관리자 로그인/회원가입, 체크인
-  화면, 홈 화면 대시보드 미리보기 카드)에서 씀
-
-둘 다 텍스트로 재현하거나 색을 임의로 바꾸지 않고 파일 그대로 사용합니다.
+현재 상태 요약:
+- 입소자 체크인(`/checkin`)이든 앱으로 등록한 UUID 기반 실시간 연동(`/dashboard/live`)이든,
+  FastAPI 분석까지 전부 실제로 동작합니다.
+- 대시보드 메뉴 중 "전체 현황"(`/dashboard`) 하나만 발표용 예시 데이터(`lib/dashboard-demo.ts`)고,
+  나머지(실시간 연동/입소자 관리/알림 이력/보고서)는 전부 실제 데이터만 씁니다.
+- `/dashboard/*`는 공용 비밀번호(`ANIMA_ADMIN_PASSWORD`)로 막혀 있고, 로그인은 `/admin/login`에서.
+- 입소자 명단·체크인 기록은 아직 파일(`lib/hub-roster.ts`)에 저장 중이라 정식 서비스 가기 전에
+  DB로 옮겨야 함. 아래 5번에 자세히 적어둠.
 
 ---
 
-## 2. 로컬 개발 시작하기
+## 1. 스택
+
+| 영역 | 기술 |
+|---|---|
+| 프레임워크 | Next.js 16.3.0 (App Router, Turbopack) |
+| UI | React / React DOM 19.2.8 |
+| 언어 | TypeScript ^5 |
+| 스타일 | Tailwind CSS ^4 (config 파일 없이 `app/globals.css`의 `@theme`에서 전부 관리) |
+| 린트 | ESLint ^9 / eslint-config-next 16.3.0 |
+| Node | 20.9.0 이상 (Next 16이 요구함) |
 
 ```bash
+node -v   # 20.9.0 이상, 22/24 LTS도 무방
 npm install
-npm run dev
+npm run dev   # localhost:3000
 ```
-`http://localhost:3000`에서 확인합니다.
 
 ```bash
-npm run build   # 프로덕션 빌드 (Turbopack)
-npm run start   # 빌드 결과 실행 (포트 3000, 환경변수 PORT로 변경 가능)
-npm run lint     # ESLint
+npm run build   # 프로덕션 빌드
+npm run start   # 빌드 결과 실행
+npm run lint
 ```
+
+### 폰트, 색
+
+기존 소비자 페이지(녹음/기록/설정 등)는 Geist + 나눔명조 조합을 쓰고, 대시보드 쪽은
+Calistoga/Inter에 한글 폰트(Gothic A1, Noto Sans KR)를 뒤에 붙여서 씁니다. 둘이 안
+섞이게 `--font-hub-*` 토큰으로 따로 뺐습니다.
+
+색은 Tailwind v4라 `tailwind.config.js`가 없고, `app/globals.css`의 `@theme` 블록
+CSS 변수가 전부입니다. 화이트 톤 배경 + 브랜드 주황(`--color-primary`) 포인트. 색
+바꿀 일 있으면 이 파일만 고치면 사이트 전체가 같이 바뀝니다(컴포넌트는 전부 토큰만
+참조).
+
+로고는 두 개 씁니다: `public/anima_logo.png`(일반 사이트), `public/anima_hub_logo.png`
+(대시보드/관리자 쪽). 둘 다 파일 그대로 쓰고 텍스트로 다시 만들거나 색 바꾸지 않습니다.
 
 ---
 
-## 3. 프로젝트 구조
+## 2. 폴더 구조
 
 ```
-app/                     페이지 (App Router, 폴더 하나 = URL 경로 하나)
-  page.tsx                 랜딩, 기침 녹음·분석과 대시보드 두 실제 기능으로 들어가는 허브
-  checkin/                  입소자용 체크인 화면, 본인 폰으로 이름 등록 후 오전/오후 녹음
-  admin/login, admin/signup  관리자 로그인·계정 생성 (현재 데모)
-  dashboard/                대시보드 전체 (레이아웃에서 AppShell로 감쌈)
-    page.tsx                  전체 현황, 예시 데이터로 채운 실시간 시연 화면
-    workers/, workers/[id]/   입소자 등록 관리 (실제 등록 폼 + 예시 데이터 혼합)
-    alerts/, reports/         알림 이력 / 보고서 (예시 데이터)
-    settings/                 알림 설정 (데모, 저장 안 됨)
+app/
+  page.tsx                   랜딩. 녹음·분석이랑 대시보드 두 실제 기능으로 들어가는 입구
+  checkin/                    입소자용 체크인 화면 (본인 폰, 이름 등록 후 오전/오후 녹음)
+  admin/login/                관리자 로그인 (비밀번호 1개, proxy.ts가 쿠키로 검사)
+  dashboard/                  AppShell로 감싼 대시보드 전체
+    page.tsx                    전체 현황 — 여기만 예시 데이터
+    live/                       실시간 연동 — 앱 UUID 등록하면 실제 측정 결과 반영
+    workers/, workers/[id]/     입소자 등록·관리, 실데이터
+    alerts/, reports/           알림 이력 / 보고서, 실데이터
+    settings/                   알림 설정 (저장은 안 됨, 데모)
   login, signup, record, result, records, settings, about, faq
-                            기존 소비자용 크라우드소싱 앱 페이지 (당분간 유지, 신규 방향과 무관)
-  api/hub/                 입소자 등록·체크인용 Route Handler (whoami, register-worker, workers, checkin)
-  api/*                    그 외 Next.js Route Handler, 브라우저 대신 FastAPI를 대리 호출
+                              원래 있던 소비자용 크라우드소싱 앱 페이지, 그대로 유지 중
+  privacy/                    개인정보처리방침 (Play 스토어 등록용, 로그인 불필요)
+  api/hub/                    입소자 등록·체크인·실시간 연동용 Route Handler
+  api/admin/                  관리자 로그인/로그아웃
+  api/*                       나머지는 전부 FastAPI 대리 호출용
 components/
-  hub/                     대시보드·체크인 전용 컴포넌트 (AppShell, StatusPill, LineChart 등)
-  dashboard/                대시보드 예시 데이터 실시간 시연 컴포넌트 (LiveDashboard)
-  checkin/                  입소자 체크인 녹음기(CheckinRecorder), CoughRecorder의 단순화 버전
-  record/, signup/, settings/  기존 소비자 앱 컴포넌트
+  hub/                        대시보드 쪽 전용 컴포넌트
+  dashboard/                  전체 현황(예시 데이터) 실시간 시연 컴포넌트
+  checkin/                    입소자 체크인 녹음기, CoughRecorder 단순화 버전
+  record/, signup/, settings/ 기존 소비자 앱 컴포넌트
 lib/
-  anima-api.ts              FastAPI 호출 유틸 + 쿠키 읽기/쓰기
-  hub-roster.ts              입소자 명단 + 체크인 기록 저장소 (파일 기반 임시 DB, 아래 참고)
-  hub-mock.ts                랜딩 페이지 "예시 화면"에만 쓰는 가짜 샘플 데이터
-  dashboard-demo.ts          대시보드 개요/알림/보고서 화면에서 쓰는 발표·시연용 예시 데이터
-  result.ts                  판정 기준(양호/주의/경고), 화면 표시용 계산
-proxy.ts                   Next.js 미들웨어, 방문자 UUID 쿠키 발급
-public/anima_logo.png      일반 소비자 사이트 로고
-public/anima_hub_logo.png  대시보드 계열 로고
-data/                     hub-roster.ts가 쓰는 JSON 파일 저장소 (.gitignore 처리됨, 커밋 안 됨)
+  anima-api.ts                 FastAPI 호출 + 쿠키 처리
+  hub-roster.ts                 입소자 명단·체크인 기록 저장 (파일 기반, 5번 참고)
+  hub-mock.ts                   랜딩 페이지 예시 화면용 가짜 데이터
+  dashboard-demo.ts             전체 현황 화면용 발표·시연용 데이터
+  result.ts                     판정 기준, 화면 표시용 계산
+proxy.ts                      미들웨어 — 방문자 UUID 쿠키 발급 + 대시보드 비밀번호 검사
+data/                        hub-roster.ts가 쓰는 JSON (.gitignore 처리, 커밋 안 됨)
 ```
 
 ---
 
-## 4. 서버(백엔드) 연동 방식
+## 3. 서버 연동
 
-**이 저장소는 자체 DB가 없습니다.** 오디오 분석은 FastAPI 서버가 담당하고, Next.js는
-그 서버를 대신 호출해주는 창구 역할만 합니다.
-
-### 왜 브라우저가 FastAPI를 직접 안 부르는가
-
-브라우저에서 직접 부르면 FastAPI 쪽에 CORS 허용 설정이 필요합니다. 그래서 `app/api/*`
-(Next.js **Route Handler**, 서버에서 실행됨)가 중간에서 FastAPI를 대신 호출합니다. 이 구조는
-`lib/anima-api.ts`의 `callAnimaApi()`가 담당합니다.
+자체 DB는 없고, 오디오 분석은 FastAPI 서버가 전부 담당합니다. 브라우저가 FastAPI를
+직접 못 부르는 이유는 CORS 때문이고, 그래서 `app/api/*` Route Handler가 중간에서
+대신 호출합니다(`lib/anima-api.ts`의 `callAnimaApi()`).
 
 ```
-브라우저 → Next.js 서버 (app/api/*) → FastAPI 서버
+브라우저 → Next.js 서버(app/api/*) → FastAPI 서버
 ```
 
-### 접속 주소 설정
-
+주소는 `lib/anima-api.ts`:
 ```ts
-// lib/anima-api.ts
 export const ANIMA_API_BASE_URL =
   process.env.ANIMA_API_BASE_URL ?? "https://api.animawith.cloud";
 ```
 
-- 2026-10월부터 분석 서버와 웹 서버 둘 다 같은 개인 서버로 옮겨졌습니다. 분석 서버는
-  `https://api.animawith.cloud`, 웹 사이트 자체는 `https://animawith.cloud`로 분리된
-  서브도메인을 씁니다. 둘 다 https라 예전에 있던 mixed content 문제(사이트는 https인데
-  FastAPI가 http라 브라우저가 막던 문제)는 더 이상 없습니다.
-- 예전에 쓰던 서버 주소들은 더 이상 쓰지 않습니다.
+2026-10월에 분석 서버랑 웹 서버를 같은 개인 서버로 옮겼습니다. 분석은
+`api.animawith.cloud`, 사이트 자체는 `animawith.cloud`로 서브도메인만 나눴고 둘 다
+https라 전에 있던 mixed content 문제는 없어졌습니다. 예전 주소들은 이제 안 씁니다.
 
-### 로그인 상태 (기존 소비자 앱 기준)
+일반 방문자는 계정 없이 UUID 쿠키(`anima_uid`)로만 식별합니다. 처음 오면 `proxy.ts`가
+자동 발급합니다.
 
-계정 개념 없이 **기기/브라우저마다 UUID 쿠키(`anima_uid`)** 로 식별합니다. `proxy.ts`(미들웨어)가
-방문자가 처음 오면 자동으로 발급합니다.
+대시보드는 따로 비밀번호로 막아뒀습니다. `/admin/login`에서 맞히면
+`ADMIN_AUTH_COOKIE`가 심어지고, 그게 있어야 `/dashboard/*`랑 관리자용 API
+(`/api/hub/workers`, `/api/hub/sync`, `/api/hub/alerts`)에 들어갈 수 있습니다. 개인
+계정이 아니라 팀이 같이 쓰는 비밀번호 하나입니다. 반대로 `/api/hub/checkin`처럼
+입소자 본인이 `/checkin`에서 쓰는 주소는 이거랑 상관없이 그대로 열려 있어야 해서
+안 막았습니다.
 
-### 대시보드 로그인
-
-`/dashboard/*`와 그 안에서 쓰는 관리자용 API(`/api/hub/workers`, `/api/hub/sync`,
-`/api/hub/alerts`)는 기침 분석 같은 건강정보를 다뤄서, 팀이 같이 쓰는 공용 비밀번호
-하나로 막아뒀습니다. `/admin/login`에서 비밀번호를 맞히면 `proxy.ts`의
-`ADMIN_AUTH_COOKIE` 쿠키가 심어지고, 그 쿠키가 있어야 들어갈 수 있습니다(개인 계정
-아님, 팀 전체가 같은 비밀번호 사용). 반대로 `/api/hub/checkin` 등 입소자 본인이
-`/checkin`에서 쓰는 주소는 이 비밀번호와 무관하게 그대로 열려 있습니다.
-
-비밀번호는 코드에 적어두지 않고 `ANIMA_ADMIN_PASSWORD` 환경변수로만 관리합니다
-(`proxy.ts`의 `getAdminPassword()` 참고). **배포 서버에 이 환경변수가 실제로
-설정돼 있는지 꼭 확인해 주세요** — 안 설정돼 있으면 로컬 개발용 기본값으로
-동작해서 비밀번호를 쉽게 추측당할 수 있습니다.
+비밀번호 자체는 코드에 안 넣고 `ANIMA_ADMIN_PASSWORD` 환경변수로만 관리합니다
+(`proxy.ts`의 `getAdminPassword()`). 배포 서버에 이 환경변수 꼭 설정해 주세요, 안
+하면 로컬 개발용 기본값이 그대로 살아있어서 비밀번호가 뚫립니다.
 
 ---
 
-## 5. 체크인 파이프라인 (입소자 → 실제 분석 → 대시보드)
+## 4. 모바일
 
-하드웨어를 안 만들기로 하면서, 입소자 식별·체크인 기록을 담을 곳이 새로 필요해졌습니다.
-FastAPI 쪽 DB(`DB 설계 및 저장로직 V8`)엔 "시설/입소자/오전오후" 같은 개념이 아예 없어서
-(기기 UUID로 식별하는 익명 방문자 모델만 있음), 그 매핑만 이 저장소가 따로 들고 있습니다.
+일반 소비자 페이지는 다 반응형으로 돼 있습니다. 대시보드는 표·실시간 목록이 많아서
+PC 기준으로 짰고, 1024px보다 좁은 화면에서는 `components/hub/AppShell.tsx`가
+"PC에서 이용해 주세요" 안내만 보여주고 실제 화면은 아예 안 그립니다(불필요한
+폴링 요청도 안 나가게).
 
+---
+
+## 5. 체크인 / 실시간 연동 — 데이터는 어떻게 쌓이나
+
+하드웨어를 안 만들기로 하면서, 입소자를 식별하고 체크인 기록을 쌓아둘 곳이 새로
+필요해졌습니다. FastAPI DB엔 "시설/입소자/오전오후" 개념이 없어서(기기 UUID로만
+식별하는 모델) 그 매핑만 이 저장소가 따로 들고 있습니다.
+
+입소자 본인 체크인 흐름:
 ```
-입소자 폰(/checkin) → 이름 등록 → 기침 녹음
-  → app/api/hub/checkin → FastAPI POST /upload (실제 분석, 기존 /api/record와 동일한 호출)
-  → 실제 분석 결과(이탈도 %, 양호/주의/경고)를 lib/hub-roster.ts에 기록
-  → app/dashboard/* 가 그 기록을 읽어서 화면에 표시
+/checkin에서 이름 등록 → 기침 녹음 → app/api/hub/checkin
+  → FastAPI POST /upload (기존 /api/record랑 똑같은 호출)
+  → 결과(이탈도 %, 양호/주의/경고)를 lib/hub-roster.ts에 저장
+  → app/dashboard/*가 읽어서 보여줌
 ```
 
-**분석 자체는 100% 진짜입니다.** 새로 지어낸 로직이 아니라 기존 `/api/record`가 쓰는 것과
-똑같이 FastAPI `POST /upload`를 호출하고, 그 응답의 `distance`를 `lib/result.ts`의
-`classifyRisk`/`toDisplayPercent`로 환산합니다.
+실시간 연동 흐름(앱 UUID 등록 방식)은 조금 다릅니다. 관리자가 `/dashboard/live`나
+`/dashboard/workers`에서 이름 + 앱에서 복사한 UUID로 등록해두면, `/api/hub/sync`가
+몇 초마다 FastAPI의 `/records` 기록을 조회해서 새로 생긴 것만 가져옵니다. 앱 쪽
+코드를 안 건드리고 기존 FastAPI 조회 API만으로 실시간처럼 보이게 만든 거라, 별도
+서버(WebSocket 같은 거)가 필요 없습니다.
 
-**입소자 식별 방식**: FastAPI의 계정 시스템(`/account/register` 등)은 안 씁니다. 그냥
-입소자의 폰이 `proxy.ts`가 이미 발급하는 익명 UUID 쿠키(`anima_uid`)를 그대로 쓰고,
-`/checkin`에서 입력한 이름·병동을 그 UUID에 붙여서 `lib/hub-roster.ts`(파일 하나)에
-저장합니다. 같은 폰으로 다시 접속하면 등록 화면을 건너뜁니다.
+분석 자체는 두 흐름 다 100% 진짜입니다. `/api/record`가 쓰는 것과 똑같이 FastAPI
+`POST /upload`를 부르고, 응답의 `distance`를 `lib/result.ts`의
+`classifyRisk`/`toDisplayPercent`로 바꿔서 보여줍니다.
 
-**중요한 한계, 반드시 읽어주세요**: `lib/hub-roster.ts`는 `data/hub-roster.json` 파일을
-직접 읽고 씁니다. 로컬 개발이나 지금 쓰는 서버(Node 프로세스가 계속 떠 있는 방식)에서는 문제없이
-동작하지만, **Vercel 같은 서버리스에 배포하면 요청마다 파일시스템이 초기화돼서 등록·체크인
-기록이 저장되지 않습니다.** 정식 서비스 전에는 이 파일 저장소를 실제 DB(FastAPI에 입소자/체크인
-테이블을 추가하거나, 별도 DB)로 옮겨야 합니다. 지금은 "서버 연동이 실제로 되는지" 빨리
-확인하기 위한 임시 다리입니다.
+현재 한계: `lib/hub-roster.ts`는 `data/hub-roster.json` 파일을 직접 읽고 씁니다.
+로컬이나 지금 쓰는 서버(Node 프로세스가 계속 떠 있음)에서는 문제없지만, Vercel 같은
+서버리스에 올리면 요청마다 파일시스템이 초기화돼서 기록이 안 남습니다. 정식
+서비스 전에는 DB로 옮겨야 합니다(FastAPI 쪽에 테이블 추가하거나 별도 DB). 지금은
+"서버 연동 자체는 진짜 되는지" 보여주려고 임시로 쓰는 구조입니다.
 
-**대시보드 예시 데이터**: `app/dashboard/page.tsx`, `alerts/`, `reports/`, `workers/`
-화면에는 `lib/dashboard-demo.ts`의 발표·시연용 데이터가 같이 섞여 있습니다. 실제
-`lib/hub-roster.ts` 체크인 기록과는 완전히 분리돼 있고, 화면에는 항상 "예시 데이터" 배지가
-붙습니다. 등록 폼으로 직접 추가한 입소자는 실제로 저장되는 데이터입니다.
-
----
-
-## 6. 배포할 때 반드시 확인할 것 (상대경로/절대경로 이슈)
-
-**결론: 코드에 상대경로를 손으로 쓴 부분은 없습니다.** Next.js가 빌드할 때
-`/_next/static/...` 같은 **루트 기준 절대경로**를 자동으로 만들어 넣기 때문에, 개발자가
-경로를 직접 잘못 쓸 수 있는 구조 자체가 아닙니다.
-
-문제는 항상 **서버가 빌드 결과물을 서빙하는 방식**에서 생깁니다. 배포할 때 아래를 순서대로
-확인해 주세요.
-
-1. **`npm ci`(또는 `npm install`) → `npm run build` → `npm run start` 순서를 그대로 지켰는지.**
-   소스 코드만 올리고 빌드를 안 하면 `.next/static`(CSS·JS)이 아예 없어서 전부 404가 납니다.
-2. **`.next` 폴더 전체가 배포 서버에 올라갔는지.** 일부만 복사하면 안 됩니다.
-3. **nginx 등 리버스 프록시를 쓴다면, 모든 경로를 예외 없이 Next.js 서버(기본 3000번 포트)로
-   넘기는지.** `/_next/static/...`, `/favicon.ico` 같은 정적 경로만 프록시가 따로 처리하려고
-   하면 404가 납니다. 서브 경로(`/anima/` 등) 뒤에 이 앱을 물릴 계획이면 `next.config.ts`에
-   `basePath` 설정이 추가로 필요합니다 (지금은 설정 안 되어 있음, 루트 도메인 기준입니다).
-4. **재빌드 후 오래된 캐시(HTML)가 남아있지 않은지.** 빌드마다 CSS/JS 파일명 해시가 바뀌므로,
-   캐시된 옛 HTML이 존재하지 않는 파일명을 가리키면 전부 404가 납니다. 시크릿창으로 재확인.
-
-### 권장: Vercel 배포
-
-지금 쓰는 서버(FastAPI랑 같은 개인 서버)에 Next.js까지 같이 올리면, 서버 프로세스가
-죽었을 때 사이트 전체가 먹통이 되는 문제가 반복됩니다. Next.js를 만든 회사가 만든 호스팅인
-[Vercel](https://vercel.com)에 프론트만 분리 배포하면 이 문제 자체가 사라집니다
-(서버리스라 죽는 프로세스가 없음, GitHub 연결만 하면 push마다 자동 배포, https 자동 적용).
-단, `lib/hub-roster.ts`의 파일 기반 저장소는 서버리스에서 안 돌아가므로, Vercel로 옮기기
-전에 실제 DB 이전이 먼저 필요합니다. 배포 시 환경변수 `ANIMA_API_BASE_URL`만 등록하면 됩니다.
+"전체 현황"(`/dashboard`) 화면만 `lib/dashboard-demo.ts` 예시 데이터를 씁니다. 실제
+체크인 기록이랑은 완전히 분리돼 있고 화면에 "예시 데이터" 배지가 붙어 있습니다.
+나머지 대시보드 화면(실시간 연동/입소자 관리/알림 이력/보고서)은 전부
+`lib/hub-roster.ts`에 실제로 저장된 데이터만 보여줍니다.
 
 ---
 
-## 7. 알아두면 좋은 것
+## 6. 배포
 
-- **판정 기준(양호/주의/경고)**: `lib/result.ts`. 개인 기준선이 아니라 COUGHVID 기반 healthy
-  분포(`p50=5.5149`, `p75=6.6988`)를 기준으로 삼습니다. 화면에는 원거리(raw distance) 대신
-  0~100%로 환산한 값만 보여줍니다.
-- **랜딩 페이지의 기능 쇼케이스, 대시보드 개요/알림/보고서 화면은 예시 데이터**입니다
-  (`lib/hub-mock.ts`, `lib/dashboard-demo.ts`). 화면 생김새와 동작 방식을 보여주는 용도이고,
-  화면에 "예시 데이터" 배지로 표시됩니다. 입소자 관리 화면의 등록 폼만 실제 저장소
-  (`lib/hub-roster.ts`)에 연결돼 있습니다.
-- **관리자 로그인/계정 생성은 아직 데모**입니다. 제출하면 실제 인증 없이 대시보드로 이동만
-  합니다. 관리자 인증 체계는 아직 설계 전입니다.
+`npm ci` → `npm run build` → `npm run start` 순서를 꼭 지켜야 합니다. 소스만 올리고
+빌드를 안 하면 `.next/static`이 없어서 전부 404가 납니다. nginx 같은 리버스
+프록시를 쓴다면 모든 경로를 Next 서버(3000번 포트)로 넘겨야 하고, `/_next/static/...`
+만 따로 처리하려고 하면 이것도 404가 납니다. 서브 경로 뒤에 앱을 물릴 거면
+`next.config.ts`에 `basePath` 추가해야 하는데 지금은 루트 도메인 기준이라 설정
+안 해뒀습니다.
+
+지금 FastAPI랑 같은 개인 서버에 Next.js까지 같이 올리고 있어서, 서버 프로세스
+하나 죽으면 사이트 전체가 같이 먹통이 되는 구조입니다. 나중에 여유 생기면
+프론트만 Vercel로 분리하는 걸 권장합니다(서버리스라 프로세스 죽을 일이 없고,
+깃허브 연결하면 push마다 자동 배포됨). 단, 4번에서 말한 파일 기반 저장소를 DB로
+옮기는 게 먼저입니다 — 안 그러면 입소자 관리/실시간 연동 쪽이 Vercel에서 그대로
+깨집니다.
+
+---
+
+## 7. 그 밖에
+
+- 판정 기준(양호/주의/경고)은 `lib/result.ts`에 있고, 개인 기준선이 아니라 COUGHVID
+  기반 healthy 분포(`p50=5.5149`, `p75=6.6988`)를 씁니다. 화면에는 원거리 값 대신
+  0~100% 환산값만 보여줍니다.
+- 랜딩 페이지 기능 쇼케이스랑 "전체 현황" 화면만 예시 데이터고, 나머지 대시보드는
+  전부 실데이터라는 거 다시 한번 — 헷갈리기 쉬운 부분이라 적어둠.

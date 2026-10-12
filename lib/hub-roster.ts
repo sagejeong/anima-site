@@ -244,10 +244,7 @@ export function recentAfterAverages(days: number): { date: string; average: numb
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
-/**
- * UTC 기준 measuredAt을 한국 시간 기준 날짜(YYYY-MM-DD)·시(0~23)로 바꿔줍니다.
- * 서버가 돌아가는 시스템 타임존이 UTC든 KST든 상관없이 항상 한국 기준으로 계산하기 위함입니다.
- */
+// measuredAt(UTC)을 한국 시간 날짜·시(0~23)로. 서버 시스템 타임존이 뭐든 상관없이 계산되게
 function toKst(measuredAt: string): { dateKey: string; hour: number } {
   const kst = new Date(new Date(measuredAt).getTime() + KST_OFFSET_MS);
   return { dateKey: kst.toISOString().slice(0, 10), hour: kst.getUTCHours() };

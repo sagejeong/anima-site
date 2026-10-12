@@ -1,10 +1,7 @@
 import type { NextRequest } from "next/server";
 import { animaUrl, callAnimaApi, readUserUuid } from "@/lib/anima-api";
 
-/**
- * 이 방문자의 측정 기록 목록을 가져옵니다.
- * ANiMA 서버의 GET /records 를 중계하며, user_uuid는 쿠키에서 읽어 붙입니다.
- */
+// 이 방문자 측정 기록 목록, GET /records 중계 + 쿠키에서 user_uuid 붙여서
 export async function GET(request: NextRequest) {
   const userUuid = await readUserUuid();
   if (!userUuid) {

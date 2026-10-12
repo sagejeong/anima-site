@@ -27,11 +27,7 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === "production",
 };
 
-/**
- * 방문자 UUID 쿠키를 특정 값으로 덮어씁니다.
- * 로그인 성공 시 이 브라우저를 "그 계정이 원래 쓰던 UUID"로 바꿔치기해,
- * 다른 기기에서도 같은 기록을 이어보게 합니다.
- */
+/** 로그인 성공하면 이 브라우저의 UUID를 그 계정 UUID로 바꿔치기함(다른 기기 기록 이어보기용) */
 export async function writeUserUuidCookie(userUuid: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(USER_UUID_COOKIE, userUuid, COOKIE_OPTIONS);
@@ -50,12 +46,8 @@ export async function writeDisplayUserIdCookie(userId: string): Promise<void> {
   cookieStore.set(DISPLAY_ID_COOKIE, userId, COOKIE_OPTIONS);
 }
 
-/**
- * 로그아웃: 두 쿠키를 모두 지웁니다.
- * user_uuid까지 지우는 이유는, 이 브라우저를 다시 "이름 없는 방문자" 상태로
- * 되돌리기 위해서입니다. 다음 요청부터 proxy.ts가 새 게스트 UUID를 발급합니다.
- * 계정에 쌓인 기존 기록은 서버에 그대로 남아 있고, 이 브라우저에서만 로그아웃됩니다.
- */
+// 로그아웃. user_uuid까지 지워서 다음 요청부턴 proxy.ts가 새 게스트 UUID를 줌.
+// 서버 쪽 기록은 그대로 있고 이 브라우저만 로그아웃되는 것
 export async function clearAuthCookies(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(USER_UUID_COOKIE);

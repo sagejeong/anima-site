@@ -46,11 +46,7 @@ export default function ConsentStep({
         <section>
           <h3 className="font-semibold text-ink">녹음 절차 안내</h3>
           <p className="mt-2">
-            조용한 환경에서 녹음해 주십시오.
-          </p>
-          <p className="mt-2">
-            ANiMA 프로젝트(한국폴리텍대학 인천캠퍼스 AI융합소프트웨어과)에서
-            진행하는 연구입니다.
+            조용한 환경에서 3초 이상 7초 이내로 녹음해 주십시오.
           </p>
         </section>
 

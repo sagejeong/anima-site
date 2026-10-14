@@ -118,7 +118,13 @@ export default function SignupFlow() {
           />
         )}
         {step === 1 && (
-          <BasicInfoStep data={data} errors={errors} onChange={updateField} />
+          <BasicInfoStep
+            data={data}
+            errors={errors}
+            onChange={updateField}
+            onComplete={goNext}
+            onBack={goPrev}
+          />
         )}
         {step === 2 && (
           <HealthInfoStep
@@ -138,6 +144,8 @@ export default function SignupFlow() {
         </p>
       )}
 
+      {/* 기본 정보(step 1)는 BasicInfoStep이 질문마다 자체적으로 이전/다음을 처리함 */}
+      {step !== 1 && (
       <div className="mt-10 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         {step > 0 ? (
           <button
@@ -161,6 +169,7 @@ export default function SignupFlow() {
           {isSubmitting ? "저장하는 중..." : step === 2 ? "완료" : "다음"}
         </button>
       </div>
+      )}
 
       <p className="mt-8 text-center text-sm text-ink-soft">
         다른 기기에서 만든 계정이 있으신가요?{" "}

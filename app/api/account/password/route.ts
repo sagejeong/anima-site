@@ -1,6 +1,6 @@
 import { animaUrl, callAnimaApi, readUserUuid } from "@/lib/anima-api";
 
-// 비밀번호 변경. email/route.ts랑 같은 사정 — 서버에 엔드포인트가 아직 없어서
+// 비밀번호 변경. email/route.ts랑 같은 사정으로 서버에 엔드포인트가 아직 없어서
 // (2026-08-16 기준) 지금은 무조건 실패함. 생기면 /account/password 경로만 맞추면 됨
 export async function POST(request: Request) {
   const userUuid = await readUserUuid();

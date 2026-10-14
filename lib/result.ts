@@ -25,8 +25,8 @@ export function classifyRisk(distance: number): RiskLevel {
 // ANiMA는 의료기기가 아니라 개인 참고용 음향 분석 도구이며, 여기서 말하는 기준은
 // 여러 사람의 기침 데이터로 만든 "기준 패턴"이지 의학적으로 확인된 건강 여부가 아닙니다.
 //
-// threshold는 화면 표시용 퍼센트(toDisplayPercent) 기준입니다. p50·p75가 정확히
-// 50%·75%에 오도록 설계했기 때문에(위 toDisplayPercent 참고), 이 숫자는 raw distance와
+// threshold는 화면 표시용 퍼센트(toDisplayPercent) 기준입니다. p50, p75가 정확히
+// 50%, 75%에 오도록 설계했기 때문에(위 toDisplayPercent 참고), 이 숫자는 raw distance와
 // 달리 사용자에게 그대로 보여줘도 되는 값입니다.
 export const RISK_COPY: Record<
   RiskLevel,

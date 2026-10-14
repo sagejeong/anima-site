@@ -79,8 +79,8 @@ function formatMeasuredPair(measuredAt: string, now: number): { dateTime: string
   return { dateTime, elapsed: formatElapsed(measuredAt, now) };
 }
 
-// 실시간 현황. 예시 데이터 없이, 등록된 팀원의 앱 UUID로 FastAPI 기록을 주기적으로
-// 끌어와서 KPI·실시간 목록·이상 감지를 그 데이터로만 채움. 팀원 등록은 입소자 관리에서
+// 전체현황. 예시 데이터 없이, 등록된 팀원의 앱 UUID로 FastAPI 기록을 주기적으로
+// 끌어와서 KPI·실시간 목록·이상 감지를 그 데이터로만 채움. 팀원 등록은 입소자 관리 메뉴에서 함
 export default function DashboardOverviewPage() {
   const [rows, setRows] = useState<readonly WorkerRow[]>([]);
   const [alerts, setAlerts] = useState<readonly Alert[]>([]);

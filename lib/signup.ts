@@ -1,4 +1,4 @@
-// 회원가입 폼 선택지·타입. 문항 추가/수정할 때 이 파일만 고치면 되게 분리함
+// 회원가입 폼에서 쓰는 선택지와 타입 모음. 문항 추가/수정할 때 이 파일만 고치면 되게 분리함
 
 export type Option = {
   value: string;
@@ -241,10 +241,7 @@ function emptyToUndefined(value: string): string | undefined {
   return value === "" ? undefined : value;
 }
 
-/**
- * 서버의 POST /profile 요청 본문 형태로 변환합니다.
- * 서버가 정의한 필드명(snake_case)·boolean 타입에 맞춥니다.
- */
+/** 서버가 정의한 snake_case 필드명과 boolean 타입에 맞춰 변환합니다. */
 export function toProfilePayload(data: SignupFormData) {
   const age = Number(data.age);
 

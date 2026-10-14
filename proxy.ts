@@ -23,7 +23,7 @@ export function getAdminPassword(): string {
 const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
 // 관리자 전용 데이터 API. 화면(/dashboard/*)만 막고 이거 빼먹으면 비밀번호 없이
-// 직접 요청해서 실명·UUID·건강 상태 다 읽히는 거 한 번 겪어서 따로 뺌.
+// 직접 요청해서 실명, UUID, 건강 상태 다 읽히는 거 한 번 겪어서 따로 뺌.
 // checkin/register-worker/whoami는 입소자 본인이 쓰는 주소라 여기 안 넣음
 const ADMIN_API_PREFIXES = ["/api/hub/workers", "/api/hub/sync", "/api/hub/alerts", "/api/hub/settings"];
 

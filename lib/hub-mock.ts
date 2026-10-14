@@ -121,7 +121,6 @@ function statusFromAverage(average: number): HubStatus {
   return "양호";
 }
 
-// 병동별 최근 이탈도 평균
 export function hubTeamAverages(workers: readonly HubWorker[]): readonly TeamAverage[] {
   const byTeam = new Map<string, number[]>();
   for (const worker of workers) {

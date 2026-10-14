@@ -1,6 +1,6 @@
 /** 브라우저별로 지원하는 녹음 형식이 달라, 쓸 수 있는 것 중 앞선 것을 고릅니다. */
 const MIME_CANDIDATES: readonly string[] = [
-  "audio/webm;codecs=opus", // 크롬·엣지·파이어폭스
+  "audio/webm;codecs=opus", // 크롬, 엣지, 파이어폭스
   "audio/webm",
   "audio/mp4", // 사파리(iOS 포함)
   "audio/ogg;codecs=opus",

@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   await writeUserUuidCookie(result.data.user_uuid);
   await writeDisplayUserIdCookie(result.data.user_id);
 
-  // 입력한 아이디·비밀번호가 대시보드 관리자 계정과 같으면, 일반 로그인과 동시에
+  // 입력한 아이디와 비밀번호가 대시보드 관리자 계정과 같으면, 일반 로그인과 동시에
   // 관리자 로그인도 같이 처리함(따로 /admin/login에 또 들어갈 필요 없게)
   if (body.user_id === getAdminId() && body.password === getAdminPassword()) {
     const cookieStore = await cookies();

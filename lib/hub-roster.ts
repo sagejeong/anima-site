@@ -140,7 +140,7 @@ export function addWorkerPlaceholder(params: { name: string; team: string }): Ro
   return worker;
 }
 
-/** 상세보기에서 이름·소속·앱 UUID를 고칠 때 씀. 넘긴 필드만 바꾸고 나머지는 그대로 둠 */
+/** 상세보기에서 이름, 소속, 앱 UUID를 고칠 때 씀. 넘긴 필드만 바꾸고 나머지는 그대로 둠 */
 export function updateWorker(
   id: string,
   patch: { name?: string; team?: string; userUuid?: string | null },
@@ -261,7 +261,7 @@ export function recentAfterAverages(days: number): { date: string; average: numb
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
-// measuredAt(UTC)을 한국 시간 날짜·시(0~23)로. 서버 시스템 타임존이 뭐든 상관없이 계산되게
+// measuredAt(UTC)을 한국 시간 날짜와 시(0~23)로. 서버 시스템 타임존이 뭐든 상관없이 계산되게
 function toKst(measuredAt: string): { dateKey: string; hour: number } {
   const kst = new Date(new Date(measuredAt).getTime() + KST_OFFSET_MS);
   return { dateKey: kst.toISOString().slice(0, 10), hour: kst.getUTCHours() };

@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 import { animaUrl, callAnimaApi, readUserUuid } from "@/lib/anima-api";
 
-// 이 방문자 측정 기록 목록, GET /records 중계 + 쿠키에서 user_uuid 붙여서
 export async function GET(request: NextRequest) {
   const userUuid = await readUserUuid();
   if (!userUuid) {

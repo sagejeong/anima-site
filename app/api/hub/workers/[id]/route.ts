@@ -1,6 +1,6 @@
 import { removeWorker, updateWorker } from "@/lib/hub-roster";
 
-// 상세보기에서 이름·소속·앱 UUID 수정
+// 상세보기에서 이름, 소속, 앱 UUID 수정
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },

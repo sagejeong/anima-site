@@ -1,10 +1,6 @@
 import { cookies } from "next/headers";
 import { USER_UUID_COOKIE } from "@/proxy";
 
-/**
- * ANiMA FastAPI 서버 주소.
- * 배포 환경에서는 ANIMA_API_BASE_URL 환경변수로 덮어쓸 수 있습니다.
- */
 export const ANIMA_API_BASE_URL =
   process.env.ANIMA_API_BASE_URL ?? "https://api.animawith.cloud";
 

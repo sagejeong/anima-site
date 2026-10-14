@@ -1,6 +1,5 @@
 import { animaUrl, callAnimaApi, readUserUuid } from "@/lib/anima-api";
 
-/** 브라우저가 보낼 수 있는 최대 녹음 파일 크기 */
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 
 // 녹음 파일을 ANiMA 서버 POST /upload로 중계. user_uuid는 httpOnly라 브라우저가

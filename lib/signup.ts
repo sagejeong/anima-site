@@ -164,7 +164,7 @@ export const INITIAL_SIGNUP_FORM: SignupFormData = {
 /** 필드 이름 → 오류 메시지 */
 export type FormErrors = Partial<Record<keyof SignupFormData, string>>;
 
-export const USER_ID_PATTERN = /^[a-zA-Z]{4,20}$/;
+export const USER_ID_PATTERN = /^[a-zA-Z0-9]{4,20}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_HAS_LETTER = /[a-zA-Z]/;
 const PASSWORD_HAS_DIGIT = /[0-9]/;
@@ -191,7 +191,7 @@ export function validateAccountStep(data: SignupFormData): FormErrors {
   const errors: FormErrors = {};
 
   if (!USER_ID_PATTERN.test(data.userId)) {
-    errors.userId = "영문 4~20자로 입력해 주세요.";
+    errors.userId = "영문, 숫자 조합 4~20자로 입력해 주세요.";
   } else if (isReservedUserId(data.userId)) {
     errors.userId = "사용할 수 없는 아이디입니다.";
   }

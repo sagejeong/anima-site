@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   const userId = body.user_id ?? "";
   if (!USER_ID_PATTERN.test(userId)) {
     return Response.json(
-      { error: "아이디는 영문 4~20자여야 합니다." },
+      { error: "아이디는 영문, 숫자 조합 4~20자여야 합니다." },
       { status: 400 },
     );
   }

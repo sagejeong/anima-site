@@ -83,7 +83,7 @@ export default function AccountStep({
               setCheckStatus("idle");
             }}
             placeholder="animauser"
-            hint="영문 4~20자. 실명이나 생년월일은 피해 주세요."
+            hint="영문, 숫자 조합 4~20자. 실명이나 생년월일은 피해 주세요."
             autoComplete="username"
             error={errors.userId}
             trailingAction={{

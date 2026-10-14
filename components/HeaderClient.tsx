@@ -30,7 +30,6 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
-  const [isAdminLoggingOut, setIsAdminLoggingOut] = useState<boolean>(false);
 
   useEffect(() => {
     const handleScroll = (): void => {
@@ -44,24 +43,13 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
 
   const closeMenu = (): void => setIsMenuOpen(false);
 
-  // /api/account/logout이 관리자 세션까지 같이 지워주므로, 평소엔 이 버튼 하나로 끝남.
-  // 완전히 새로 불러와야 캐시된 로그인 상태가 안 남음(AppShell 로그아웃과 동일한 이유)
+  // /api/account/logout이 관리자 세션까지 같이 지워주므로, 로그인 경로(/login 또는
+  // /admin/login)와 상관없이 이 버튼 하나로 항상 다 끝남. 완전히 새로 불러와야
+  // 캐시된 로그인 상태가 안 남음(AppShell 로그아웃과 동일한 이유)
   const handleLogout = async (): Promise<void> => {
     setIsLoggingOut(true);
     try {
       await fetch("/api/account/logout", { method: "POST" });
-    } finally {
-      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-      window.location.href = "/";
-    }
-  };
-
-  // 일반 회원 계정 없이 /admin/login으로만 들어온 경우를 위한 버튼. 일반 로그인
-  // 상태(userId)가 있을 땐 위 handleLogout 하나로 둘 다 끝나서 이 버튼을 안 보여줌
-  const handleAdminLogout = async (): Promise<void> => {
-    setIsAdminLoggingOut(true);
-    try {
-      await fetch("/api/admin/logout", { method: "POST" });
     } finally {
       // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/";
@@ -118,26 +106,25 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
 
         {/* 우측: 로그인 상태에 따라 아이디/로그아웃 또는 로그인·회원가입 + 모바일 햄버거 */}
         <div className="flex items-center justify-end gap-2">
-          {isAdminAuthed && !userId && (
+          {isAdminAuthed ? (
             <div className="hidden items-center gap-2 rounded-full bg-primary/10 pl-3 pr-1 md:flex">
               <span className="text-xs font-bold text-primary">관리자로 로그인됨</span>
               <button
                 type="button"
-                onClick={() => void handleAdminLogout()}
-                disabled={isAdminLoggingOut}
+                onClick={() => void handleLogout()}
+                disabled={isLoggingOut}
                 className="rounded-full px-2.5 py-1.5 text-xs font-bold text-primary underline underline-offset-4 disabled:opacity-60"
               >
-                {isAdminLoggingOut ? "로그아웃 중..." : "관리자 로그아웃"}
+                {isLoggingOut ? "로그아웃 중..." : "관리자 로그아웃"}
               </button>
             </div>
-          )}
-          {userId ? (
+          ) : userId ? (
             <div className="hidden items-center gap-3 md:flex">
               <Link
                 href="/settings"
                 className="rounded-full px-2 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary"
               >
-                {userId}님{isAdminAuthed && " · 관리자"}
+                {userId}님
               </Link>
               <button
                 type="button"
@@ -149,22 +136,20 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
               </button>
             </div>
           ) : (
-            !isAdminAuthed && (
-              <div className="hidden items-center gap-2 md:flex">
-                <Link
-                  href="/login"
-                  className="rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary"
-                >
-                  로그인
-                </Link>
-                <Link
-                  href="/signup"
-                  className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
-                >
-                  회원가입
-                </Link>
-              </div>
-            )
+            <div className="hidden items-center gap-2 md:flex">
+              <Link
+                href="/login"
+                className="rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary"
+              >
+                로그인
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
+              >
+                회원가입
+              </Link>
+            </div>
           )}
 
           <button
@@ -215,24 +200,23 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
             ))}
 
             <div className="mt-3 flex flex-col gap-2 border-t border-line pt-4">
-              {isAdminAuthed && !userId && (
+              {isAdminAuthed ? (
                 <button
                   type="button"
-                  onClick={() => void handleAdminLogout()}
-                  disabled={isAdminLoggingOut}
+                  onClick={() => void handleLogout()}
+                  disabled={isLoggingOut}
                   className="rounded-lg bg-primary/10 px-3 py-2.5 text-center text-sm font-bold text-primary disabled:opacity-60"
                 >
-                  {isAdminLoggingOut ? "로그아웃 중..." : "관리자로 로그인됨 · 관리자 로그아웃"}
+                  {isLoggingOut ? "로그아웃 중..." : "관리자로 로그인됨 · 관리자 로그아웃"}
                 </button>
-              )}
-              {userId ? (
+              ) : userId ? (
                 <>
                   <Link
                     href="/settings"
                     onClick={closeMenu}
                     className="rounded-lg px-3 py-2.5 text-base font-medium text-ink transition-colors hover:bg-primary/10 hover:text-primary"
                   >
-                    {userId}님{isAdminAuthed && " · 관리자"} · 설정
+                    {userId}님 · 설정
                   </Link>
                   <button
                     type="button"
@@ -244,24 +228,22 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
                   </button>
                 </>
               ) : (
-                !isAdminAuthed && (
-                  <>
-                    <Link
-                      href="/login"
-                      onClick={closeMenu}
-                      className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
-                    >
-                      로그인
-                    </Link>
-                    <Link
-                      href="/signup"
-                      onClick={closeMenu}
-                      className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
-                    >
-                      회원가입
-                    </Link>
-                  </>
-                )
+                <>
+                  <Link
+                    href="/login"
+                    onClick={closeMenu}
+                    className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
+                  >
+                    로그인
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={closeMenu}
+                    className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
+                  >
+                    회원가입
+                  </Link>
+                </>
               )}
             </div>
           </nav>

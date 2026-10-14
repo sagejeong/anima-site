@@ -46,10 +46,7 @@ export default function ConsentStep({
         <section>
           <h3 className="font-semibold text-ink">녹음 절차 안내</h3>
           <p className="mt-2">
-            전체 녹음 및 데이터 수집은 약 5분 정도 소요됩니다. 녹음 중에는 기기를
-            얼굴에서 약 20cm 정도 떨어뜨려 주시고, 조용한 환경에서 녹음해
-            주십시오. 녹음 기기는 세척·소독 전에는 다른 사람과 공유하지
-            마십시오.
+            조용한 환경에서 녹음해 주십시오.
           </p>
           <p className="mt-2">
             ANiMA 프로젝트(한국폴리텍대학 인천캠퍼스 AI융합소프트웨어과)는

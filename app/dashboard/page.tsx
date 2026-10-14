@@ -16,7 +16,17 @@ type Alert = {
   team: string;
   percent: number;
   status: CheckinStatus;
-  when: string;
+  measuredAt: string;
+};
+
+type AlertHistoryRow = {
+  id: string;
+  workerId: string;
+  workerName: string;
+  workerTeam: string;
+  measuredAt: string;
+  percent: number | null;
+  status: CheckinStatus | null;
 };
 
 type LiveStats = {
@@ -46,7 +56,18 @@ function sortByLatest(rows: readonly WorkerRow[]): WorkerRow[] {
   });
 }
 
-// 날짜+시각(평소 굵기)과 "n초/분 전"(굵게, now가 매초 갱신되면서 같이 움직임)을 따로 반환
+// "방금" / "n초 전" / "n분 전" / "n시간 전" / "n일 전" (now가 매초 갱신되면서 같이 움직임)
+function formatElapsed(measuredAt: string, now: number): string {
+  const date = parseServerDate(measuredAt);
+  const diffSec = Math.max(0, Math.floor((now - date.getTime()) / 1000));
+  if (diffSec < 5) return "방금";
+  if (diffSec < 60) return `${diffSec}초 전`;
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}분 전`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}시간 전`;
+  return `${Math.floor(diffSec / 86400)}일 전`;
+}
+
+// 날짜+시각(평소 굵기)과 "n초/분 전"(굵게)을 따로 반환
 function formatMeasuredPair(measuredAt: string, now: number): { dateTime: string; elapsed: string } {
   const date = parseServerDate(measuredAt);
   const mm = date.getMonth() + 1;
@@ -55,15 +76,7 @@ function formatMeasuredPair(measuredAt: string, now: number): { dateTime: string
   const mi = date.getMinutes().toString().padStart(2, "0");
   const dateTime = `${mm}/${dd} ${hh}:${mi}`;
 
-  const diffSec = Math.max(0, Math.floor((now - date.getTime()) / 1000));
-  let elapsed: string;
-  if (diffSec < 5) elapsed = "방금";
-  else if (diffSec < 60) elapsed = `${diffSec}초 전`;
-  else if (diffSec < 3600) elapsed = `${Math.floor(diffSec / 60)}분 전`;
-  else if (diffSec < 86400) elapsed = `${Math.floor(diffSec / 3600)}시간 전`;
-  else elapsed = `${Math.floor(diffSec / 86400)}일 전`;
-
-  return { dateTime, elapsed };
+  return { dateTime, elapsed: formatElapsed(measuredAt, now) };
 }
 
 // 실시간 현황. 예시 데이터 없이, 등록된 팀원의 앱 UUID로 FastAPI 기록을 주기적으로
@@ -77,6 +90,10 @@ export default function DashboardOverviewPage() {
   const [now, setNow] = useState(() => Date.now());
 
   const latestIdsRef = useRef<Map<string, string>>(new Map());
+  // 최초 로드 때 이미 알고 있던 사람인지. 여기 없는 사람의 "첫 기록"은 옛날 기록을
+  // 그제서야 보는 것일 수 있어 알림을 안 띄우고, 있는 사람의 첫 기록(측정 전 →
+  // 측정 완료)은 지금 막 생긴 진짜 새 기록이라 알림을 띄워야 함
+  const seenIdsRef = useRef<Set<string>>(new Set());
   const alertSeqRef = useRef(0);
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const prevTops = useRef<Map<string, number>>(new Map());
@@ -88,11 +105,13 @@ export default function DashboardOverviewPage() {
     for (const row of sorted) {
       const prevLatestId = latestIdsRef.current.get(row.id);
       const currentLatestId = row.latest?.id;
+      const hasBeenSeen = seenIdsRef.current.has(row.id);
+
       if (currentLatestId && currentLatestId !== prevLatestId) {
         setFlashId(row.id);
         window.setTimeout(() => setFlashId((cur) => (cur === row.id ? null : cur)), FLASH_MS);
 
-        if (row.latest && row.latest.status && row.latest.status !== "양호" && prevLatestId !== undefined) {
+        if (hasBeenSeen && row.latest && row.latest.status && row.latest.status !== "양호") {
           alertSeqRef.current += 1;
           newAlerts.push({
             id: `a-${alertSeqRef.current}`,
@@ -101,10 +120,11 @@ export default function DashboardOverviewPage() {
             team: row.team,
             percent: row.latest.percent ?? 0,
             status: row.latest.status,
-            when: "방금",
+            measuredAt: row.latest.measuredAt,
           });
         }
       }
+      seenIdsRef.current.add(row.id);
       if (currentLatestId) latestIdsRef.current.set(row.id, currentLatestId);
     }
 
@@ -115,15 +135,36 @@ export default function DashboardOverviewPage() {
   };
 
   const loadRows = async () => {
-    const res = await fetch("/api/hub/workers");
-    const body: { workers: WorkerRow[]; stats?: LiveStats } = await res.json();
+    const [workersRes, alertsRes] = await Promise.all([
+      fetch("/api/hub/workers"),
+      fetch("/api/hub/alerts"),
+    ]);
+    const body: { workers: WorkerRow[]; stats?: LiveStats } = await workersRes.json();
     const liveRows = body.workers.filter((w) => w.userUuid);
-    // 처음 불러올 때는 "새 기록" 알림을 띄우지 않고, 현재 상태만 기준점으로 잡아둠
+    // 처음 불러올 때는 "새 기록" 알림을 띄우지 않고, 현재 상태만 기준점으로 잡아둠.
+    // 이때 아직 체크인이 없는 사람도 "알고 있던 사람"으로 표시해둬야, 그 사람의
+    // 첫 체크인이 들어왔을 때 (currentLatestId가 생기는 순간) 알림이 뜬다
     for (const row of liveRows) {
+      seenIdsRef.current.add(row.id);
       if (row.latest?.id) latestIdsRef.current.set(row.id, row.latest.id);
     }
     setRows(sortByLatest(liveRows));
     if (body.stats) setStats(body.stats);
+
+    // 이미 쌓여 있는 주의·경고 기록도 보여줌(탭을 지금 막 열었다고 사라지면 안 됨)
+    const alertsBody: { alerts: AlertHistoryRow[] } = await alertsRes.json();
+    setAlerts(
+      alertsBody.alerts.slice(0, MAX_ALERTS).map((row) => ({
+        id: row.id,
+        workerId: row.workerId,
+        name: row.workerName,
+        team: row.workerTeam,
+        percent: row.percent ?? 0,
+        status: row.status as CheckinStatus,
+        measuredAt: row.measuredAt,
+      })),
+    );
+
     setIsLoading(false);
   };
 
@@ -173,6 +214,11 @@ export default function DashboardOverviewPage() {
     if (row.latest?.status) counts[row.latest.status] += 1;
   }
 
+  const weeklyAverage =
+    stats.weekly.length > 0
+      ? Math.round(stats.weekly.reduce((sum, p) => sum + p.average, 0) / stats.weekly.length)
+      : null;
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div>
@@ -189,7 +235,7 @@ export default function DashboardOverviewPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
+        <div className="flex flex-col rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-ink">오늘 오전 → 오후</p>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
@@ -197,32 +243,43 @@ export default function DashboardOverviewPage() {
               LIVE
             </span>
           </div>
-          {stats.today.morning === null && stats.today.afternoon === null ? (
-            <p className="mt-6 text-sm text-ink-soft">오늘 측정된 기록이 아직 없습니다.</p>
-          ) : (
-            <div className="mt-5 flex items-center justify-center gap-6">
-              <BigStat label={`오전 (${stats.today.morningCount}건)`} value={stats.today.morning} />
-              <span className="text-2xl text-ink-soft" aria-hidden="true">
-                →
-              </span>
-              <BigStat label={`오후 (${stats.today.afternoonCount}건)`} value={stats.today.afternoon} />
-            </div>
-          )}
+          <div className="flex flex-1 items-center justify-center">
+            {stats.today.morning === null && stats.today.afternoon === null ? (
+              <p className="text-sm text-ink-soft">오늘 측정된 기록이 아직 없습니다.</p>
+            ) : (
+              <div className="flex items-center justify-center gap-6">
+                <BigStat label={`오전 (${stats.today.morningCount}건)`} value={stats.today.morning} />
+                <span className="text-2xl text-ink-soft" aria-hidden="true">
+                  →
+                </span>
+                <BigStat label={`오후 (${stats.today.afternoonCount}건)`} value={stats.today.afternoon} />
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
+        <div className="flex flex-col rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-ink">최근 7일 평균 이탈도</p>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
-              <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
-              LIVE
-            </span>
+            <div className="flex items-center gap-2">
+              {weeklyAverage !== null && (
+                <span className="font-hub-mono text-sm font-extrabold text-ink">평균 {weeklyAverage}%</span>
+              )}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
+                <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+                LIVE
+              </span>
+            </div>
           </div>
           {stats.weekly.length < 2 ? (
-            <p className="mt-6 text-sm text-ink-soft">추이를 보려면 며칠 더 데이터가 쌓여야 합니다.</p>
+            <div className="flex flex-1 items-center justify-center">
+              <p className="text-sm text-ink-soft">추이를 보려면 며칠 더 데이터가 쌓여야 합니다.</p>
+            </div>
           ) : (
             <LineChart
               points={stats.weekly.map((p) => ({ label: p.date.slice(5), value: p.average }))}
+              showRiskBands
+              showValues
               className="mt-5"
             />
           )}
@@ -318,7 +375,7 @@ export default function DashboardOverviewPage() {
                     <StatusPill status={alert.status} />
                   </div>
                   <p className="mt-1 text-xs text-ink-soft">
-                    {alert.team} · {alert.percent}% · {alert.when}
+                    {alert.team} · {alert.percent}% · {formatElapsed(alert.measuredAt, now)}
                   </p>
                 </li>
               ))}

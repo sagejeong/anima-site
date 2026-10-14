@@ -130,7 +130,8 @@ export default function SignupFlow() {
           <HealthInfoStep
             data={data}
             onChange={updateField}
-            onSkip={() => void submit()}
+            onComplete={() => void submit()}
+            onBack={goPrev}
           />
         )}
       </div>
@@ -144,21 +145,10 @@ export default function SignupFlow() {
         </p>
       )}
 
-      {/* 기본 정보(step 1)는 BasicInfoStep이 질문마다 자체적으로 이전/다음을 처리함 */}
-      {step !== 1 && (
+      {/* 기본 정보(step 1)·건강 정보(step 2)는 각자 질문마다 이전/다음을 자체 처리함 */}
+      {step === 0 && (
       <div className="mt-10 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        {step > 0 ? (
-          <button
-            type="button"
-            onClick={goPrev}
-            disabled={isSubmitting}
-            className="rounded-full border border-gray-light px-6 py-3 text-sm font-medium text-ink-soft transition-colors hover:border-line disabled:opacity-50 sm:text-base"
-          >
-            이전
-          </button>
-        ) : (
-          <span className="hidden sm:block" />
-        )}
+        <span className="hidden sm:block" />
 
         <button
           type="button"
@@ -166,7 +156,7 @@ export default function SignupFlow() {
           disabled={isSubmitting}
           className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-accent disabled:opacity-60 sm:text-base"
         >
-          {isSubmitting ? "저장하는 중..." : step === 2 ? "완료" : "다음"}
+          {isSubmitting ? "저장하는 중..." : "다음"}
         </button>
       </div>
       )}

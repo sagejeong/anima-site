@@ -55,14 +55,14 @@ export default function DashboardDemoPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
+            <div className="flex flex-col rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-ink">오늘 오전 → 오후</p>
                 <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
                   예시 데이터
                 </span>
               </div>
-              <div className="mt-5 flex items-center justify-center gap-6">
+              <div className="flex flex-1 items-center justify-center gap-6">
                 <BigStat
                   label={`오전 체크 (${DEMO_TODAY_SESSIONS.beforeCount}명)`}
                   value={DEMO_TODAY_SESSIONS.before}
@@ -77,7 +77,7 @@ export default function DashboardDemoPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
+            <div className="flex flex-col rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-ink">최근 7일 오후 평균 이탈도</p>
                 <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">

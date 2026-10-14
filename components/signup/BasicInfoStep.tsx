@@ -128,10 +128,7 @@ export default function BasicInfoStep({
 
       {current === "age" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">나이가 어떻게 되세요?</h2>
-          <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            나이에 따라 기침 패턴이 다르게 나타나요.
-          </p>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">나이를 입력해주세요.</h2>
           <div className="mt-6">
             <TextField
               id="age"
@@ -151,7 +148,7 @@ export default function BasicInfoStep({
 
       {current === "gender" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">성별이 어떻게 되세요?</h2>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">성별을 선택해주세요.</h2>
           <BigChoiceList
             options={GENDER_OPTIONS}
             value={data.gender}
@@ -162,9 +159,10 @@ export default function BasicInfoStep({
 
       {current === "location" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">어디 사세요?</h2>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">사는 곳을 선택해주세요.</h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            생활 환경에 따라 기침 패턴이 달라질 수 있어요.
+            입력하신 내용은 연구 목적으로만 쓰이며, 이름이나 연락처 같은 개인정보와
+            연결해 저장하지 않아요.
           </p>
           <div className="mt-6 flex flex-col gap-5">
             <SelectField
@@ -211,7 +209,7 @@ export default function BasicInfoStep({
 
       {current === "smoking" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">흡연하시나요?</h2>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">흡연 유무를 선택해주세요.</h2>
           <BigChoiceList
             options={SMOKING_OPTIONS}
             value={data.smoking}
@@ -222,7 +220,7 @@ export default function BasicInfoStep({
 
       {current === "allergy" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">알레르기가 있으세요?</h2>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">알레르기 유무를 선택해주세요.</h2>
           <BigChoiceList
             options={HAS_OPTIONS}
             value={data.allergy}
@@ -235,7 +233,7 @@ export default function BasicInfoStep({
             <div className="mt-5">
               <TextField
                 id="allergyDetail"
-                label="어떤 알레르기인가요? (선택)"
+                label="어떤 알레르기인지 입력해주세요. (선택)"
                 value={data.allergyDetail}
                 onChange={(value) => onChange("allergyDetail", value)}
                 placeholder="예: 꽃가루, 집먼지진드기"
@@ -249,7 +247,7 @@ export default function BasicInfoStep({
       {current === "dustExposure" && (
         <div className="mt-8">
           <h2 className="text-xl font-bold text-ink sm:text-2xl">
-            최근 2주 내 미세먼지·대기오염이 심한 곳에 계셨나요?
+            최근 2주 내 미세먼지·대기오염이 심한 곳에 계셨는지 선택해주세요.
           </h2>
           <BigChoiceList
             options={YES_NO_OPTIONS}
@@ -261,7 +259,7 @@ export default function BasicInfoStep({
 
       {current === "hasPet" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">반려동물을 기르고 계세요?</h2>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">반려동물을 기르고 있는지 선택해주세요.</h2>
           <BigChoiceList
             options={YES_NO_OPTIONS}
             value={data.hasPet}
@@ -272,7 +270,7 @@ export default function BasicInfoStep({
 
       {current === "livingEnvironment" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">주로 어떤 환경에서 생활하세요?</h2>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">주로 생활하는 환경을 선택해주세요.</h2>
           <BigChoiceList
             options={LIVING_ENVIRONMENT_OPTIONS}
             value={data.livingEnvironment}
@@ -283,7 +281,7 @@ export default function BasicInfoStep({
 
       {current === "firstVisit" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">ANiMA 첫 방문이신가요?</h2>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">ANiMA 첫 방문인지 선택해주세요.</h2>
           <BigChoiceList
             options={YES_NO_OPTIONS}
             value={data.firstVisit}
@@ -294,7 +292,7 @@ export default function BasicInfoStep({
 
       {current === "visitPurpose" && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">오늘은 어떤 목적으로 오셨어요?</h2>
+          <h2 className="text-xl font-bold text-ink sm:text-2xl">방문 목적을 선택해주세요.</h2>
           <BigChoiceList
             options={VISIT_PURPOSE_OPTIONS}
             value={data.visitPurpose}

@@ -154,6 +154,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), var(--font-noto-sans-kr), system-ui, sans-serif;
+  /* 한글은 음절 중간에서 줄바꿈되면 어색해서(예: "확인해" / "야 합니다"), 글자 단위
+     대신 단어(띄어쓰기) 단위로만 줄바꿈. 끊어질 공백이 없는 긴 문자열(URL 등)은
+     overflow-wrap이 대신 받아서 넘치지 않게 함 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* 제목은 Calistoga(한글은 Gothic A1), 본문은 Inter(한글은 Noto Sans KR) */
@@ -161,6 +166,8 @@ h1,
 h2,
 h3 {
   font-family: var(--font-calistoga), var(--font-gothic-a1), serif;
+  /* 마지막 줄에 한 단어만 외로이 남는 것 방지 */
+  text-wrap: balance;
 }
 
 /* 움직임에 민감한 사용자는 배경을 정지시킵니다 */

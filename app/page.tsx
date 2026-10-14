@@ -71,7 +71,7 @@ export default function Home() {
         <section className="border-y border-line bg-steel-surface">
           <div className="mx-auto grid w-full max-w-6xl grid-cols-1 divide-y divide-line px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-8 lg:px-12">
             <Stat value="3초" label="녹음만으로 분석 시작" />
-            <Stat value="하루 2회" label="오전 · 오후 체크인" />
+            <Stat value="하루 2회" label="오전/오후 체크인" />
             <Stat value="한 화면" label="전 입소자 동시 확인" />
           </div>
         </section>
@@ -170,13 +170,7 @@ export default function Home() {
           <div className="mx-auto flex max-w-xl flex-col items-center gap-6">
             <h2 className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-hub-display text-3xl font-black tracking-tight text-balance text-ink sm:text-4xl">
               <span>지금,</span>
-              <Image
-                src="/anima_logo.png"
-                alt="ANiMA"
-                width={774}
-                height={158}
-                className="h-8 w-auto sm:h-10"
-              />
+              <span className="gradient-brand-text">ANiMA</span>
               <span>를 시작하세요.</span>
             </h2>
             <div className="flex flex-col gap-3 sm:flex-row">

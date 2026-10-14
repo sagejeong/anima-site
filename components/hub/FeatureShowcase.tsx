@@ -32,7 +32,7 @@ const SLIDES: readonly Slide[] = [
   },
   {
     id: "trend",
-    tag: "오전 · 오후 비교",
+    tag: "오전/오후 비교",
     render: () => (
       <div className="flex h-full flex-col items-center justify-center gap-6 px-6 py-6">
         <p className="text-xs font-bold text-ink-soft">오늘 시설 평균 이탈도</p>

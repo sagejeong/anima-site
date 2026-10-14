@@ -101,8 +101,12 @@ export function formatMeasuredAt(value: string | Date): string {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "Asia/Seoul",
   });
-  const weekday = date.toLocaleDateString("ko-KR", { weekday: "short" });
+  const weekday = date.toLocaleDateString("ko-KR", {
+    weekday: "short",
+    timeZone: "Asia/Seoul",
+  });
 
   if (!hasTimeComponent) {
     return `${datePart} (${weekday})`;
@@ -112,6 +116,7 @@ export function formatMeasuredAt(value: string | Date): string {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    timeZone: "Asia/Seoul",
   });
 
   return `${datePart} (${weekday}) ${timePart}`;
@@ -215,6 +220,7 @@ export function computeTrend(
         shortDateLabel: new Date(time).toLocaleDateString("ko-KR", {
           month: "numeric",
           day: "numeric",
+          timeZone: "Asia/Seoul",
         }),
         percent: toDisplayPercent(distance),
         risk: classifyRisk(distance),

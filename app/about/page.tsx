@@ -207,10 +207,6 @@ export default function AboutPage() {
               표시, 기록 추적이 정상적으로 작동하는 것을 확인했습니다.
               임상적 유효성은 아직 검증하지 않았습니다.
             </p>
-            <p>
-              이 분석 방식(STFT→2D CNN→마할라노비스 거리)은
-              한국산업기술융합학회 학술대회에서 발표해 우수상을 받았습니다.
-            </p>
           </Section>
 
           <Section eyebrow="앞으로의 계획" title="앞으로 이렇게 발전시킵니다">

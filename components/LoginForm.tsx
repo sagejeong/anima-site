@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { TextField } from "@/components/form/Fields";
 
 type LoginErrors = {
@@ -12,7 +11,6 @@ type LoginErrors = {
 };
 
 export default function LoginForm() {
-  const router = useRouter();
   const [userId, setUserId] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [errors, setErrors] = useState<LoginErrors>({});
@@ -54,8 +52,10 @@ export default function LoginForm() {
         return;
       }
 
-      router.push("/");
-      router.refresh();
+      // router.push 대신 완전히 새로 불러오기: 안 그러면 헤더(서버 컴포넌트)가
+      // 로그인 직후 쿠키 상태(특히 관리자 계정 여부)를 못 따라오는 경우가 있음
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.href = "/";
     } catch {
       setErrors({ form: "네트워크에 연결하지 못했습니다." });
     } finally {

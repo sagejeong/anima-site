@@ -74,7 +74,7 @@ export default function LoginForm() {
             setUserId(value);
             setErrors((prev) => ({ ...prev, userId: undefined, form: undefined }));
           }}
-          placeholder="anima_user01"
+          placeholder="animauser"
           autoComplete="username"
           error={errors.userId}
         />

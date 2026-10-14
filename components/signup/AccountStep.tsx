@@ -35,8 +35,8 @@ export default function AccountStep({
           required
           value={data.userId}
           onChange={(value) => onChange("userId", value)}
-          placeholder="anima_user01"
-          hint="영문·숫자·밑줄(_) 4~20자. 실명이나 생년월일은 피해 주세요."
+          placeholder="animauser"
+          hint="영문 4~20자. 실명이나 생년월일은 피해 주세요."
           autoComplete="username"
           error={errors.userId}
         />
@@ -48,7 +48,7 @@ export default function AccountStep({
           required
           value={data.password}
           onChange={(value) => onChange("password", value)}
-          hint="영문 포함 8자 이상"
+          hint="숫자, 영문, 특수문자 포함 8자 이상"
           autoComplete="new-password"
           error={errors.password}
         />

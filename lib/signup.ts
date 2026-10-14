@@ -171,9 +171,11 @@ export const INITIAL_SIGNUP_FORM: SignupFormData = {
 /** 필드 이름 → 오류 메시지 */
 export type FormErrors = Partial<Record<keyof SignupFormData, string>>;
 
-export const USER_ID_PATTERN = /^[a-zA-Z0-9_]{4,20}$/;
+export const USER_ID_PATTERN = /^[a-zA-Z]{4,20}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_HAS_LETTER = /[a-zA-Z]/;
+const PASSWORD_HAS_DIGIT = /[0-9]/;
+const PASSWORD_HAS_SPECIAL = /[^a-zA-Z0-9]/;
 
 // 관리자 로그인 아이디(proxy.ts의 getAdminId())와 겹치면 혼동되니 일반 회원가입에서는 막음
 const RESERVED_USER_IDS = new Set(["admin"]);
@@ -183,7 +185,12 @@ export function isReservedUserId(userId: string): boolean {
 }
 
 export function isValidSignupPassword(password: string): boolean {
-  return password.length >= 8 && PASSWORD_HAS_LETTER.test(password);
+  return (
+    password.length >= 8 &&
+    PASSWORD_HAS_LETTER.test(password) &&
+    PASSWORD_HAS_DIGIT.test(password) &&
+    PASSWORD_HAS_SPECIAL.test(password)
+  );
 }
 
 /** 2단계(계정) 검증 */
@@ -191,12 +198,12 @@ export function validateAccountStep(data: SignupFormData): FormErrors {
   const errors: FormErrors = {};
 
   if (!USER_ID_PATTERN.test(data.userId)) {
-    errors.userId = "영문, 숫자, 밑줄(_) 조합 4~20자로 입력해 주세요.";
+    errors.userId = "영문 4~20자로 입력해 주세요.";
   } else if (isReservedUserId(data.userId)) {
     errors.userId = "사용할 수 없는 아이디입니다.";
   }
   if (!isValidSignupPassword(data.password)) {
-    errors.password = "비밀번호는 영문 포함 8자 이상이어야 합니다.";
+    errors.password = "비밀번호는 숫자, 영문, 특수문자를 포함해 8자 이상이어야 합니다.";
   }
   if (data.password !== data.passwordConfirm) {
     errors.passwordConfirm = "비밀번호가 일치하지 않습니다.";

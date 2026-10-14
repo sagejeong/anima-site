@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   const userId = body.user_id ?? "";
   if (!USER_ID_PATTERN.test(userId)) {
     return Response.json(
-      { error: "아이디는 영문, 숫자, 밑줄(_) 조합 4~20자여야 합니다." },
+      { error: "아이디는 영문 4~20자여야 합니다." },
       { status: 400 },
     );
   }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   }
   if (!isValidSignupPassword(body.password ?? "")) {
     return Response.json(
-      { error: "비밀번호는 영문 포함 8자 이상이어야 합니다." },
+      { error: "비밀번호는 숫자, 영문, 특수문자를 포함해 8자 이상이어야 합니다." },
       { status: 400 },
     );
   }

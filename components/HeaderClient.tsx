@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import RecordButton from "@/components/RecordButton";
 
 type NavItem = {
@@ -28,7 +27,6 @@ type HeaderClientProps = {
 };
 
 export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProps) {
-  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
@@ -46,20 +44,20 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
 
   const closeMenu = (): void => setIsMenuOpen(false);
 
+  // /api/account/logout이 관리자 세션까지 같이 지워주므로, 평소엔 이 버튼 하나로 끝남.
+  // 완전히 새로 불러와야 캐시된 로그인 상태가 안 남음(AppShell 로그아웃과 동일한 이유)
   const handleLogout = async (): Promise<void> => {
     setIsLoggingOut(true);
     try {
       await fetch("/api/account/logout", { method: "POST" });
     } finally {
-      setIsLoggingOut(false);
-      closeMenu();
-      // Header는 서버 컴포넌트라 쿠키가 지워진 걸 반영하려면 다시 렌더링해야 합니다.
-      router.refresh();
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.href = "/";
     }
   };
 
-  // 관리자 로그아웃. 일반 회원 로그아웃과 완전히 별개 세션이라 따로 버튼이 필요함.
-  // 완전히 새로 불러와야 캐시된 관리자 상태가 안 남음(AppShell 로그아웃과 동일한 이유)
+  // 일반 회원 계정 없이 /admin/login으로만 들어온 경우를 위한 버튼. 일반 로그인
+  // 상태(userId)가 있을 땐 위 handleLogout 하나로 둘 다 끝나서 이 버튼을 안 보여줌
   const handleAdminLogout = async (): Promise<void> => {
     setIsAdminLoggingOut(true);
     try {
@@ -120,7 +118,7 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
 
         {/* 우측: 로그인 상태에 따라 아이디/로그아웃 또는 로그인·회원가입 + 모바일 햄버거 */}
         <div className="flex items-center justify-end gap-2">
-          {isAdminAuthed && (
+          {isAdminAuthed && !userId && (
             <div className="hidden items-center gap-2 rounded-full bg-primary/10 pl-3 pr-1 md:flex">
               <span className="text-xs font-bold text-primary">관리자로 로그인됨</span>
               <button
@@ -139,7 +137,7 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
                 href="/settings"
                 className="rounded-full px-2 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary"
               >
-                {userId}님
+                {userId}님{isAdminAuthed && " · 관리자"}
               </Link>
               <button
                 type="button"
@@ -215,7 +213,7 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
             ))}
 
             <div className="mt-3 flex flex-col gap-2 border-t border-line pt-4">
-              {isAdminAuthed && (
+              {isAdminAuthed && !userId && (
                 <button
                   type="button"
                   onClick={() => void handleAdminLogout()}
@@ -232,7 +230,7 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
                     onClick={closeMenu}
                     className="rounded-lg px-3 py-2.5 text-base font-medium text-ink transition-colors hover:bg-primary/10 hover:text-primary"
                   >
-                    {userId}님 · 설정
+                    {userId}님{isAdminAuthed && " · 관리자"} · 설정
                   </Link>
                   <button
                     type="button"

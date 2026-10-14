@@ -1,14 +1,25 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import AuthLayout from "@/components/hub/AuthLayout";
+import { ADMIN_AUTH_COOKIE, getAdminPassword } from "@/proxy";
 
 export const metadata: Metadata = {
   title: "대시보드 보기 · ANiMA",
 };
 
 // 대시보드로 가기 전에 들르는 선택 화면. 데모버전은 더미 데이터로 동작 방식만
-// 보여주고, 실제 팀원 데이터는 관리자 로그인(/admin/login) 후에만 보임
-export default function DashboardStartPage() {
+// 보여주고, 실제 팀원 데이터는 관리자 로그인(/admin/login) 후에만 보임.
+// 이미 관리자로 로그인된 상태(일반 회원 A의 로그인과는 별개)면 선택 화면 없이
+// 바로 실제 대시보드로 보냄
+export default async function DashboardStartPage() {
+  const cookieStore = await cookies();
+  const isAdmin = cookieStore.get(ADMIN_AUTH_COOKIE)?.value === getAdminPassword();
+  if (isAdmin) {
+    redirect("/dashboard");
+  }
+
   return (
     <AuthLayout
       eyebrow="대시보드 보기"

@@ -23,13 +23,16 @@ const SCROLL_THRESHOLD = 8;
 type HeaderClientProps = {
   /** 로그인(계정 연결)돼 있으면 아이디, 아니면 null. 서버 컴포넌트인 Header가 쿠키를 읽어 내려줍니다. */
   userId: string | null;
+  /** 일반 회원 로그인과는 별개인 관리자 대시보드 로그인 상태 */
+  isAdminAuthed: boolean;
 };
 
-export default function HeaderClient({ userId }: HeaderClientProps) {
+export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProps) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+  const [isAdminLoggingOut, setIsAdminLoggingOut] = useState<boolean>(false);
 
   useEffect(() => {
     const handleScroll = (): void => {
@@ -52,6 +55,18 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
       closeMenu();
       // Header는 서버 컴포넌트라 쿠키가 지워진 걸 반영하려면 다시 렌더링해야 합니다.
       router.refresh();
+    }
+  };
+
+  // 관리자 로그아웃. 일반 회원 로그아웃과 완전히 별개 세션이라 따로 버튼이 필요함.
+  // 완전히 새로 불러와야 캐시된 관리자 상태가 안 남음(AppShell 로그아웃과 동일한 이유)
+  const handleAdminLogout = async (): Promise<void> => {
+    setIsAdminLoggingOut(true);
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } finally {
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.href = "/";
     }
   };
 
@@ -105,6 +120,19 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
 
         {/* 우측: 로그인 상태에 따라 아이디/로그아웃 또는 로그인·회원가입 + 모바일 햄버거 */}
         <div className="flex items-center justify-end gap-2">
+          {isAdminAuthed && (
+            <div className="hidden items-center gap-2 rounded-full bg-primary/10 pl-3 pr-1 md:flex">
+              <span className="text-xs font-bold text-primary">관리자로 로그인됨</span>
+              <button
+                type="button"
+                onClick={() => void handleAdminLogout()}
+                disabled={isAdminLoggingOut}
+                className="rounded-full px-2.5 py-1.5 text-xs font-bold text-primary underline underline-offset-4 disabled:opacity-60"
+              >
+                {isAdminLoggingOut ? "로그아웃 중..." : "관리자 로그아웃"}
+              </button>
+            </div>
+          )}
           {userId ? (
             <div className="hidden items-center gap-3 md:flex">
               <Link
@@ -187,6 +215,16 @@ export default function HeaderClient({ userId }: HeaderClientProps) {
             ))}
 
             <div className="mt-3 flex flex-col gap-2 border-t border-line pt-4">
+              {isAdminAuthed && (
+                <button
+                  type="button"
+                  onClick={() => void handleAdminLogout()}
+                  disabled={isAdminLoggingOut}
+                  className="rounded-lg bg-primary/10 px-3 py-2.5 text-center text-sm font-bold text-primary disabled:opacity-60"
+                >
+                  {isAdminLoggingOut ? "로그아웃 중..." : "관리자로 로그인됨 · 관리자 로그아웃"}
+                </button>
+              )}
               {userId ? (
                 <>
                   <Link

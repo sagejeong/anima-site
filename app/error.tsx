@@ -19,7 +19,7 @@ export default function GlobalError({
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-cream">
-      <HeaderClient userId={null} />
+      <HeaderClient userId={null} isAdminAuthed={false} />
 
       <main className="flex flex-1 flex-col items-center justify-center px-5 py-28 text-center sm:px-8">
         <p className="font-hub-label text-sm font-bold uppercase tracking-[0.25em] text-ink-soft">

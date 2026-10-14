@@ -278,7 +278,6 @@ export default function DashboardOverviewPage() {
           ) : (
             <LineChart
               points={stats.weekly.map((p) => ({ label: p.date.slice(5), value: p.average }))}
-              showRiskBands
               showValues
               className="mt-5"
             />

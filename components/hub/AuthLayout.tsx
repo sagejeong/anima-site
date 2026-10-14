@@ -15,16 +15,18 @@ export default function AuthLayout({ eyebrow, title, description, children }: Au
   return (
     <div className="flex min-h-screen flex-col font-hub-body lg:flex-row">
       <div className="relative flex flex-col justify-between bg-charcoal px-8 py-10 text-ink sm:px-12 sm:py-14 lg:w-[42%]">
-        <Link href="/" className="inline-flex items-center gap-2.5">
-          <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
-        </Link>
-        <Link
-          href="/"
-          className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ink/50 transition-colors hover:text-ink/80"
-        >
-          <HomeIcon className="h-3.5 w-3.5" />
-          홈으로
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center gap-2.5">
+            <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-ink/60 transition-colors hover:border-white/25 hover:text-ink/90"
+          >
+            <HomeIcon className="h-3.5 w-3.5" />
+            홈으로
+          </Link>
+        </div>
 
         <div className="mt-16 lg:mt-0">
           <p className="font-hub-label text-sm font-bold uppercase tracking-[0.3em] text-primary">

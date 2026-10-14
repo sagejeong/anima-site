@@ -114,16 +114,18 @@ function SidebarContent({
       <Link href="/" className="flex items-center gap-2.5 px-1" onClick={onNavigate}>
         <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
       </Link>
-      <Link
-        href="/"
-        onClick={onNavigate}
-        className="mt-3 inline-flex items-center gap-1.5 px-1 text-xs font-semibold text-ink/50 transition-colors hover:text-ink/80"
-      >
-        <HomeIcon className="h-3.5 w-3.5" />
-        홈으로
-      </Link>
 
       <nav className="mt-8 flex flex-col gap-1" aria-label="대시보드 메뉴">
+        <Link
+          href="/"
+          onClick={onNavigate}
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink/70 transition-colors hover:bg-primary/10 hover:text-ink"
+        >
+          <HomeIcon className="h-4.5 w-4.5 shrink-0" />
+          홈으로
+        </Link>
+        <div className="my-2 border-t border-white/10" />
+
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
           return (

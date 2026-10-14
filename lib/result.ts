@@ -74,16 +74,16 @@ export function toDisplayPercent(distance: number): number {
 }
 
 /**
- * 서버(FastAPI)의 created_at 등은 타임존 표기 없이 오는데, 실제 값은 UTC입니다
- * (실측 확인함: created_at이 KST가 아니라 UTC 기준으로 찍혀 있었음).
- * 타임존 표기가 없으면 UTC로 간주해서 파싱합니다. 이걸 안 하면, 서버가 KST로
- * 설정된 환경에서 new Date()가 이 문자열을 "로컬(KST) 시각"으로 잘못 읽어서
- * 9시간씩 밀려 보입니다.
+ * 서버(FastAPI)의 measured_at은 타임존 표기 없이 오는데, 실제 값은 이미 한국
+ * 시각입니다(2026-10월 재확인: 녹음 직후 결과 화면엔 맞게 뜨다가, 같은 값을
+ * 기록 목록에서 다시 보면 9시간 밀려 있었음 — UTC로 잘못 간주해 거기서 또
+ * +9시간을 더했기 때문). 타임존 표기가 없으면 이미 한국 시각이라고 보고
+ * 그대로 읽습니다.
  */
 export function parseServerDate(value: string): Date {
   const hasTimezone = /(Z|[+-]\d{2}:\d{2})$/i.test(value);
   if (value.includes("T") && !hasTimezone) {
-    return new Date(`${value}Z`);
+    return new Date(`${value}+09:00`);
   }
   return new Date(value);
 }

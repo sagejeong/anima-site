@@ -7,7 +7,6 @@ import {
   GENDER_OPTIONS,
   HAS_OPTIONS,
   KOREA_REGION_OPTIONS,
-  LANGUAGE_OPTIONS,
   LIVING_ENVIRONMENT_OPTIONS,
   SMOKING_OPTIONS,
   VISIT_PURPOSE_OPTIONS,
@@ -40,7 +39,6 @@ const MICRO_STEPS = [
   "hasPet",
   "livingEnvironment",
   "firstVisit",
-  "language",
   "visitPurpose",
 ] as const;
 
@@ -290,17 +288,6 @@ export default function BasicInfoStep({
             options={YES_NO_OPTIONS}
             value={data.firstVisit}
             onSelect={(value) => choose("firstVisit", value)}
-          />
-        </div>
-      )}
-
-      {current === "language" && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold text-ink sm:text-2xl">주로 어떤 언어를 쓰세요?</h2>
-          <BigChoiceList
-            options={LANGUAGE_OPTIONS}
-            value={data.language}
-            onSelect={(value) => choose("language", value)}
           />
         </div>
       )}

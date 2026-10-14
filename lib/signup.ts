@@ -63,11 +63,6 @@ export const LIVING_ENVIRONMENT_OPTIONS = [
   { value: "other", label: "기타" },
 ] as const satisfies readonly Option[];
 
-export const LANGUAGE_OPTIONS = [
-  { value: "ko", label: "한국어" },
-  { value: "en", label: "영어" },
-] as const satisfies readonly Option[];
-
 export const VISIT_PURPOSE_OPTIONS = [
   { value: "self_check", label: "건강 자가 점검" },
   { value: "research", label: "연구 참여" },
@@ -126,7 +121,6 @@ export type SignupFormData = {
   hasPet: string;
   livingEnvironment: string;
   firstVisit: string;
-  language: string;
   visitPurpose: string;
 
   // 4단계: 건강 정보 (선택 입력)
@@ -157,7 +151,6 @@ export const INITIAL_SIGNUP_FORM: SignupFormData = {
   hasPet: "",
   livingEnvironment: "",
   firstVisit: "",
-  language: "",
   visitPurpose: "",
 
   symptoms: [],
@@ -234,7 +227,6 @@ export function validateBasicInfoStep(data: SignupFormData): FormErrors {
     "hasPet",
     "livingEnvironment",
     "firstVisit",
-    "language",
     "visitPurpose",
   ];
 
@@ -271,7 +263,6 @@ export function toProfilePayload(data: SignupFormData) {
     gender: emptyToUndefined(data.gender),
     country: emptyToUndefined(data.country),
     region: emptyToUndefined(data.region),
-    language: emptyToUndefined(data.language),
     visit_purpose: emptyToUndefined(data.visitPurpose),
     first_visit: yesNoToBoolean(data.firstVisit),
     smoking: emptyToUndefined(data.smoking),

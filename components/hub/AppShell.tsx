@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { BellIcon, ChartIcon, GearIcon, GridIcon, PeopleIcon } from "@/components/hub/icons";
+import { usePathname } from "next/navigation";
+import { BellIcon, ChartIcon, GearIcon, GridIcon, HomeIcon, PeopleIcon } from "@/components/hub/icons";
 
 /**
  * 대시보드는 표·실시간 목록 위주로 PC 화면 기준으로 설계돼 있어서, 작은
@@ -114,8 +114,16 @@ function SidebarContent({
       <Link href="/" className="flex items-center gap-2.5 px-1" onClick={onNavigate}>
         <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
       </Link>
+      <Link
+        href="/"
+        onClick={onNavigate}
+        className="mt-3 inline-flex items-center gap-1.5 px-1 text-xs font-semibold text-ink/50 transition-colors hover:text-ink/80"
+      >
+        <HomeIcon className="h-3.5 w-3.5" />
+        홈으로
+      </Link>
 
-      <nav className="mt-10 flex flex-col gap-1" aria-label="대시보드 메뉴">
+      <nav className="mt-8 flex flex-col gap-1" aria-label="대시보드 메뉴">
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
           return (
@@ -142,7 +150,6 @@ function SidebarContent({
 }
 
 function LogoutButton() {
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -150,8 +157,10 @@ function LogoutButton() {
     try {
       await fetch("/api/admin/logout", { method: "POST" });
     } finally {
-      router.push("/admin/login");
-      router.refresh();
+      // router.push 대신 완전히 새로 불러오기: 안 그러면 /dashboard-start 같은
+      // 페이지가 로그아웃 전 "관리자였음" 상태를 브라우저 캐시에서 그대로 보여줌
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.href = "/admin/login";
     }
   };
 

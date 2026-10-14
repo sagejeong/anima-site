@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import GradientBar from "@/components/hub/GradientBar";
+import { HomeIcon } from "@/components/hub/icons";
 
 type AuthLayoutProps = {
   eyebrow: string;
@@ -16,6 +17,13 @@ export default function AuthLayout({ eyebrow, title, description, children }: Au
       <div className="relative flex flex-col justify-between bg-charcoal px-8 py-10 text-ink sm:px-12 sm:py-14 lg:w-[42%]">
         <Link href="/" className="inline-flex items-center gap-2.5">
           <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
+        </Link>
+        <Link
+          href="/"
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ink/50 transition-colors hover:text-ink/80"
+        >
+          <HomeIcon className="h-3.5 w-3.5" />
+          홈으로
         </Link>
 
         <div className="mt-16 lg:mt-0">

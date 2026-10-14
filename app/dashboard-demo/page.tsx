@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import LiveDashboard from "@/components/dashboard/LiveDashboard";
 import LineChart from "@/components/hub/LineChart";
+import { HomeIcon } from "@/components/hub/icons";
 import { DEMO_TODAY_SESSIONS, DEMO_WEEKLY_AFTER } from "@/lib/dashboard-demo";
 
 export const metadata: Metadata = {
@@ -22,6 +23,13 @@ export default function DashboardDemoPage() {
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
             DEMO
           </span>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line px-3.5 py-2 text-sm font-bold text-ink-soft transition-colors hover:border-ink hover:text-ink"
+          >
+            <HomeIcon className="h-4 w-4" />
+            홈으로
+          </Link>
           <Link
             href="/admin/login"
             className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"

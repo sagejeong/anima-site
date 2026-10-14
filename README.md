@@ -118,16 +118,17 @@ https라 전에 있던 mixed content 문제는 없어졌습니다. 예전 주소
 일반 방문자는 계정 없이 UUID 쿠키(`anima_uid`)로만 식별합니다. 처음 오면 `proxy.ts`가
 자동 발급합니다.
 
-대시보드는 따로 비밀번호로 막아뒀습니다. `/admin/login`에서 맞히면
+대시보드는 따로 아이디+비밀번호로 막아뒀습니다. `/admin/login`에서 맞히면
 `ADMIN_AUTH_COOKIE`가 심어지고, 그게 있어야 `/dashboard/*`랑 관리자용 API
-(`/api/hub/workers`, `/api/hub/sync`, `/api/hub/alerts`)에 들어갈 수 있습니다. 개인
-계정이 아니라 팀이 같이 쓰는 비밀번호 하나입니다. 반대로 `/api/hub/checkin`처럼
-입소자 본인이 `/checkin`에서 쓰는 주소는 이거랑 상관없이 그대로 열려 있어야 해서
-안 막았습니다.
+(`/api/hub/workers`, `/api/hub/sync`, `/api/hub/alerts`)에 들어갈 수 있습니다. FastAPI
+계정 시스템(`/login`, `/signup`)과는 완전히 별개이고, 팀이 같이 쓰는 아이디·비밀번호
+하나입니다. 반대로 `/api/hub/checkin`처럼 입소자 본인이 `/checkin`에서 쓰는 주소는
+이거랑 상관없이 그대로 열려 있어야 해서 안 막았습니다.
 
-비밀번호 자체는 코드에 안 넣고 `ANIMA_ADMIN_PASSWORD` 환경변수로만 관리합니다
-(`proxy.ts`의 `getAdminPassword()`). 배포 서버에 이 환경변수 꼭 설정해 주세요, 안
-하면 로컬 개발용 기본값이 그대로 살아있어서 비밀번호가 뚫립니다.
+아이디·비밀번호 자체는 코드에 안 넣고 `ANIMA_ADMIN_ID`/`ANIMA_ADMIN_PASSWORD`
+환경변수로만 관리합니다(`proxy.ts`의 `getAdminId()`/`getAdminPassword()`). 배포
+서버에 이 환경변수 꼭 설정해 주세요, 안 하면 로컬 개발용 기본값(`admin`/`12345678`)이
+그대로 살아있어서 뚫립니다.
 
 ---
 

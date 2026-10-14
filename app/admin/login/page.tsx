@@ -9,6 +9,7 @@ import FormField from "@/components/hub/FormField";
 function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,7 +23,7 @@ function AdminLoginForm() {
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ id, password }),
       });
 
       if (!response.ok) {
@@ -47,6 +48,16 @@ function AdminLoginForm() {
       description="팀이 같이 쓰는 비밀번호로 대시보드에 들어갑니다."
     >
       <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-5">
+        <FormField
+          label="아이디"
+          type="text"
+          name="id"
+          placeholder="admin"
+          autoComplete="username"
+          value={id}
+          onChange={(event) => setId(event.target.value)}
+        />
+
         <FormField
           label="비밀번호"
           type="password"

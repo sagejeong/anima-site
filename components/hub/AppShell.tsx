@@ -42,10 +42,12 @@ const NAV_ITEMS: readonly NavItem[] = [
 
 type AppShellProps = {
   children: React.ReactNode;
+  isAdmin: boolean;
 };
 
-// 대시보드 레이아웃(사이드바 + 본문). 공용 비밀번호 로그인(proxy.ts)으로 /dashboard/* 전체가 막혀 있음
-export default function AppShell({ children }: AppShellProps) {
+// 대시보드 레이아웃(사이드바 + 본문). /dashboard(전체 현황)만 공개 데모고,
+// 그 아래 실제 데이터 화면은 proxy.ts가 관리자 로그인으로 막아둠
+export default function AppShell({ children, isAdmin }: AppShellProps) {
   const pathname = usePathname();
   const isNarrowScreen = useIsNarrowScreen();
   // 전체 현황(개요)만 발표용 예시 데이터로 남겨두고, 나머지 전부는 실제 데이터 화면
@@ -84,7 +86,7 @@ export default function AppShell({ children }: AppShellProps) {
     <div className="flex min-h-screen bg-steel font-hub-body text-ink">
       {/* PC에서만 이 컴포넌트가 렌더되므로 사이드바는 항상 보임 */}
       <aside className="flex w-64 shrink-0 flex-col bg-charcoal px-5 py-6">
-        <SidebarContent isActive={isActive} />
+        <SidebarContent isActive={isActive} isAdmin={isAdmin} />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -115,11 +117,16 @@ export default function AppShell({ children }: AppShellProps) {
 
 function SidebarContent({
   isActive,
+  isAdmin,
   onNavigate,
 }: {
   isActive: (href: string) => boolean;
+  isAdmin: boolean;
   onNavigate?: () => void;
 }) {
+  // 일반 회원(비로그인)은 예시 데이터인 전체 현황만 보이고, 실제 데이터 메뉴는 숨김
+  const visibleItems = isAdmin ? NAV_ITEMS : NAV_ITEMS.filter((item) => item.href === "/dashboard");
+
   return (
     <>
       <Link href="/" className="flex items-center gap-2.5 px-1" onClick={onNavigate}>
@@ -127,7 +134,7 @@ function SidebarContent({
       </Link>
 
       <nav className="mt-10 flex flex-col gap-1" aria-label="대시보드 메뉴">
-        {NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const active = isActive(item.href);
           return (
             <Link
@@ -147,8 +154,25 @@ function SidebarContent({
         })}
       </nav>
 
-      <LogoutButton />
+      {isAdmin ? <LogoutButton /> : <AdminLoginLink />}
     </>
+  );
+}
+
+function AdminLoginLink() {
+  return (
+    <Link
+      href="/admin/login"
+      className="mt-auto flex items-center gap-3 rounded-xl bg-primary/5 px-3 py-3 text-left transition-colors hover:bg-primary/10"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
+        관
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-ink">일반 회원</p>
+        <p className="truncate text-xs text-ink/50">관리자 로그인</p>
+      </div>
+    </Link>
   );
 }
 

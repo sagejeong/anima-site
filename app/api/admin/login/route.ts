@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
-import { ADMIN_AUTH_COOKIE, getAdminPassword } from "@/proxy";
+import { ADMIN_AUTH_COOKIE, getAdminId, getAdminPassword } from "@/proxy";
 
 const THIRTY_DAYS_IN_SECONDS = 60 * 60 * 24 * 30;
 
-// 대시보드 공용 비밀번호 확인. 맞으면 쿠키를 심어서 proxy.ts가 통과시키게 함
+// 대시보드 관리자 로그인. 아이디+비밀번호가 맞으면 쿠키를 심어서 proxy.ts가 통과시키게 함
 export async function POST(request: Request) {
-  let body: { password?: string };
+  let body: { id?: string; password?: string };
   try {
     body = await request.json();
   } catch {
@@ -13,8 +13,11 @@ export async function POST(request: Request) {
   }
 
   const expected = getAdminPassword();
-  if (body.password !== expected) {
-    return Response.json({ error: "비밀번호가 올바르지 않습니다." }, { status: 401 });
+  if (body.id !== getAdminId() || body.password !== expected) {
+    return Response.json(
+      { error: "아이디 또는 비밀번호가 올바르지 않습니다." },
+      { status: 401 },
+    );
   }
 
   const cookieStore = await cookies();

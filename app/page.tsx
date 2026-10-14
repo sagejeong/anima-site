@@ -53,7 +53,7 @@ export default function Home() {
                   지금 기침 체크하기
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/dashboard-start"
                   className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink px-7 py-3.5 text-base font-bold text-ink transition-colors hover:bg-ink hover:text-steel"
                 >
                   대시보드 보기

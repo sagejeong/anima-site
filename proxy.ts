@@ -10,9 +10,14 @@ export const USER_UUID_COOKIE = "anima_uid";
 /** 대시보드 공용 비밀번호 확인용 쿠키. 값이 실제 비밀번호와 같을 때만 통과시킴 */
 export const ADMIN_AUTH_COOKIE = "anima_admin_auth";
 
-/** 팀 전체가 같이 쓰는 대시보드 비밀번호. 실서비스 전엔 ANIMA_ADMIN_PASSWORD 환경변수로 바꿔야 함 */
+/** 대시보드 로그인 아이디. 실서비스 전엔 ANIMA_ADMIN_ID 환경변수로 바꿔야 함 */
+export function getAdminId(): string {
+  return process.env.ANIMA_ADMIN_ID ?? "admin";
+}
+
+/** 대시보드 로그인 비밀번호. 실서비스 전엔 ANIMA_ADMIN_PASSWORD 환경변수로 바꿔야 함 */
 export function getAdminPassword(): string {
-  return process.env.ANIMA_ADMIN_PASSWORD ?? "anima2026";
+  return process.env.ANIMA_ADMIN_PASSWORD ?? "12345678";
 }
 
 const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
@@ -36,7 +41,9 @@ export function proxy(request: NextRequest) {
   }
 
   const pathname = request.nextUrl.pathname;
-  const isDashboardPage = pathname.startsWith("/dashboard");
+  // /dashboard(전체 현황)은 예시 데이터만 보여주는 데모라 공개, 그 아래 실제 데이터
+  // 화면(/dashboard/live, /workers 등)만 막음
+  const isDashboardPage = pathname.startsWith("/dashboard/");
   const isAdminApi = ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (isDashboardPage || isAdminApi) {

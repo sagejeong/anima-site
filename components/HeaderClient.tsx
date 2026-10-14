@@ -149,20 +149,22 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
               </button>
             </div>
           ) : (
-            <div className="hidden items-center gap-2 md:flex">
-              <Link
-                href="/login"
-                className="rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary"
-              >
-                로그인
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
-              >
-                회원가입
-              </Link>
-            </div>
+            !isAdminAuthed && (
+              <div className="hidden items-center gap-2 md:flex">
+                <Link
+                  href="/login"
+                  className="rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:text-primary"
+                >
+                  로그인
+                </Link>
+                <Link
+                  href="/signup"
+                  className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
+                >
+                  회원가입
+                </Link>
+              </div>
+            )
           )}
 
           <button
@@ -242,22 +244,24 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
                   </button>
                 </>
               ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={closeMenu}
-                    className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
-                  >
-                    로그인
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={closeMenu}
-                    className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
-                  >
-                    회원가입
-                  </Link>
-                </>
+                !isAdminAuthed && (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={closeMenu}
+                      className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
+                    >
+                      로그인
+                    </Link>
+                    <Link
+                      href="/signup"
+                      onClick={closeMenu}
+                      className="rounded-full border border-line px-4 py-2.5 text-center text-sm font-medium text-ink transition-colors hover:border-primary hover:text-primary"
+                    >
+                      회원가입
+                    </Link>
+                  </>
+                )
               )}
             </div>
           </nav>

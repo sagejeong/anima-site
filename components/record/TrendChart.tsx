@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { RISK_COPY, type RiskLevel, type TrendPoint } from "@/lib/result";
 
 const VIEW_WIDTH = 320;
@@ -25,7 +28,7 @@ function yForPercent(percent: number): number {
   return PLOT_BOTTOM - (clamped / 100) * (PLOT_BOTTOM - PLOT_TOP);
 }
 
-// 순수 표시용 선 그래프. points만 그림, SVG+title뿐이라 클라이언트 컴포넌트 아님.
+// 선 그래프. 점에 마우스를 올리면 그 자리에 퍼센트를 띄워줌.
 // 기록 0~1개일 때도 틀(축·기준선)은 그대로 두고 선·점·평균선만 생략함
 export default function TrendChart({
   points,
@@ -34,6 +37,8 @@ export default function TrendChart({
   points: readonly TrendPoint[];
   average: number;
 }) {
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
   const hasLine = points.length >= 2;
   const xStep = hasLine ? (PLOT_RIGHT - PLOT_LEFT) / (points.length - 1) : 0;
   const xForIndex = (index: number): number =>
@@ -46,12 +51,13 @@ export default function TrendChart({
     : "";
 
   const gridPercents = [0, 50, 75, 100] as const;
+  const hovered = hoverIndex !== null ? points[hoverIndex] : null;
 
   return (
-    <div>
+    <div className="relative">
       <svg
         viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-        className="h-auto w-full"
+        className="h-auto w-full overflow-visible"
         role="img"
         aria-label={
           points.length > 0
@@ -106,20 +112,18 @@ export default function TrendChart({
           </>
         )}
 
-        {/* 데이터 점, 판정 색으로 표시 */}
+        {/* 데이터 점, 판정 색으로 표시. 마우스를 올리면 퍼센트가 뜸 */}
         {points.map((point, index) => (
           <circle
             key={point.time}
             cx={xForIndex(index)}
             cy={yForPercent(point.percent)}
-            r={4}
-            className={`${RISK_FILL[point.risk]} stroke-white`}
+            r={hoverIndex === index ? 6 : 4}
+            className={`${RISK_FILL[point.risk]} stroke-white transition-[r]`}
             strokeWidth={2}
-          >
-            <title>
-              {point.fullDateLabel} · {Math.round(point.percent)}%
-            </title>
-          </circle>
+            onMouseEnter={() => setHoverIndex(index)}
+            onMouseLeave={() => setHoverIndex((current) => (current === index ? null : current))}
+          />
         ))}
 
         {points.length > 0 && (
@@ -145,6 +149,19 @@ export default function TrendChart({
           </>
         )}
       </svg>
+
+      {hovered && hoverIndex !== null && (
+        <div
+          className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-lg bg-ink px-2.5 py-1.5 text-xs font-bold whitespace-nowrap text-steel shadow-lg"
+          style={{
+            left: `${(xForIndex(hoverIndex) / VIEW_WIDTH) * 100}%`,
+            top: `${(yForPercent(hovered.percent) / VIEW_HEIGHT) * 100}%`,
+            marginTop: "-10px",
+          }}
+        >
+          {hovered.fullDateLabel} · {Math.round(hovered.percent)}%
+        </div>
+      )}
 
       <ul className="mt-3 flex items-center justify-center gap-4 text-xs text-ink-soft">
         {(Object.keys(RISK_COPY) as RiskLevel[])

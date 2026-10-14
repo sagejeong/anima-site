@@ -237,8 +237,8 @@ export function describeTrendChange(points: readonly TrendPoint[]): string {
 
   const delta = Math.round(points[points.length - 1].percent - points[0].percent);
 
-  if (delta <= -5) return `최근 며칠 새 ${Math.abs(delta)}%p 낮아졌어요.`;
-  if (delta >= 5) return `최근 며칠 새 ${delta}%p 높아졌어요.`;
+  if (delta <= -5) return `최근 ${Math.abs(delta)}% 낮아졌어요.`;
+  if (delta >= 5) return `최근 ${delta}% 높아졌어요.`;
   return "최근 큰 변화 없이 안정적이에요.";
 }
 

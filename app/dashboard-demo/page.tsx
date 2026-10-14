@@ -80,9 +80,18 @@ export default function DashboardDemoPage() {
             <div className="flex flex-col rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-ink">최근 7일 오후 평균 이탈도</p>
-                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
-                  예시 데이터
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-hub-mono text-sm font-extrabold text-ink">
+                    평균{" "}
+                    {Math.round(
+                      DEMO_WEEKLY_AFTER.reduce((sum, p) => sum + p.average, 0) / DEMO_WEEKLY_AFTER.length,
+                    )}
+                    %
+                  </span>
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
+                    예시 데이터
+                  </span>
+                </div>
               </div>
               <LineChart
                 points={DEMO_WEEKLY_AFTER.map((p) => ({ label: p.date, value: p.average }))}

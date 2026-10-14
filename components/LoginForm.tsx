@@ -54,7 +54,7 @@ export default function LoginForm() {
         return;
       }
 
-      router.push("/record");
+      router.push("/");
       router.refresh();
     } catch {
       setErrors({ form: "네트워크에 연결하지 못했습니다." });

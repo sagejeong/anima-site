@@ -60,7 +60,8 @@ function formatMeasuredPair(measuredAt: string, now: number): { dateTime: string
   if (diffSec < 5) elapsed = "방금";
   else if (diffSec < 60) elapsed = `${diffSec}초 전`;
   else if (diffSec < 3600) elapsed = `${Math.floor(diffSec / 60)}분 전`;
-  else elapsed = `${Math.floor(diffSec / 3600)}시간 전`;
+  else if (diffSec < 86400) elapsed = `${Math.floor(diffSec / 3600)}시간 전`;
+  else elapsed = `${Math.floor(diffSec / 86400)}일 전`;
 
   return { dateTime, elapsed };
 }

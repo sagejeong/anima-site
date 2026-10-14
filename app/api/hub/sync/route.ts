@@ -33,6 +33,8 @@ export async function POST() {
 
       const recordDate = pickRecordDate(record);
       const measuredAt = recordDate ? parseServerDate(recordDate).toISOString() : new Date().toISOString();
+      // 등록 전에 그 사람이 앱으로 녹음해둔 옛 기록(예: 예전 테스트)은 끌어오지 않음
+      if (new Date(measuredAt).getTime() < new Date(worker.registeredAt).getTime()) continue;
       // record_uuid가 없는 경우를 대비해, 없으면 측정 시각으로 대신 중복을 가린다
       // (record_uuid가 없다고 그냥 건너뛰면 새 기록이 계속 무시되는 문제가 있었음)
       const dedupKey = record.record_uuid ?? `ts:${measuredAt}`;

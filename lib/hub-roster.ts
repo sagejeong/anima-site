@@ -140,6 +140,23 @@ export function addWorkerPlaceholder(params: { name: string; team: string }): Ro
   return worker;
 }
 
+/** 상세보기에서 이름·소속·앱 UUID를 고칠 때 씀. 넘긴 필드만 바꾸고 나머지는 그대로 둠 */
+export function updateWorker(
+  id: string,
+  patch: { name?: string; team?: string; userUuid?: string | null },
+): RosterWorker | null {
+  const store = readStore();
+  const worker = store.workers.find((w) => w.id === id);
+  if (!worker) return null;
+
+  if (patch.name !== undefined) worker.name = patch.name;
+  if (patch.team !== undefined) worker.team = patch.team;
+  if (patch.userUuid !== undefined) worker.userUuid = patch.userUuid;
+
+  writeStore(store);
+  return worker;
+}
+
 /** 관리자가 잘못 등록했거나 더 이상 필요 없는 입소자를 명단에서 지울 때 씀. 체크인 기록도 같이 지움 */
 export function removeWorker(id: string): boolean {
   const store = readStore();

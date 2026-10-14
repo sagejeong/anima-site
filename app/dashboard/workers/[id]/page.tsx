@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import LineChart from "@/components/hub/LineChart";
 import StatusPill from "@/components/hub/StatusPill";
+import WorkerEditForm from "@/components/hub/WorkerEditForm";
 import { findWorkerById, listCheckinsForWorker, type CheckinSession } from "@/lib/hub-roster";
 import { formatMeasuredAt } from "@/lib/result";
 
@@ -30,15 +31,7 @@ export default async function WorkerDetailPage({ params }: WorkerDetailPageProps
         ← 입소자 관리
       </Link>
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="font-hub-label text-sm font-bold uppercase tracking-[0.25em] text-ink-soft">
-            {worker.team}
-          </p>
-          <h1 className="mt-1 font-hub-display text-3xl font-black tracking-tight text-ink">{worker.name}</h1>
-          <p className="mt-1 text-xs text-ink-soft">{worker.userUuid ? "본인 폰(앱)과 연결됨" : "아직 첫 체크인 전"}</p>
-        </div>
-      </div>
+      <WorkerEditForm id={worker.id} name={worker.name} team={worker.team} userUuid={worker.userUuid} />
 
       {trend.length >= 2 && (
         <div className="rounded-2xl border border-line bg-steel-surface p-6 sm:p-8">

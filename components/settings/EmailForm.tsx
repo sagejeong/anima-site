@@ -8,18 +8,23 @@ type EmailFormProps = {
   currentEmail: string | null;
 };
 
-type SubmitState = "idle" | "submitting" | "unavailable" | "done";
+type SubmitState = "idle" | "submitting" | "error" | "done";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function EmailForm({ currentEmail }: EmailFormProps) {
   const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<SubmitState>("idle");
 
   const handleSubmit = async (): Promise<void> => {
     if (!EMAIL_PATTERN.test(email)) {
       setError("이메일 형식이 올바르지 않습니다.");
+      return;
+    }
+    if (password === "") {
+      setError("현재 비밀번호를 입력해 주세요.");
       return;
     }
     setError(null);
@@ -29,12 +34,21 @@ export default function EmailForm({ currentEmail }: EmailFormProps) {
       const response = await fetch("/api/account/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recovery_email: email }),
+        body: JSON.stringify({ recovery_email: email, current_password: password }),
       });
-      // 지금은 서버에 이 기능이 없어 항상 실패 분기를 탑니다.
-      setState(response.ok ? "done" : "unavailable");
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        setError(body?.error ?? "변경하지 못했습니다.");
+        setState("error");
+        return;
+      }
+
+      setState("done");
+      setPassword("");
     } catch {
-      setState("unavailable");
+      setError("네트워크에 연결하지 못했습니다.");
+      setState("error");
     }
   };
 
@@ -51,7 +65,7 @@ export default function EmailForm({ currentEmail }: EmailFormProps) {
         비밀번호를 잊었을 때 계정을 되찾는 데만 쓰여요.
       </p>
 
-      <div className="mt-4">
+      <div className="mt-4 space-y-4">
         <TextField
           id="settingsEmail"
           label="새 이메일"
@@ -64,15 +78,22 @@ export default function EmailForm({ currentEmail }: EmailFormProps) {
           }}
           placeholder="example@email.com"
           autoComplete="email"
+        />
+        <TextField
+          id="settingsEmailPassword"
+          label="현재 비밀번호"
+          type="password"
+          value={password}
+          onChange={(value) => {
+            setPassword(value);
+            setError(null);
+            setState("idle");
+          }}
+          autoComplete="current-password"
           error={error ?? undefined}
         />
       </div>
 
-      {state === "unavailable" && (
-        <p className="mt-3 text-sm text-ink-soft">
-          아직 서버에서 지원하지 않는 기능이에요. 곧 지원할 예정이에요.
-        </p>
-      )}
       {state === "done" && (
         <p className="mt-3 text-sm font-medium text-emerald-600">
           이메일이 변경되었습니다.
@@ -82,7 +103,7 @@ export default function EmailForm({ currentEmail }: EmailFormProps) {
       <button
         type="button"
         onClick={() => void handleSubmit()}
-        disabled={state === "submitting" || email === ""}
+        disabled={state === "submitting" || email === "" || password === ""}
         className="mt-5 w-full rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent disabled:opacity-60"
       >
         {state === "submitting" ? "변경하는 중..." : "이메일 변경"}

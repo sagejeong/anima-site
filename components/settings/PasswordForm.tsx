@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { TextField } from "@/components/form/Fields";
+import { isValidSignupPassword } from "@/lib/signup";
 
-type SubmitState = "idle" | "submitting" | "unavailable" | "done";
+type SubmitState = "idle" | "submitting" | "error" | "done";
 
 export default function PasswordForm() {
   const [currentPassword, setCurrentPassword] = useState<string>("");
@@ -13,8 +14,8 @@ export default function PasswordForm() {
   const [state, setState] = useState<SubmitState>("idle");
 
   const handleSubmit = async (): Promise<void> => {
-    if (newPassword.length < 8) {
-      setError("새 비밀번호는 8자 이상이어야 합니다.");
+    if (!isValidSignupPassword(newPassword)) {
+      setError("새 비밀번호는 숫자, 영문, 특수문자를 포함해 8자 이상이어야 합니다.");
       return;
     }
     if (newPassword !== newPasswordConfirm) {
@@ -33,17 +34,21 @@ export default function PasswordForm() {
           new_password: newPassword,
         }),
       });
-      // 지금은 서버에 이 기능이 없어 항상 실패 분기를 탑니다.
-      if (response.ok) {
-        setState("done");
-        setCurrentPassword("");
-        setNewPassword("");
-        setNewPasswordConfirm("");
-      } else {
-        setState("unavailable");
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        setError(body?.error ?? "변경하지 못했습니다.");
+        setState("error");
+        return;
       }
+
+      setState("done");
+      setCurrentPassword("");
+      setNewPassword("");
+      setNewPasswordConfirm("");
     } catch {
-      setState("unavailable");
+      setError("네트워크에 연결하지 못했습니다.");
+      setState("error");
     }
   };
 
@@ -75,7 +80,7 @@ export default function PasswordForm() {
             setNewPassword(value);
             resetStatus();
           }}
-          hint="8자 이상"
+          hint="숫자, 영문, 특수문자 포함 8자 이상"
           autoComplete="new-password"
         />
         <TextField
@@ -92,11 +97,6 @@ export default function PasswordForm() {
         />
       </div>
 
-      {state === "unavailable" && (
-        <p className="mt-3 text-sm text-ink-soft">
-          아직 서버에서 지원하지 않는 기능이에요. 곧 지원할 예정이에요.
-        </p>
-      )}
       {state === "done" && (
         <p className="mt-3 text-sm font-medium text-emerald-600">
           비밀번호가 변경되었습니다.

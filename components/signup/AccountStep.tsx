@@ -1,7 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { TextField } from "@/components/form/Fields";
-import type { FormErrors, SignupFormData } from "@/lib/signup";
+import {
+  USER_ID_PATTERN,
+  isReservedUserId,
+  type FormErrors,
+  type SignupFormData,
+} from "@/lib/signup";
 
 type AccountStepProps = {
   data: SignupFormData;
@@ -12,12 +18,49 @@ type AccountStepProps = {
   ) => void;
 };
 
+type CheckStatus = "idle" | "checking" | "available" | "taken" | "error";
+
+const CHECK_MESSAGES: Record<Exclude<CheckStatus, "idle">, { text: string; className: string }> = {
+  checking: { text: "확인 중...", className: "text-ink-soft" },
+  available: { text: "사용할 수 있는 아이디예요.", className: "text-emerald-600" },
+  taken: { text: "이미 사용 중인 아이디예요.", className: "text-red-600" },
+  error: { text: "확인하지 못했어요. 잠시 후 다시 시도해 주세요.", className: "text-red-600" },
+};
+
 /** 계정 정보 입력 (개인 식별 정보를 받지 않는 ID 기반). 참여 정보 저장 후 선택적으로 노출됩니다. */
 export default function AccountStep({
   data,
   errors,
   onChange,
 }: AccountStepProps) {
+  const [checkStatus, setCheckStatus] = useState<CheckStatus>("idle");
+
+  const handleCheckUserId = async (): Promise<void> => {
+    if (!USER_ID_PATTERN.test(data.userId)) {
+      setCheckStatus("idle");
+      return;
+    }
+    if (isReservedUserId(data.userId)) {
+      setCheckStatus("taken");
+      return;
+    }
+
+    setCheckStatus("checking");
+    try {
+      const response = await fetch(
+        `/api/account/check?user_id=${encodeURIComponent(data.userId)}`,
+      );
+      if (!response.ok) {
+        setCheckStatus("error");
+        return;
+      }
+      const body: { available: boolean } = await response.json();
+      setCheckStatus(body.available ? "available" : "taken");
+    } catch {
+      setCheckStatus("error");
+    }
+  };
+
   return (
     <div>
       <h2 className="text-xl font-bold text-ink sm:text-2xl">
@@ -29,17 +72,32 @@ export default function AccountStep({
       </p>
 
       <div className="mt-6 space-y-5">
-        <TextField
-          id="userId"
-          label="아이디"
-          required
-          value={data.userId}
-          onChange={(value) => onChange("userId", value)}
-          placeholder="animauser"
-          hint="영문 4~20자. 실명이나 생년월일은 피해 주세요."
-          autoComplete="username"
-          error={errors.userId}
-        />
+        <div>
+          <TextField
+            id="userId"
+            label="아이디"
+            required
+            value={data.userId}
+            onChange={(value) => {
+              onChange("userId", value);
+              setCheckStatus("idle");
+            }}
+            placeholder="animauser"
+            hint="영문 4~20자. 실명이나 생년월일은 피해 주세요."
+            autoComplete="username"
+            error={errors.userId}
+            trailingAction={{
+              label: "중복확인",
+              onClick: () => void handleCheckUserId(),
+              disabled: checkStatus === "checking" || data.userId === "",
+            }}
+          />
+          {checkStatus !== "idle" && (
+            <p className={`mt-1.5 text-xs font-medium ${CHECK_MESSAGES[checkStatus].className}`}>
+              {CHECK_MESSAGES[checkStatus].text}
+            </p>
+          )}
+        </div>
 
         <TextField
           id="password"

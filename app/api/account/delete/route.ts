@@ -5,13 +5,18 @@ import {
   readUserUuid,
 } from "@/lib/anima-api";
 
-// 계정+기록 삭제. 2026-08-16 기준 /openapi.json 보면 서버에 /upload, /records/sync,
-// /records, /profile, /account/register, /account/login, /health밖에 없어서
-// 삭제 엔드포인트 자체가 없음. 강민 님한테 따로 만들어달라고 해야 함
-export async function POST() {
+// 계정+기록 삭제. 서버가 본인 확인용으로 현재 비밀번호도 같이 받음
+export async function POST(request: Request) {
   const userUuid = await readUserUuid();
   if (!userUuid) {
     return Response.json({ error: "방문자 정보가 없습니다." }, { status: 400 });
+  }
+
+  let body: { current_password?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "요청 본문을 읽지 못했습니다." }, { status: 400 });
   }
 
   const result = await callAnimaApi<{ ok: boolean }>(
@@ -19,7 +24,7 @@ export async function POST() {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_uuid: userUuid }),
+      body: JSON.stringify({ ...body, user_uuid: userUuid }),
     },
   );
 

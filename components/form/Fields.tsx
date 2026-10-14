@@ -67,6 +67,12 @@ type TextFieldProps = {
   autoComplete?: string;
   min?: number;
   max?: number;
+  /** 입력칸 옆에 버튼을 붙일 때(예: 아이디 중복확인) */
+  trailingAction?: {
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+  };
 };
 
 export function TextField({
@@ -82,36 +88,55 @@ export function TextField({
   autoComplete,
   min,
   max,
+  trailingAction,
 }: TextFieldProps) {
   const [isVisible, setIsVisible] = useState(false);
   const isPassword = type === "password";
 
+  const input = (
+    <div className="relative">
+      <input
+        id={id}
+        type={isPassword && isVisible ? "text" : type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        min={min}
+        max={max}
+        aria-invalid={error ? true : undefined}
+        className={`${inputClass(Boolean(error))} ${isPassword ? "pr-11" : ""}`}
+      />
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setIsVisible((v) => !v)}
+          aria-label={isVisible ? "비밀번호 숨기기" : "비밀번호 보기"}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft transition-colors hover:text-ink"
+        >
+          {isVisible ? <EyeOffIcon /> : <EyeIcon />}
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <Field label={label} htmlFor={id} required={required} hint={hint} error={error}>
-      <div className="relative">
-        <input
-          id={id}
-          type={isPassword && isVisible ? "text" : type}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          min={min}
-          max={max}
-          aria-invalid={error ? true : undefined}
-          className={`${inputClass(Boolean(error))} ${isPassword ? "pr-11" : ""}`}
-        />
-        {isPassword && (
+      {trailingAction ? (
+        <div className="flex gap-2">
+          <div className="flex-1">{input}</div>
           <button
             type="button"
-            onClick={() => setIsVisible((v) => !v)}
-            aria-label={isVisible ? "비밀번호 숨기기" : "비밀번호 보기"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-soft transition-colors hover:text-ink"
+            onClick={trailingAction.onClick}
+            disabled={trailingAction.disabled}
+            className="shrink-0 rounded-xl border border-gray-light px-4 text-sm font-semibold text-ink-soft transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
           >
-            {isVisible ? <EyeOffIcon /> : <EyeIcon />}
+            {trailingAction.label}
           </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        input
+      )}
     </Field>
   );
 }

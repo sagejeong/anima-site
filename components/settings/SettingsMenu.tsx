@@ -3,17 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { TextField } from "@/components/form/Fields";
 
 type SettingsMenuProps = {
   userId: string;
 };
 
-type DeleteState = "idle" | "confirming" | "deleting" | "unavailable";
+type DeleteState = "idle" | "confirming" | "deleting" | "error";
 
 export default function SettingsMenu({ userId }: SettingsMenuProps) {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [deleteState, setDeleteState] = useState<DeleteState>("idle");
+  const [deletePassword, setDeletePassword] = useState<string>("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleLogout = async (): Promise<void> => {
     setIsLoggingOut(true);
@@ -26,18 +29,29 @@ export default function SettingsMenu({ userId }: SettingsMenuProps) {
   };
 
   const handleConfirmDelete = async (): Promise<void> => {
+    if (deletePassword === "") {
+      setDeleteError("현재 비밀번호를 입력해 주세요.");
+      return;
+    }
+    setDeleteError(null);
     setDeleteState("deleting");
     try {
-      const response = await fetch("/api/account/delete", { method: "POST" });
+      const response = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ current_password: deletePassword }),
+      });
       if (response.ok) {
         router.push("/");
         router.refresh();
         return;
       }
-      // 지금은 서버에 삭제 기능이 없어 항상 이 분기를 탑니다.
-      setDeleteState("unavailable");
+      const body = await response.json().catch(() => null);
+      setDeleteError(body?.error ?? "탈퇴하지 못했습니다.");
+      setDeleteState("error");
     } catch {
-      setDeleteState("unavailable");
+      setDeleteError("네트워크에 연결하지 못했습니다.");
+      setDeleteState("error");
     }
   };
 
@@ -74,10 +88,20 @@ export default function SettingsMenu({ userId }: SettingsMenuProps) {
 
       {(deleteState === "confirming" ||
         deleteState === "deleting" ||
-        deleteState === "unavailable") && (
+        deleteState === "error") && (
         <ConfirmDeleteModal
           state={deleteState}
-          onCancel={() => setDeleteState("idle")}
+          password={deletePassword}
+          error={deleteError}
+          onPasswordChange={(value) => {
+            setDeletePassword(value);
+            setDeleteError(null);
+          }}
+          onCancel={() => {
+            setDeleteState("idle");
+            setDeletePassword("");
+            setDeleteError(null);
+          }}
           onConfirm={() => void handleConfirmDelete()}
         />
       )}
@@ -126,10 +150,16 @@ function ChevronIcon() {
 
 function ConfirmDeleteModal({
   state,
+  password,
+  error,
+  onPasswordChange,
   onCancel,
   onConfirm,
 }: {
   state: DeleteState;
+  password: string;
+  error: string | null;
+  onPasswordChange: (value: string) => void;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -145,51 +175,41 @@ function ConfirmDeleteModal({
         className="w-full max-w-sm rounded-2xl bg-steel-surface p-6 text-center shadow-xl"
         onClick={(event) => event.stopPropagation()}
       >
-        {state === "unavailable" ? (
-          <>
-            <h2 className="text-lg font-bold text-ink">
-              아직 준비 중인 기능이에요
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-              계정·기록 삭제는 현재 서버에서 지원하지 않아요. 지금은 로그아웃만
-              가능합니다. 곧 지원할 예정이에요.
-            </p>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="mt-6 w-full rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent"
-            >
-              확인
-            </button>
-          </>
-        ) : (
-          <>
-            <h2 id="delete-account-title" className="text-lg font-bold text-ink">
-              정말 탈퇴하시겠어요?
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-              탈퇴하면 지금까지의 기침 기록이 함께 삭제되며, 되돌릴 수 없어요.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                onClick={onCancel}
-                disabled={state === "deleting"}
-                className="flex-1 rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-line disabled:opacity-60"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={onConfirm}
-                disabled={state === "deleting"}
-                className="flex-1 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-60"
-              >
-                {state === "deleting" ? "탈퇴하는 중..." : "탈퇴하기"}
-              </button>
-            </div>
-          </>
-        )}
+        <h2 id="delete-account-title" className="text-lg font-bold text-ink">
+          정말 탈퇴하시겠어요?
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+          탈퇴하면 지금까지의 기침 기록이 함께 삭제되며, 되돌릴 수 없어요.
+        </p>
+        <div className="mt-5 text-left">
+          <TextField
+            id="deleteAccountPassword"
+            label="현재 비밀번호"
+            type="password"
+            value={password}
+            onChange={onPasswordChange}
+            autoComplete="current-password"
+            error={error ?? undefined}
+          />
+        </div>
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={state === "deleting"}
+            className="flex-1 rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-line disabled:opacity-60"
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={state === "deleting"}
+            className="flex-1 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+          >
+            {state === "deleting" ? "탈퇴하는 중..." : "탈퇴하기"}
+          </button>
+        </div>
       </div>
     </div>
   );

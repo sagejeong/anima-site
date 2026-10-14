@@ -49,8 +49,8 @@ export default function ConsentStep({
             조용한 환경에서 녹음해 주십시오.
           </p>
           <p className="mt-2">
-            ANiMA 프로젝트(한국폴리텍대학 인천캠퍼스 AI융합소프트웨어과)는
-            비침습적 기록 절차로 본 연구를 진행합니다.
+            ANiMA 프로젝트(한국폴리텍대학 인천캠퍼스 AI융합소프트웨어과)에서
+            진행하는 연구입니다.
           </p>
         </section>
 

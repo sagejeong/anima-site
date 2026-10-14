@@ -10,11 +10,13 @@
 문서입니다.
 
 현재 상태 요약:
-- 입소자 체크인(`/checkin`)이든 앱으로 등록한 UUID 기반 실시간 연동(`/dashboard/live`)이든,
+- 입소자 체크인(`/checkin`)이든 앱으로 등록한 UUID 기반 실시간 연동(`/dashboard`)이든,
   FastAPI 분석까지 전부 실제로 동작합니다.
-- 대시보드 메뉴 중 "전체 현황"(`/dashboard`) 하나만 발표용 예시 데이터(`lib/dashboard-demo.ts`)고,
-  나머지(실시간 연동/입소자 관리/알림 이력/보고서)는 전부 실제 데이터만 씁니다.
-- `/dashboard/*`는 공용 비밀번호(`ANIMA_ADMIN_PASSWORD`)로 막혀 있고, 로그인은 `/admin/login`에서.
+- "대시보드 보기"(`/dashboard-start`)를 누르면 둘로 나뉩니다: 더미 데이터만 보는
+  데모버전(`/dashboard-demo`, 로그인 불필요)과, 관리자 로그인 후 실제 팀원 데이터가
+  그대로 쌓이는 진짜 대시보드(`/dashboard`).
+- `/dashboard/*`는 아이디+비밀번호(`ANIMA_ADMIN_ID`/`ANIMA_ADMIN_PASSWORD`)로 막혀 있고,
+  로그인은 `/admin/login`에서.
 - 입소자 명단·체크인 기록은 아직 파일(`lib/hub-roster.ts`)에 저장 중이라 정식 서비스 가기 전에
   DB로 옮겨야 함. 아래 5번에 자세히 적어둠.
 
@@ -65,10 +67,11 @@ CSS 변수가 전부입니다. 화이트 톤 배경 + 브랜드 주황(`--color-
 app/
   page.tsx                   랜딩. 녹음·분석이랑 대시보드 두 실제 기능으로 들어가는 입구
   checkin/                    입소자용 체크인 화면 (본인 폰, 이름 등록 후 오전/오후 녹음)
-  admin/login/                관리자 로그인 (비밀번호 1개, proxy.ts가 쿠키로 검사)
-  dashboard/                  AppShell로 감싼 대시보드 전체
-    page.tsx                    전체 현황 — 여기만 예시 데이터
-    live/                       실시간 연동 — 앱 UUID 등록하면 실제 측정 결과 반영
+  admin/login/                관리자 로그인 (아이디+비밀번호, proxy.ts가 쿠키로 검사)
+  dashboard-start/            "대시보드 보기" 누르면 먼저 오는 선택 화면(데모 / 관리자 로그인)
+  dashboard-demo/             로그인 불필요, 더미 데이터로만 동작 방식을 보여주는 데모
+  dashboard/                  AppShell로 감싼 실제 대시보드 전체, 관리자 로그인 필요
+    page.tsx                    전체현황 — 앱 UUID 등록하면 실제 측정 결과 반영, 예시 데이터 없음
     workers/, workers/[id]/     입소자 등록·관리, 실데이터
     alerts/, reports/           알림 이력 / 보고서, 실데이터
     settings/                   알림 설정 (저장은 안 됨, 데모)
@@ -80,14 +83,14 @@ app/
   api/*                       나머지는 전부 FastAPI 대리 호출용
 components/
   hub/                        대시보드 쪽 전용 컴포넌트
-  dashboard/                  전체 현황(예시 데이터) 실시간 시연 컴포넌트
+  dashboard/                  dashboard-demo 전용 더미 데이터 시연 컴포넌트
   checkin/                    입소자 체크인 녹음기, CoughRecorder 단순화 버전
   record/, signup/, settings/ 기존 소비자 앱 컴포넌트
 lib/
   anima-api.ts                 FastAPI 호출 + 쿠키 처리
   hub-roster.ts                 입소자 명단·체크인 기록 저장 (파일 기반, 5번 참고)
   hub-mock.ts                   랜딩 페이지 예시 화면용 가짜 데이터
-  dashboard-demo.ts             전체 현황 화면용 발표·시연용 데이터
+  dashboard-demo.ts             dashboard-demo 화면용 더미 데이터
   result.ts                     판정 기준, 화면 표시용 계산
 proxy.ts                      미들웨어 — 방문자 UUID 쿠키 발급 + 대시보드 비밀번호 검사
 data/                        hub-roster.ts가 쓰는 JSON (.gitignore 처리, 커밋 안 됨)
@@ -123,7 +126,8 @@ https라 전에 있던 mixed content 문제는 없어졌습니다. 예전 주소
 (`/api/hub/workers`, `/api/hub/sync`, `/api/hub/alerts`)에 들어갈 수 있습니다. FastAPI
 계정 시스템(`/login`, `/signup`)과는 완전히 별개이고, 팀이 같이 쓰는 아이디·비밀번호
 하나입니다. 반대로 `/api/hub/checkin`처럼 입소자 본인이 `/checkin`에서 쓰는 주소는
-이거랑 상관없이 그대로 열려 있어야 해서 안 막았습니다.
+이거랑 상관없이 그대로 열려 있어야 해서 안 막았습니다. 로그인 없이도 더미
+데이터로 동작 방식만 보는 `/dashboard-demo`는 이 검사 대상이 아니라 늘 공개입니다.
 
 아이디·비밀번호 자체는 코드에 안 넣고 `ANIMA_ADMIN_ID`/`ANIMA_ADMIN_PASSWORD`
 환경변수로만 관리합니다(`proxy.ts`의 `getAdminId()`/`getAdminPassword()`). 배포
@@ -155,7 +159,7 @@ PC 기준으로 짰고, 1024px보다 좁은 화면에서는 `components/hub/AppS
   → app/dashboard/*가 읽어서 보여줌
 ```
 
-실시간 연동 흐름(앱 UUID 등록 방식)은 조금 다릅니다. 관리자가 `/dashboard/live`나
+실시간 연동 흐름(앱 UUID 등록 방식)은 조금 다릅니다. 관리자가 `/dashboard`나
 `/dashboard/workers`에서 이름 + 앱에서 복사한 UUID로 등록해두면, `/api/hub/sync`가
 몇 초마다 FastAPI의 `/records` 기록을 조회해서 새로 생긴 것만 가져옵니다. 앱 쪽
 코드를 안 건드리고 기존 FastAPI 조회 API만으로 실시간처럼 보이게 만든 거라, 별도
@@ -171,10 +175,10 @@ PC 기준으로 짰고, 1024px보다 좁은 화면에서는 `components/hub/AppS
 서비스 전에는 DB로 옮겨야 합니다(FastAPI 쪽에 테이블 추가하거나 별도 DB). 지금은
 "서버 연동 자체는 진짜 되는지" 보여주려고 임시로 쓰는 구조입니다.
 
-"전체 현황"(`/dashboard`) 화면만 `lib/dashboard-demo.ts` 예시 데이터를 씁니다. 실제
-체크인 기록이랑은 완전히 분리돼 있고 화면에 "예시 데이터" 배지가 붙어 있습니다.
-나머지 대시보드 화면(실시간 연동/입소자 관리/알림 이력/보고서)은 전부
-`lib/hub-roster.ts`에 실제로 저장된 데이터만 보여줍니다.
+관리자 로그인 후 보는 대시보드 전체(전체현황/입소자 관리/알림 이력/보고서)가
+예시 데이터 없이 `lib/hub-roster.ts`에 실제로 저장된 데이터만 보여줍니다(데모버전인
+`/dashboard-demo`만 예외). 2026-10월부터 팀원들이
+직접 앱을 설치해 녹음하면서 이 데이터를 채우고 있습니다.
 
 ---
 
@@ -201,5 +205,5 @@ PC 기준으로 짰고, 1024px보다 좁은 화면에서는 `components/hub/AppS
 - 판정 기준(양호/주의/경고)은 `lib/result.ts`에 있고, 개인 기준선이 아니라 COUGHVID
   기반 healthy 분포(`p50=5.5149`, `p75=6.6988`)를 씁니다. 화면에는 원거리 값 대신
   0~100% 환산값만 보여줍니다.
-- 랜딩 페이지 기능 쇼케이스랑 "전체 현황" 화면만 예시 데이터고, 나머지 대시보드는
-  전부 실데이터라는 거 다시 한번 — 헷갈리기 쉬운 부분이라 적어둠.
+- 랜딩 페이지 기능 쇼케이스랑 `/dashboard-demo`만 예시 데이터고, 관리자 로그인 후
+  보는 `/dashboard/*`는 전부 실데이터라는 거 다시 한번 — 헷갈리기 쉬운 부분이라 적어둠.

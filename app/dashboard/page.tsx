@@ -1,21 +1,189 @@
-import LiveDashboard from "@/components/dashboard/LiveDashboard";
-import LineChart from "@/components/hub/LineChart";
-import { DEMO_TODAY_SESSIONS, DEMO_WEEKLY_AFTER } from "@/lib/dashboard-demo";
+"use client";
 
-// 발표용 대시보드 개요. hub-roster 실 체크인과 분리된 예시 데이터, 배지로 계속 표시
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import LineChart from "@/components/hub/LineChart";
+import StatusPill from "@/components/hub/StatusPill";
+import { BellIcon, PeopleIcon, ShieldIcon, WarningIcon } from "@/components/hub/icons";
+import type { Checkin, CheckinStatus, RosterWorker } from "@/lib/hub-roster";
+import { parseServerDate } from "@/lib/result";
+
+type WorkerRow = RosterWorker & { latest: Checkin | null };
+
+type Alert = {
+  id: string;
+  workerId: string;
+  name: string;
+  team: string;
+  percent: number;
+  status: CheckinStatus;
+  when: string;
+};
+
+type LiveStats = {
+  today: {
+    morning: number | null;
+    afternoon: number | null;
+    morningCount: number;
+    afternoonCount: number;
+  };
+  weekly: { date: string; average: number }[];
+};
+
+const EMPTY_STATS: LiveStats = {
+  today: { morning: null, afternoon: null, morningCount: 0, afternoonCount: 0 },
+  weekly: [],
+};
+
+const POLL_MS = 3000;
+const FLASH_MS = 10000;
+const MAX_ALERTS = 8;
+
+function sortByLatest(rows: readonly WorkerRow[]): WorkerRow[] {
+  return [...rows].sort((a, b) => {
+    const aTime = a.latest ? new Date(a.latest.measuredAt).getTime() : 0;
+    const bTime = b.latest ? new Date(b.latest.measuredAt).getTime() : 0;
+    return bTime - aTime;
+  });
+}
+
+// 날짜+시각(평소 굵기)과 "n초/분 전"(굵게, now가 매초 갱신되면서 같이 움직임)을 따로 반환
+function formatMeasuredPair(measuredAt: string, now: number): { dateTime: string; elapsed: string } {
+  const date = parseServerDate(measuredAt);
+  const mm = date.getMonth() + 1;
+  const dd = date.getDate();
+  const hh = date.getHours().toString().padStart(2, "0");
+  const mi = date.getMinutes().toString().padStart(2, "0");
+  const dateTime = `${mm}/${dd} ${hh}:${mi}`;
+
+  const diffSec = Math.max(0, Math.floor((now - date.getTime()) / 1000));
+  let elapsed: string;
+  if (diffSec < 5) elapsed = "방금";
+  else if (diffSec < 60) elapsed = `${diffSec}초 전`;
+  else if (diffSec < 3600) elapsed = `${Math.floor(diffSec / 60)}분 전`;
+  else elapsed = `${Math.floor(diffSec / 3600)}시간 전`;
+
+  return { dateTime, elapsed };
+}
+
+// 실시간 현황. 예시 데이터 없이, 등록된 팀원의 앱 UUID로 FastAPI 기록을 주기적으로
+// 끌어와서 KPI·실시간 목록·이상 감지를 그 데이터로만 채움. 팀원 등록은 입소자 관리에서
 export default function DashboardOverviewPage() {
+  const [rows, setRows] = useState<readonly WorkerRow[]>([]);
+  const [alerts, setAlerts] = useState<readonly Alert[]>([]);
+  const [stats, setStats] = useState<LiveStats>(EMPTY_STATS);
+  const [isLoading, setIsLoading] = useState(true);
+  const [flashId, setFlashId] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  const latestIdsRef = useRef<Map<string, string>>(new Map());
+  const alertSeqRef = useRef(0);
+  const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const prevTops = useRef<Map<string, number>>(new Map());
+
+  const applyRows = (next: WorkerRow[]) => {
+    const sorted = sortByLatest(next);
+    const newAlerts: Alert[] = [];
+
+    for (const row of sorted) {
+      const prevLatestId = latestIdsRef.current.get(row.id);
+      const currentLatestId = row.latest?.id;
+      if (currentLatestId && currentLatestId !== prevLatestId) {
+        setFlashId(row.id);
+        window.setTimeout(() => setFlashId((cur) => (cur === row.id ? null : cur)), FLASH_MS);
+
+        if (row.latest && row.latest.status && row.latest.status !== "양호" && prevLatestId !== undefined) {
+          alertSeqRef.current += 1;
+          newAlerts.push({
+            id: `a-${alertSeqRef.current}`,
+            workerId: row.id,
+            name: row.name,
+            team: row.team,
+            percent: row.latest.percent ?? 0,
+            status: row.latest.status,
+            when: "방금",
+          });
+        }
+      }
+      if (currentLatestId) latestIdsRef.current.set(row.id, currentLatestId);
+    }
+
+    if (newAlerts.length > 0) {
+      setAlerts((prev) => [...newAlerts, ...prev].slice(0, MAX_ALERTS));
+    }
+    setRows(sorted);
+  };
+
+  const loadRows = async () => {
+    const res = await fetch("/api/hub/workers");
+    const body: { workers: WorkerRow[]; stats?: LiveStats } = await res.json();
+    const liveRows = body.workers.filter((w) => w.userUuid);
+    // 처음 불러올 때는 "새 기록" 알림을 띄우지 않고, 현재 상태만 기준점으로 잡아둠
+    for (const row of liveRows) {
+      if (row.latest?.id) latestIdsRef.current.set(row.id, row.latest.id);
+    }
+    setRows(sortByLatest(liveRows));
+    if (body.stats) setStats(body.stats);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    void loadRows();
+
+    const timer = window.setInterval(async () => {
+      const res = await fetch("/api/hub/sync", { method: "POST" });
+      if (!res.ok) return;
+      const body: { workers: WorkerRow[]; stats?: LiveStats } = await res.json();
+      applyRows(body.workers.filter((w) => w.userUuid));
+      if (body.stats) setStats(body.stats);
+    }, POLL_MS);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const tick = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(tick);
+  }, []);
+
+  useLayoutEffect(() => {
+    const nextTops = new Map<string, number>();
+    nodeRefs.current.forEach((el, id) => nextTops.set(id, el.getBoundingClientRect().top));
+
+    nodeRefs.current.forEach((el, id) => {
+      const prevTop = prevTops.current.get(id);
+      const nextTop = nextTops.get(id);
+      if (prevTop === undefined || nextTop === undefined) return;
+      const delta = prevTop - nextTop;
+      if (!delta) return;
+
+      el.style.transition = "none";
+      el.style.transform = `translateY(${delta}px)`;
+      requestAnimationFrame(() => {
+        el.style.transition = "transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+        el.style.transform = "";
+      });
+    });
+
+    prevTops.current = nextTops;
+  }, [rows]);
+
+  const counts: Record<CheckinStatus, number> = { 양호: 0, 주의: 0, 경고: 0 };
+  for (const row of rows) {
+    if (row.latest?.status) counts[row.latest.status] += 1;
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div>
         <p className="font-hub-label text-sm font-bold uppercase tracking-[0.25em] text-ink-soft">
-          전체 현황
+          전체현황
         </p>
         <h1 className="mt-1 font-hub-display text-3xl font-black tracking-tight text-ink">
-          지금 시설은 이렇습니다
+          지금 연동된 팀원은 이렇습니다
         </h1>
         <p className="mt-1 text-sm text-ink-soft">
-          예시 데이터로 동작 방식을 보여주는 화면입니다. 실제 서비스에서는 입소자들이 본인 폰으로
-          체크인한 결과가 여기 그대로 쌓입니다.
+          예시 데이터가 아니라 실제 기록입니다. 등록한 사람이 ANiMA 앱에서 기침을 녹음하면 몇 초
+          안에 그대로 반영됩니다.
         </p>
       </div>
 
@@ -23,40 +191,140 @@ export default function DashboardOverviewPage() {
         <div className="rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-ink">오늘 오전 → 오후</p>
-            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
-              예시 데이터
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
+              <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+              LIVE
             </span>
           </div>
-          <div className="mt-5 flex items-center justify-center gap-6">
-            <BigStat
-              label={`오전 체크 (${DEMO_TODAY_SESSIONS.beforeCount}명)`}
-              value={DEMO_TODAY_SESSIONS.before}
-            />
-            <span className="text-2xl text-ink-soft" aria-hidden="true">
-              →
-            </span>
-            <BigStat
-              label={`오후 체크 (${DEMO_TODAY_SESSIONS.afterCount}명)`}
-              value={DEMO_TODAY_SESSIONS.after}
-            />
-          </div>
+          {stats.today.morning === null && stats.today.afternoon === null ? (
+            <p className="mt-6 text-sm text-ink-soft">오늘 측정된 기록이 아직 없습니다.</p>
+          ) : (
+            <div className="mt-5 flex items-center justify-center gap-6">
+              <BigStat label={`오전 (${stats.today.morningCount}건)`} value={stats.today.morning} />
+              <span className="text-2xl text-ink-soft" aria-hidden="true">
+                →
+              </span>
+              <BigStat label={`오후 (${stats.today.afternoonCount}건)`} value={stats.today.afternoon} />
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-line bg-steel-surface p-5 sm:p-6">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-ink">최근 7일 오후 평균 이탈도</p>
-            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
-              예시 데이터
+            <p className="text-sm font-bold text-ink">최근 7일 평균 이탈도</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
+              <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+              LIVE
             </span>
           </div>
-          <LineChart
-            points={DEMO_WEEKLY_AFTER.map((p) => ({ label: p.date, value: p.average }))}
-            className="mt-5"
-          />
+          {stats.weekly.length < 2 ? (
+            <p className="mt-6 text-sm text-ink-soft">추이를 보려면 며칠 더 데이터가 쌓여야 합니다.</p>
+          ) : (
+            <LineChart
+              points={stats.weekly.map((p) => ({ label: p.date.slice(5), value: p.average }))}
+              className="mt-5"
+            />
+          )}
         </div>
       </div>
 
-      <LiveDashboard />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <KpiTile label="연동 인원" value={rows.length} icon={PeopleIcon} />
+        <KpiTile label="양호" value={counts.양호} tone="양호" icon={ShieldIcon} />
+        <KpiTile label="주의" value={counts.주의} tone="주의" icon={WarningIcon} />
+        <KpiTile label="경고" value={counts.경고} tone="경고" icon={BellIcon} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="overflow-hidden rounded-2xl border border-line bg-steel-surface lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
+            <p className="text-sm font-bold text-ink">입소자 실시간 현황</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-good/10 px-2.5 py-1 text-[10px] font-bold text-good">
+              <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
+              LIVE
+            </span>
+          </div>
+
+          {isLoading ? (
+            <p className="px-5 py-8 text-center text-sm text-ink-soft">불러오는 중...</p>
+          ) : rows.length === 0 ? (
+            <div className="px-5 py-10 text-center">
+              <p className="font-hub-display text-lg font-extrabold text-ink">
+                연동된 팀원이 없습니다
+              </p>
+              <p className="mt-2 text-sm text-ink-soft">
+                입소자 관리에서 이름·소속과 앱 UUID를 등록하면, 그 사람이 앱으로 녹음한 결과가
+                여기 실시간으로 쌓입니다.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col divide-y divide-line px-2">
+              {rows.map((row) => {
+                const measured = row.latest ? formatMeasuredPair(row.latest.measuredAt, now) : null;
+                return (
+                  <div
+                    key={row.id}
+                    ref={(el) => {
+                      if (el) nodeRefs.current.set(row.id, el);
+                      else nodeRefs.current.delete(row.id);
+                    }}
+                    className={`flex items-center justify-between gap-3 px-3 py-4 transition-colors duration-500 ${
+                      flashId === row.id ? "bg-critical/10" : ""
+                    }`}
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-ink">{row.name}</p>
+                      <p className="text-xs text-ink-soft">
+                        {row.team}
+                        {measured && (
+                          <>
+                            {" · "}
+                            {measured.dateTime}
+                            {" · "}
+                            <span className="font-bold text-ink">{measured.elapsed}</span>
+                          </>
+                        )}
+                        {!measured && " · 측정 전"}
+                      </p>
+                    </div>
+                    {row.latest?.status ? (
+                      <div className="flex items-center gap-2.5">
+                        <span className="font-hub-mono text-sm font-semibold tabular-nums text-ink-soft">
+                          {row.latest.percent}%
+                        </span>
+                        <StatusPill status={row.latest.status} />
+                      </div>
+                    ) : (
+                      <span className="text-xs text-ink-soft">측정 전</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-steel-surface p-5">
+          <p className="text-sm font-bold text-ink">최근 이상 감지</p>
+          {alerts.length === 0 ? (
+            <p className="text-sm text-ink-soft">아직 주의·경고 기록이 없습니다.</p>
+          ) : (
+            <ul className="flex flex-col gap-2.5">
+              {alerts.map((alert) => (
+                <li key={alert.id} className="rounded-xl border border-line px-3.5 py-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-bold text-ink">{alert.name}</p>
+                    <StatusPill status={alert.status} />
+                  </div>
+                  <p className="mt-1 text-xs text-ink-soft">
+                    {alert.team} · {alert.percent}% · {alert.when}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -68,6 +336,40 @@ function BigStat({ label, value }: { label: string; value: number | null }) {
         {value === null ? "—" : `${value}%`}
       </p>
       <p className="mt-1 text-xs font-semibold text-ink-soft">{label}</p>
+    </div>
+  );
+}
+
+function KpiTile({
+  label,
+  value,
+  tone,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  tone?: CheckinStatus;
+  icon: (props: { className?: string }) => React.ReactElement;
+}) {
+  const toneClass: Record<CheckinStatus, string> = {
+    양호: "text-good bg-good/10",
+    주의: "text-caution bg-caution/10",
+    경고: "text-critical bg-critical/10",
+  };
+
+  return (
+    <div className="rounded-2xl border border-line bg-steel-surface px-5 py-5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">{label}</p>
+        <span
+          className={`flex h-8 w-8 items-center justify-center rounded-full ${
+            tone ? toneClass[tone] : "bg-ink/5 text-ink-soft"
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+        </span>
+      </div>
+      <p className="mt-3 font-hub-label text-4xl font-extrabold tabular-nums text-ink">{value}</p>
     </div>
   );
 }

@@ -126,7 +126,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2">
-                  <Link href="/dashboard" className="group inline-flex items-center gap-2 font-bold text-primary">
+                  <Link href="/dashboard-start" className="group inline-flex items-center gap-2 font-bold text-primary">
                     대시보드 열어보기
                     <ArrowIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>

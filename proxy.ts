@@ -41,9 +41,7 @@ export function proxy(request: NextRequest) {
   }
 
   const pathname = request.nextUrl.pathname;
-  // /dashboard(전체 현황)은 예시 데이터만 보여주는 데모라 공개, 그 아래 실제 데이터
-  // 화면(/dashboard/live, /workers 등)만 막음
-  const isDashboardPage = pathname.startsWith("/dashboard/");
+  const isDashboardPage = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const isAdminApi = ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (isDashboardPage || isAdminApi) {

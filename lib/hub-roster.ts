@@ -169,6 +169,14 @@ export function removeWorker(id: string): boolean {
   return true;
 }
 
+/** 전체 명단 비우기. 테스트 중 등록한 걸 한 번에 정리할 때 씀 */
+export function clearAllWorkers(): number {
+  const store = readStore();
+  const count = store.workers.length;
+  writeStore({ workers: [], checkins: [] });
+  return count;
+}
+
 export function addCheckin(entry: Omit<Checkin, "id">): Checkin {
   const store = readStore();
   const checkin: Checkin = { id: makeId("c"), ...entry };

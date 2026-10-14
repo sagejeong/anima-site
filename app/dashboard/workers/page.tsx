@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { TextField } from "@/components/form/Fields";
 import StatusPill from "@/components/hub/StatusPill";
 import type { Checkin, RosterWorker } from "@/lib/hub-roster";
 
 type WorkerRow = RosterWorker & { latest: Checkin | null };
+
+type ClearAllState = "idle" | "confirming" | "clearing";
 
 // 입소자 관리. 예시 데이터 없음, 실제 등록된 명단만 관리. 앱 UUID를 붙이면
 // 그 사람이 앱으로 녹음한 기록이 실시간 연동으로 자동 반영됨
@@ -18,6 +21,10 @@ export default function WorkersPage() {
   const [userUuid, setUserUuid] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [clearAllState, setClearAllState] = useState<ClearAllState>("idle");
+  const [clearAllPassword, setClearAllPassword] = useState("");
+  const [clearAllError, setClearAllError] = useState<string | null>(null);
 
   const loadWorkers = () => {
     fetch("/api/hub/workers")
@@ -69,14 +76,35 @@ export default function WorkersPage() {
     }
   };
 
-  const handleClearAll = async () => {
-    if (workers.length === 0) return;
-    if (!window.confirm(`전체 명단 ${workers.length}명을 다 지울까요? 테스트하면서 등록된 걸 한 번에 정리할 때 씁니다.`)) {
+  const handleConfirmClearAll = async (): Promise<void> => {
+    if (clearAllPassword === "") {
+      setClearAllError("로그인 비밀번호를 입력해 주세요.");
       return;
     }
-    setIsLoading(true);
-    await Promise.all(workers.map((worker) => fetch(`/api/hub/workers/${worker.id}`, { method: "DELETE" })));
-    loadWorkers();
+    setClearAllError(null);
+    setClearAllState("clearing");
+
+    try {
+      const response = await fetch("/api/hub/workers/clear-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: clearAllPassword }),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        setClearAllError(body?.error ?? "비우지 못했습니다.");
+        setClearAllState("confirming");
+        return;
+      }
+
+      setClearAllState("idle");
+      setClearAllPassword("");
+      loadWorkers();
+    } catch {
+      setClearAllError("네트워크에 연결하지 못했습니다.");
+      setClearAllState("confirming");
+    }
   };
 
   return (
@@ -90,15 +118,15 @@ export default function WorkersPage() {
             등록 · 배정 관리
           </h1>
           <p className="mt-2 max-w-xl text-sm text-ink-soft">
-            예시 데이터가 아니라 실제로 저장되는 명단입니다. 개발 과정에서 테스트로 등록한
-            항목이 섞여 있을 수 있어요, 아래 "전체 비우기"로 언제든 정리할 수 있습니다.
+            실제로 저장된 명단입니다. &ldquo;전체비우기&rdquo;로 언제든 명단을
+            정리할 수 있습니다.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {workers.length > 0 && (
             <button
               type="button"
-              onClick={() => void handleClearAll()}
+              onClick={() => setClearAllState("confirming")}
               className="inline-flex items-center justify-center rounded-full border border-line px-4 py-2.5 text-sm font-bold text-ink-soft transition-colors hover:border-critical hover:text-critical"
             >
               전체 비우기
@@ -223,6 +251,94 @@ export default function WorkersPage() {
             </p>
           </div>
         )}
+      </div>
+
+      {(clearAllState === "confirming" || clearAllState === "clearing") && (
+        <ClearAllModal
+          state={clearAllState}
+          count={workers.length}
+          password={clearAllPassword}
+          error={clearAllError}
+          onPasswordChange={(value) => {
+            setClearAllPassword(value);
+            setClearAllError(null);
+          }}
+          onCancel={() => {
+            setClearAllState("idle");
+            setClearAllPassword("");
+            setClearAllError(null);
+          }}
+          onConfirm={() => void handleConfirmClearAll()}
+        />
+      )}
+    </div>
+  );
+}
+
+function ClearAllModal({
+  state,
+  count,
+  password,
+  error,
+  onPasswordChange,
+  onCancel,
+  onConfirm,
+}: {
+  state: ClearAllState;
+  count: number;
+  password: string;
+  error: string | null;
+  onPasswordChange: (value: string) => void;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 p-5"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="clear-all-title"
+      onClick={onCancel}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl bg-steel-surface p-6 text-center shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h2 id="clear-all-title" className="text-lg font-bold text-ink">
+          전체 명단 {count}명을 다 지울까요?
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+          등록된 입소자와 체크인 기록이 모두 삭제되며, 되돌릴 수 없습니다.
+        </p>
+        <div className="mt-5 text-left">
+          <TextField
+            id="clearAllPassword"
+            label="로그인 비밀번호"
+            type="password"
+            value={password}
+            onChange={onPasswordChange}
+            autoComplete="current-password"
+            error={error ?? undefined}
+          />
+        </div>
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={state === "clearing"}
+            className="flex-1 rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-line disabled:opacity-60"
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={state === "clearing"}
+            className="flex-1 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+          >
+            {state === "clearing" ? "비우는 중..." : "전체 비우기"}
+          </button>
+        </div>
       </div>
     </div>
   );

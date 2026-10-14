@@ -48,7 +48,7 @@ export default function AccountStep({
           required
           value={data.password}
           onChange={(value) => onChange("password", value)}
-          hint="8자 이상"
+          hint="영문 포함 8자 이상"
           autoComplete="new-password"
           error={errors.password}
         />

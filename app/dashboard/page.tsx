@@ -247,9 +247,9 @@ export default function DashboardOverviewPage() {
             {stats.today.morning === null && stats.today.afternoon === null ? (
               <p className="text-sm text-ink-soft">오늘 측정된 기록이 아직 없습니다.</p>
             ) : (
-              <div className="flex items-center justify-center gap-6">
+              <div className="flex items-center justify-center gap-3 sm:gap-6">
                 <BigStat label={`오전 (${stats.today.morningCount}건)`} value={stats.today.morning} />
-                <span className="text-2xl text-ink-soft" aria-hidden="true">
+                <span className="text-xl text-ink-soft sm:text-2xl" aria-hidden="true">
                   →
                 </span>
                 <BigStat label={`오후 (${stats.today.afternoonCount}건)`} value={stats.today.afternoon} />
@@ -388,7 +388,7 @@ export default function DashboardOverviewPage() {
 function BigStat({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="text-center">
-      <p className="font-hub-label text-4xl font-black tabular-nums text-ink">
+      <p className="font-hub-label text-3xl font-black tabular-nums text-ink sm:text-4xl">
         {value === null ? "—" : `${value}%`}
       </p>
       <p className="mt-1 text-xs font-semibold text-ink-soft">{label}</p>

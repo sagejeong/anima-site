@@ -15,31 +15,31 @@ export const metadata: Metadata = {
 export default function DashboardDemoPage() {
   return (
     <div className="min-h-screen bg-steel font-hub-body text-ink">
-      <header className="flex items-center justify-between border-b border-line bg-steel-surface px-5 py-4 sm:px-8">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-steel-surface px-5 py-4 sm:px-8">
         <Link href="/" className="flex items-center gap-2.5">
           <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
-        </Link>
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary">
+          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
             DEMO
           </span>
+        </Link>
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-full border border-line px-3.5 py-2 text-sm font-bold text-ink-soft transition-colors hover:border-ink hover:text-ink"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-2 text-sm font-bold text-ink-soft transition-colors hover:border-ink hover:text-ink"
           >
             <HomeIcon className="h-4 w-4" />
-            홈으로
+            <span className="hidden sm:inline">홈으로</span>
           </Link>
           <Link
             href="/admin/login"
-            className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-3.5 py-2 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 sm:px-4"
           >
             관리자 로그인
           </Link>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8">
+      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-8">
         <div className="mx-auto flex w-full flex-col gap-6">
           <div>
             <p className="font-hub-label text-sm font-bold uppercase tracking-[0.25em] text-ink-soft">
@@ -62,12 +62,12 @@ export default function DashboardDemoPage() {
                   예시 데이터
                 </span>
               </div>
-              <div className="flex flex-1 items-center justify-center gap-6">
+              <div className="flex flex-1 items-center justify-center gap-3 sm:gap-6">
                 <BigStat
                   label={`오전 체크 (${DEMO_TODAY_SESSIONS.beforeCount}명)`}
                   value={DEMO_TODAY_SESSIONS.before}
                 />
-                <span className="text-2xl text-ink-soft" aria-hidden="true">
+                <span className="text-xl text-ink-soft sm:text-2xl" aria-hidden="true">
                   →
                 </span>
                 <BigStat
@@ -110,7 +110,7 @@ export default function DashboardDemoPage() {
 function BigStat({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="text-center">
-      <p className="font-hub-label text-4xl font-black tabular-nums text-ink">
+      <p className="font-hub-label text-3xl font-black tabular-nums text-ink sm:text-4xl">
         {value === null ? "—" : `${value}%`}
       </p>
       <p className="mt-1 text-xs font-semibold text-ink-soft">{label}</p>

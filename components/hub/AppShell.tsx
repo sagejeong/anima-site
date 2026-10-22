@@ -6,23 +6,37 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BellIcon, ChartIcon, GearIcon, GridIcon, HomeIcon, PeopleIcon } from "@/components/hub/icons";
 
+type ScreenMode = "blocked" | "compact" | "full";
+
 /**
- * 대시보드는 표·실시간 목록 위주로 PC 화면 기준으로 설계돼 있어서, 작은
- * 화면에서는 억지로 욱여넣는 대신 안내만 보여줌. children(각 페이지)을
+ * 대시보드는 표·실시간 목록이 많아 폰 폭(640 미만)에서는 안내만 보여줌. 640~1023은
+ * 노트북 창을 꽉 안 채웠을 때 흔히 걸리는 구간이라 막지 않고, 사이드바를 아이콘만
+ * 남는 좁은 폭으로 줄여서 본문 공간을 확보함(compact). children을 블록 상태에서는
  * 아예 마운트 안 해서, 휴대폰에서 폴링 같은 불필요한 요청도 안 나가게 함.
  */
-function useIsNarrowScreen(): boolean | null {
-  const [isNarrow, setIsNarrow] = useState<boolean | null>(null);
+function useScreenMode(): ScreenMode | null {
+  const [mode, setMode] = useState<ScreenMode | null>(null);
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1023px)");
-    const update = () => setIsNarrow(mq.matches);
+    const blockedQuery = window.matchMedia("(max-width: 639px)");
+    const compactQuery = window.matchMedia("(min-width: 640px) and (max-width: 1023px)");
+
+    const update = () => {
+      if (blockedQuery.matches) setMode("blocked");
+      else if (compactQuery.matches) setMode("compact");
+      else setMode("full");
+    };
+
     update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    blockedQuery.addEventListener("change", update);
+    compactQuery.addEventListener("change", update);
+    return () => {
+      blockedQuery.removeEventListener("change", update);
+      compactQuery.removeEventListener("change", update);
+    };
   }, []);
 
-  return isNarrow;
+  return mode;
 }
 
 type NavItem = {
@@ -46,17 +60,17 @@ type AppShellProps = {
 // 대시보드 레이아웃(사이드바 + 본문). 공용 비밀번호 로그인(proxy.ts)으로 /dashboard/* 전체가 막혀 있음
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const isNarrowScreen = useIsNarrowScreen();
+  const mode = useScreenMode();
 
   const isActive = (href: string): boolean =>
     href === "/dashboard" ? pathname === href : pathname.startsWith(href);
 
-  if (isNarrowScreen === null) {
+  if (mode === null) {
     // 화면 폭을 아직 확인 전. 깜빡임 없이 그냥 비워둠(아주 잠깐)
     return <div className="min-h-screen bg-steel" />;
   }
 
-  if (isNarrowScreen) {
+  if (mode === "blocked") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-steel px-6 text-center font-hub-body">
         <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-7 w-auto" />
@@ -77,26 +91,28 @@ export default function AppShell({ children }: AppShellProps) {
     );
   }
 
+  const isCompact = mode === "compact";
+
   return (
     <div className="flex min-h-screen bg-steel font-hub-body text-ink">
-      {/* PC에서만 이 컴포넌트가 렌더되므로 사이드바는 항상 보임 */}
-      <aside className="flex w-64 shrink-0 flex-col bg-charcoal px-5 py-6">
-        <SidebarContent isActive={isActive} />
+      {/* compact(640~1023)는 아이콘만 남는 좁은 레일로, 본문에 공간을 더 줌 */}
+      <aside className={`flex shrink-0 flex-col bg-charcoal py-6 ${isCompact ? "w-16 items-center px-2" : "w-64 px-5"}`}>
+        <SidebarContent isActive={isActive} compact={isCompact} />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-line bg-steel-surface px-5 sm:px-8">
-          <span className="text-sm font-semibold text-ink-soft">
+        <header className="flex h-16 items-center justify-between gap-3 border-b border-line bg-steel-surface px-5 sm:px-8">
+          <span className="hidden truncate text-sm font-semibold text-ink-soft md:inline">
             실제 등록된 입소자의 데이터만 보여주는 화면입니다
           </span>
 
-          <span className="inline-flex items-center gap-2 rounded-full bg-good/10 px-3 py-1.5 text-xs font-bold text-good">
+          <span className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full bg-good/10 px-3 py-1.5 text-xs font-bold text-good">
             <span className="h-1.5 w-1.5 rounded-full bg-good" aria-hidden="true" />
             LIVE
           </span>
         </header>
 
-        <main className="flex-1 px-5 py-8 sm:px-8 sm:py-10">{children}</main>
+        <main className="flex-1 overflow-x-auto px-5 py-8 sm:px-8 sm:py-10">{children}</main>
       </div>
     </div>
   );
@@ -105,26 +121,37 @@ export default function AppShell({ children }: AppShellProps) {
 function SidebarContent({
   isActive,
   onNavigate,
+  compact = false,
 }: {
   isActive: (href: string) => boolean;
   onNavigate?: () => void;
+  compact?: boolean;
 }) {
   return (
     <>
-      <Link href="/" className="flex items-center gap-2.5 px-1" onClick={onNavigate}>
-        <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
+      <Link href="/" className="flex items-center gap-2.5 px-1" onClick={onNavigate} aria-label="ANiMA 홈으로">
+        {compact ? (
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-black text-white">
+            A
+          </span>
+        ) : (
+          <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto sm:h-7" />
+        )}
       </Link>
 
-      <nav className="mt-8 flex flex-col gap-1" aria-label="대시보드 메뉴">
+      <nav className={`mt-8 flex flex-col gap-1 ${compact ? "items-center" : ""}`} aria-label="대시보드 메뉴">
         <Link
           href="/"
           onClick={onNavigate}
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink/70 transition-colors hover:bg-primary/10 hover:text-ink"
+          title="홈으로"
+          className={`flex items-center gap-3 rounded-xl text-sm font-semibold text-ink/70 transition-colors hover:bg-primary/10 hover:text-ink ${
+            compact ? "justify-center p-2.5" : "px-3 py-2.5"
+          }`}
         >
           <HomeIcon className="h-4.5 w-4.5 shrink-0" />
-          홈으로
+          {!compact && "홈으로"}
         </Link>
-        <div className="my-2 border-t border-white/10" />
+        <div className={`my-2 border-t border-white/10 ${compact ? "w-8" : ""}`} />
 
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
@@ -133,25 +160,24 @@ function SidebarContent({
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
-                active
-                  ? "bg-primary text-white"
-                  : "text-ink/70 hover:bg-primary/10 hover:text-ink"
-              }`}
+              title={item.label}
+              className={`flex items-center gap-3 rounded-xl text-sm font-semibold transition-colors ${
+                compact ? "justify-center p-2.5" : "px-3 py-2.5"
+              } ${active ? "bg-primary text-white" : "text-ink/70 hover:bg-primary/10 hover:text-ink"}`}
             >
               <item.icon className="h-4.5 w-4.5 shrink-0" />
-              {item.label}
+              {!compact && item.label}
             </Link>
           );
         })}
       </nav>
 
-      <LogoutButton />
+      <LogoutButton compact={compact} />
     </>
   );
 }
 
-function LogoutButton() {
+function LogoutButton({ compact = false }: { compact?: boolean }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -171,15 +197,20 @@ function LogoutButton() {
       type="button"
       onClick={() => void handleLogout()}
       disabled={isLoggingOut}
-      className="mt-auto flex items-center gap-3 rounded-xl bg-primary/5 px-3 py-3 text-left transition-colors hover:bg-primary/10 disabled:opacity-60"
+      title={isLoggingOut ? "로그아웃 중..." : "로그아웃"}
+      className={`mt-auto flex items-center gap-3 rounded-xl bg-primary/5 text-left transition-colors hover:bg-primary/10 disabled:opacity-60 ${
+        compact ? "justify-center p-2" : "px-3 py-3"
+      }`}
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
         관
       </span>
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-ink">관리자</p>
-        <p className="truncate text-xs text-ink/50">{isLoggingOut ? "로그아웃 중..." : "로그아웃"}</p>
-      </div>
+      {!compact && (
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-ink">관리자</p>
+          <p className="truncate text-xs text-ink/50">{isLoggingOut ? "로그아웃 중..." : "로그아웃"}</p>
+        </div>
+      )}
     </button>
   );
 }

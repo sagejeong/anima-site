@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import AuthLayout from "@/components/hub/AuthLayout";
-import { ADMIN_AUTH_COOKIE, getAdminPassword } from "@/proxy";
+import { ADMIN_AUTH_COOKIE, isAdminAuthCookieValid } from "@/proxy";
 
 export const metadata: Metadata = {
   title: "대시보드 보기 · ANiMA",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 // 바로 실제 대시보드로 보냄
 export default async function DashboardStartPage() {
   const cookieStore = await cookies();
-  const isAdmin = cookieStore.get(ADMIN_AUTH_COOKIE)?.value === getAdminPassword();
+  const isAdmin = isAdminAuthCookieValid(cookieStore.get(ADMIN_AUTH_COOKIE)?.value);
   if (isAdmin) {
     redirect("/dashboard");
   }

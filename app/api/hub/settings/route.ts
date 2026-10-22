@@ -1,4 +1,4 @@
-import { getAdminPassword } from "@/proxy";
+import { isAdminAuthCookieValid } from "@/proxy";
 import { readFacilitySettings, writeFacilitySettings } from "@/lib/facility-settings";
 
 export async function GET() {
@@ -14,7 +14,7 @@ export async function PATCH(request: Request) {
     return Response.json({ error: "요청을 읽지 못했습니다." }, { status: 400 });
   }
 
-  if (body.password !== getAdminPassword()) {
+  if (!isAdminAuthCookieValid(body.password)) {
     return Response.json({ error: "비밀번호가 올바르지 않습니다." }, { status: 401 });
   }
 

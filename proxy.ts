@@ -10,14 +10,34 @@ export const USER_UUID_COOKIE = "anima_uid";
 /** 대시보드 공용 비밀번호 확인용 쿠키. 값이 실제 비밀번호와 같을 때만 통과시킴 */
 export const ADMIN_AUTH_COOKIE = "anima_admin_auth";
 
-/** 대시보드 로그인 아이디. 실서비스 전엔 ANIMA_ADMIN_ID 환경변수로 바꿔야 함 */
-export function getAdminId(): string {
-  return process.env.ANIMA_ADMIN_ID ?? "admin";
+/**
+ * 대시보드 로그인 아이디/비밀번호. 기본값을 코드에 두지 않음. 레포가 public이라
+ * 기본값을 박아두면 그게 곧 운영 비밀번호 유출이 됨. 로컬 개발은 .env.local에
+ * 직접 값을 넣어서 씀(README 참고)
+ */
+export function getAdminId(): string | undefined {
+  return process.env.ANIMA_ADMIN_ID;
 }
 
-/** 대시보드 로그인 비밀번호. 실서비스 전엔 ANIMA_ADMIN_PASSWORD 환경변수로 바꿔야 함 */
-export function getAdminPassword(): string {
-  return process.env.ANIMA_ADMIN_PASSWORD ?? "12345678";
+export function getAdminPassword(): string | undefined {
+  return process.env.ANIMA_ADMIN_PASSWORD;
+}
+
+/**
+ * 쿠키 값이 지금의 관리자 비밀번호와 일치하는지 확인. 환경변수가 비어 있으면
+ * (둘 다 undefined인 경우 등) 쿠키도 없는 상태와 구분이 안 돼서 무조건 통과되는
+ * 사고가 날 수 있어, 환경변수가 설정 안 됐으면 무조건 거짓으로 처리
+ */
+export function isAdminAuthCookieValid(cookieValue: string | undefined): boolean {
+  const expected = getAdminPassword();
+  return Boolean(expected) && cookieValue === expected;
+}
+
+/** 로그인 폼에서 받은 아이디·비밀번호가 실제 관리자 계정과 일치하는지. 위와 같은 이유로 환경변수 미설정 시 무조건 거짓 */
+export function isAdminCredentials(id: string | undefined, password: string | undefined): boolean {
+  const expectedId = getAdminId();
+  const expectedPassword = getAdminPassword();
+  return Boolean(expectedId && expectedPassword) && id === expectedId && password === expectedPassword;
 }
 
 const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
@@ -45,7 +65,7 @@ export function proxy(request: NextRequest) {
   const isAdminApi = ADMIN_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (isDashboardPage || isAdminApi) {
-    const authed = request.cookies.get(ADMIN_AUTH_COOKIE)?.value === getAdminPassword();
+    const authed = isAdminAuthCookieValid(request.cookies.get(ADMIN_AUTH_COOKIE)?.value);
     if (!authed && isDashboardPage) {
       const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("next", pathname);
@@ -60,7 +80,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // 정적 파일에는 실행할 필요가 없습니다.
+  // 정적 파일에는 실행할 필요가 없음.
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff2?)$).*)",
   ],

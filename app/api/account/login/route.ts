@@ -5,7 +5,7 @@ import {
   writeDisplayUserIdCookie,
   writeUserUuidCookie,
 } from "@/lib/anima-api";
-import { ADMIN_AUTH_COOKIE, getAdminId, getAdminPassword } from "@/proxy";
+import { ADMIN_AUTH_COOKIE, getAdminId, getAdminPassword, isAdminCredentials } from "@/proxy";
 
 type LoginResponse = {
   ok: boolean;
@@ -26,12 +26,11 @@ export async function POST(request: Request) {
 
   // 관리자 자격은 FastAPI 계정이랑 무관하게 환경변수로만 판단함(proxy.ts).
   // 그 계정이 FastAPI 쪽에 없거나 지워졌어도 관리자 로그인은 그대로 돼야 함
-  const isAdminCredentials =
-    body.user_id === getAdminId() && body.password === getAdminPassword();
+  const isAdmin = isAdminCredentials(body.user_id, body.password);
 
   const setAdminCookie = async () => {
     const cookieStore = await cookies();
-    cookieStore.set(ADMIN_AUTH_COOKIE, getAdminPassword(), {
+    cookieStore.set(ADMIN_AUTH_COOKIE, getAdminPassword() as string, {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
@@ -47,7 +46,7 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    if (isAdminCredentials) {
+    if (isAdmin) {
       await setAdminCookie();
       return Response.json({ ok: true, user_id: getAdminId() });
     }
@@ -57,7 +56,7 @@ export async function POST(request: Request) {
   await writeUserUuidCookie(result.data.user_uuid);
   await writeDisplayUserIdCookie(result.data.user_id);
 
-  if (isAdminCredentials) {
+  if (isAdmin) {
     await setAdminCookie();
   }
 

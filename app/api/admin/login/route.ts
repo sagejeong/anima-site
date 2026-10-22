@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { ADMIN_AUTH_COOKIE, getAdminId, getAdminPassword } from "@/proxy";
+import { ADMIN_AUTH_COOKIE, getAdminPassword, isAdminCredentials } from "@/proxy";
 
 const THIRTY_DAYS_IN_SECONDS = 60 * 60 * 24 * 30;
 
@@ -12,8 +12,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "요청을 읽지 못했습니다." }, { status: 400 });
   }
 
-  const expected = getAdminPassword();
-  if (body.id !== getAdminId() || body.password !== expected) {
+  if (!isAdminCredentials(body.id, body.password)) {
     return Response.json(
       { error: "아이디 또는 비밀번호가 올바르지 않습니다." },
       { status: 401 },
@@ -21,7 +20,7 @@ export async function POST(request: Request) {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(ADMIN_AUTH_COOKIE, expected, {
+  cookieStore.set(ADMIN_AUTH_COOKIE, getAdminPassword() as string, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",

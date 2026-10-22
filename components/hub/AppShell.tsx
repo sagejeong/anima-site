@@ -6,34 +6,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BellIcon, ChartIcon, GearIcon, GridIcon, HomeIcon, PeopleIcon } from "@/components/hub/icons";
 
-type ScreenMode = "blocked" | "compact" | "full";
+type ScreenMode = "compact" | "full";
 
 /**
- * 대시보드는 표·실시간 목록이 많아 폰 폭(640 미만)에서는 안내만 보여줌. 640~1023은
- * 노트북 창을 꽉 안 채웠을 때 흔히 걸리는 구간이라 막지 않고, 사이드바를 아이콘만
- * 남는 좁은 폭으로 줄여서 본문 공간을 확보함(compact). children을 블록 상태에서는
- * 아예 마운트 안 해서, 휴대폰에서 폴링 같은 불필요한 요청도 안 나가게 함.
+ * 1024 미만에서는 사이드바가 아이콘만 남는 좁은 레일로 줄어 본문 공간을 확보함
+ * (compact). 메인 사이트처럼 창을 아무리 줄여도 안내 화면으로 막지 않고 그대로 보여줌.
  */
 function useScreenMode(): ScreenMode | null {
   const [mode, setMode] = useState<ScreenMode | null>(null);
 
   useEffect(() => {
-    const blockedQuery = window.matchMedia("(max-width: 639px)");
-    const compactQuery = window.matchMedia("(min-width: 640px) and (max-width: 1023px)");
-
-    const update = () => {
-      if (blockedQuery.matches) setMode("blocked");
-      else if (compactQuery.matches) setMode("compact");
-      else setMode("full");
-    };
+    const compactQuery = window.matchMedia("(max-width: 1023px)");
+    const update = () => setMode(compactQuery.matches ? "compact" : "full");
 
     update();
-    blockedQuery.addEventListener("change", update);
     compactQuery.addEventListener("change", update);
-    return () => {
-      blockedQuery.removeEventListener("change", update);
-      compactQuery.removeEventListener("change", update);
-    };
+    return () => compactQuery.removeEventListener("change", update);
   }, []);
 
   return mode;
@@ -68,27 +56,6 @@ export default function AppShell({ children }: AppShellProps) {
   if (mode === null) {
     // 화면 폭을 아직 확인 전. 깜빡임 없이 그냥 비워둠(아주 잠깐)
     return <div className="min-h-screen bg-steel" />;
-  }
-
-  if (mode === "blocked") {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-steel px-6 text-center font-hub-body">
-        <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-7 w-auto" />
-        <p className="font-hub-display text-xl font-black text-ink">
-          이 화면은 PC에서 이용해 주세요
-        </p>
-        <p className="max-w-xs text-sm leading-relaxed text-ink-soft">
-          대시보드는 표와 실시간 목록이 많아 넓은 화면에 맞춰 설계했어요. 노트북이나
-          데스크톱에서 다시 열어주시면 정상적으로 보여요.
-        </p>
-        <Link
-          href="/"
-          className="mt-2 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-accent"
-        >
-          홈으로 돌아가기
-        </Link>
-      </div>
-    );
   }
 
   const isCompact = mode === "compact";

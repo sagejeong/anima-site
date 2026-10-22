@@ -108,7 +108,7 @@ export default function LineChart({
         {AXIS_PERCENTS.map((percent) => (
           <span
             key={percent}
-            className="absolute -translate-y-1/2 text-right text-[10px] font-medium text-ink-soft"
+            className="absolute -translate-y-1/2 whitespace-nowrap text-right text-[10px] font-medium text-ink-soft"
             style={{
               top: `${(yFor(percent) / VIEW_HEIGHT) * 100}%`,
               left: 0,

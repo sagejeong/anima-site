@@ -65,6 +65,32 @@ export default function TrendChart({
             : "아직 표시할 기록이 없습니다"
         }
       >
+        {/* 위험도 구간 배경: 0~50 양호 · 50~75 주의 · 75~100 경고, lib/result.ts 임계값과 동일 */}
+        <rect
+          x={PLOT_LEFT}
+          y={yForPercent(100)}
+          width={PLOT_RIGHT - PLOT_LEFT}
+          height={yForPercent(75) - yForPercent(100)}
+          className="fill-red-500"
+          opacity="0.08"
+        />
+        <rect
+          x={PLOT_LEFT}
+          y={yForPercent(75)}
+          width={PLOT_RIGHT - PLOT_LEFT}
+          height={yForPercent(50) - yForPercent(75)}
+          className="fill-amber-500"
+          opacity="0.08"
+        />
+        <rect
+          x={PLOT_LEFT}
+          y={yForPercent(50)}
+          width={PLOT_RIGHT - PLOT_LEFT}
+          height={yForPercent(0) - yForPercent(50)}
+          className="fill-emerald-500"
+          opacity="0.08"
+        />
+
         {gridPercents.map((percent) => (
           <g key={percent}>
             <line

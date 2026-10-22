@@ -64,6 +64,11 @@ export default function LineChart({
         role="img"
         aria-label="시간대별 시설 평균 이탈도 추이"
       >
+        {/* 위험도 구간 배경: 0~50 양호 · 50~75 주의 · 75~100 경고, lib/result.ts 임계값과 동일 */}
+        <rect x={PAD_LEFT} y={yFor(100)} width={VIEW_WIDTH - PAD_LEFT} height={yFor(75) - yFor(100)} fill="var(--color-critical)" opacity="0.08" />
+        <rect x={PAD_LEFT} y={yFor(75)} width={VIEW_WIDTH - PAD_LEFT} height={yFor(50) - yFor(75)} fill="var(--color-caution)" opacity="0.08" />
+        <rect x={PAD_LEFT} y={yFor(50)} width={VIEW_WIDTH - PAD_LEFT} height={yFor(0) - yFor(50)} fill="var(--color-good)" opacity="0.08" />
+
         {AXIS_PERCENTS.map((percent) => (
           <g key={percent}>
             <line

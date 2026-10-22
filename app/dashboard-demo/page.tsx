@@ -52,6 +52,11 @@ export default function DashboardDemoPage() {
               더미 데이터로 동작 방식을 보여주는 데모 화면입니다. 실제 데이터는 관리자
               로그인 후 같은 화면 구성으로 보입니다.
             </p>
+            <p className="mt-3 rounded-xl bg-primary/5 px-3.5 py-2.5 text-xs leading-relaxed text-ink-soft md:hidden">
+              실제 대시보드는 표·실시간 목록이 많아 노트북이나 큰 화면에서 보는 걸
+              기준으로 만들었습니다. 지금 보시는 화면은 폰에서도 열리도록 맞춘 데모라
+              구성이 조금 간단합니다.
+            </p>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">

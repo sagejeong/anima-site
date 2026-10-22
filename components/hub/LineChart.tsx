@@ -90,21 +90,41 @@ export default function LineChart({
 
           <path d={areaPath} fill={color} opacity="0.12" />
           <path d={linePath} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-
-          {coords.map((c, i) => (
-            <circle
-              key={i}
-              cx={c.x}
-              cy={c.y}
-              r={hoverIndex === i ? 6 : i === coords.length - 1 ? 4 : 3}
-              fill={color}
-              className="transition-[r]"
-              onMouseEnter={() => setHoverIndex(i)}
-              onMouseLeave={() => setHoverIndex((current) => (current === i ? null : current))}
-            />
-          ))}
-          {last && <circle cx={last.x} cy={last.y} r="7" fill={color} opacity="0.2" />}
         </svg>
+
+        {/* 점은 HTML 원으로 따로 그림. svg 안의 circle이었을 땐 preserveAspectRatio="none"
+            때문에 가로세로가 다르게 늘어나 타원으로 찌그러져 보였음 */}
+        {last && (
+          <span
+            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              left: `${(last.x / VIEW_WIDTH) * 100}%`,
+              top: `${(last.y / VIEW_HEIGHT) * 100}%`,
+              width: 14,
+              height: 14,
+              backgroundColor: color,
+              opacity: 0.2,
+            }}
+          />
+        )}
+        {coords.map((c, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full transition-transform"
+            style={{
+              left: `${(c.x / VIEW_WIDTH) * 100}%`,
+              top: `${(c.y / VIEW_HEIGHT) * 100}%`,
+              width: 6,
+              height: 6,
+              backgroundColor: color,
+              transform: `translate(-50%, -50%) scale(${
+                hoverIndex === i ? 2 : i === coords.length - 1 ? 1.3 : 1
+              })`,
+            }}
+            onMouseEnter={() => setHoverIndex(i)}
+            onMouseLeave={() => setHoverIndex((current) => (current === i ? null : current))}
+          />
+        ))}
 
         {/* 축 숫자는 HTML로 따로 그림. svg가 preserveAspectRatio="none"이라 글자까지
             가로세로 다르게 늘어나 찌그러져 보였음 */}

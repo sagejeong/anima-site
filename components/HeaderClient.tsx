@@ -67,7 +67,7 @@ export default function HeaderClient({ userId, isAdminAuthed }: HeaderClientProp
           : "bg-transparent"
       }`}
     >
-      <div className="mx-auto grid h-16 w-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center px-5 sm:px-8">
+      <div className="mx-auto grid h-16 w-full max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-2 px-5 sm:px-8">
         {/* 좌측: 로고 + 네비게이션 */}
         <div className="flex items-center gap-8">
           <Link

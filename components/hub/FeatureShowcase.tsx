@@ -127,12 +127,12 @@ export default function FeatureShowcase() {
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        <div className="flex items-center justify-between border-b border-line bg-charcoal px-5 py-3.5">
-          <div className="flex items-center gap-2">
-            <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto opacity-80 sm:h-7" />
-            <span className="text-xs font-bold tracking-[0.2em] text-ink/70">· {active.tag}</span>
+        <div className="flex items-center justify-between gap-2 border-b border-line bg-charcoal px-5 py-3.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Image src="/anima_hub_logo.png" alt="ANiMA" width={645} height={119} className="h-6 w-auto shrink-0 opacity-80 sm:h-7" />
+            <span className="truncate text-xs font-bold tracking-[0.2em] text-ink/70">· {active.tag}</span>
           </div>
-          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
+          <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
             예시 화면
           </span>
         </div>

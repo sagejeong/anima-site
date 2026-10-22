@@ -353,7 +353,7 @@ export default function CoughRecorder() {
 
       {/* 녹음 안내 */}
       {status !== "recorded" && (
-        <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+        <ul className="mt-8 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-5 sm:gap-y-2">
           {RECORDING_TIPS.map((tip) => (
             <li
               key={tip}

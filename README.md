@@ -54,3 +54,21 @@ lib/
 proxy.ts                      미들웨어. 방문자 UUID 쿠키 발급 + 대시보드 비밀번호 검사
 data/                        hub-roster.ts가 쓰는 JSON (gitignore)
 ```
+
+## 데이터 흐름
+
+녹음은 앱과 웹 모두 같은 FastAPI 분석 서버로 올라가고, 분석 결과는 그 서버의 DB에
+쌓인다. Next.js는 자체 DB가 없어서, 대시보드가 FastAPI의 기록 조회 API를 주기적으로
+확인해 새로 생긴 결과만 화면에 반영한다. 브라우저는 FastAPI를 직접 부르지 못해서
+(CORS), 모든 요청은 Next.js의 Route Handler(`app/api/*`)가 중계한다.
+
+## 배포
+
+```bash
+git pull
+npm ci
+npm run build
+# 이후 서비스 재시작
+```
+
+순서를 꼭 지켜야 한다. 빌드를 건너뛰면 정적 파일이 없어서 화면이 뜨지 않는다.

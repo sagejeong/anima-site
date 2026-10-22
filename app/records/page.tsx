@@ -150,7 +150,7 @@ function TrendDashboard({ trend }: { trend: ReturnType<typeof computeTrend> }) {
       </div>
 
       <div className="mt-4">
-        <TrendChart points={trend} average={average ?? 0} />
+        <TrendChart points={trend} />
       </div>
 
       {hasEnoughData ? (

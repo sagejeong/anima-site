@@ -32,10 +32,8 @@ function yForPercent(percent: number): number {
 // 기록 0~1개일 때도 틀(축·기준선)은 그대로 두고 선·점·평균선만 생략함
 export default function TrendChart({
   points,
-  average,
 }: {
   points: readonly TrendPoint[];
-  average: number;
 }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -61,7 +59,7 @@ export default function TrendChart({
         role="img"
         aria-label={
           points.length > 0
-            ? `최근 ${points.length}개 기록, 평균 이탈도 ${average}%`
+            ? `최근 ${points.length}개 기록의 이탈도 추이`
             : "아직 표시할 기록이 없습니다"
         }
       >
@@ -115,17 +113,6 @@ export default function TrendChart({
 
         {hasLine && (
           <>
-            {/* 평균선 */}
-            <line
-              x1={PLOT_LEFT}
-              x2={PLOT_RIGHT}
-              y1={yForPercent(average)}
-              y2={yForPercent(average)}
-              className="stroke-ink-soft"
-              strokeWidth={1.5}
-              strokeDasharray="4 3"
-            />
-
             {/* 추이선 */}
             <path
               d={linePath}

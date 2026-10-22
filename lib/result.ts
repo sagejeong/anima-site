@@ -239,7 +239,9 @@ export function describeTrendChange(points: readonly TrendPoint[]): string {
 
   if (delta <= -5) return `최근 ${Math.abs(delta)}% 낮아졌어요.`;
   if (delta >= 5) return `최근 ${delta}% 높아졌어요.`;
-  return "최근 큰 변화 없이 안정적이에요.";
+  // 처음·마지막 값만 비교하는 함수라, 그 사이 변동이 커도 시작과 끝이 비슷하면
+  // 여기로 온다. "안정적"이라고 단정할 근거가 없어 문구 없이 빈 값만 반환한다.
+  return "";
 }
 
 // 방금 업로드한 결과를 sessionStorage에 저장할 때 쓰는 형태. measuredAt은 서버

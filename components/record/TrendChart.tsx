@@ -52,129 +52,133 @@ export default function TrendChart({
   const hovered = hoverIndex !== null ? points[hoverIndex] : null;
 
   return (
-    <div className="relative">
-      <svg
-        viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
-        className="h-auto w-full overflow-visible"
-        role="img"
-        aria-label={
-          points.length > 0
-            ? `최근 ${points.length}개 기록의 이탈도 추이`
-            : "아직 표시할 기록이 없습니다"
-        }
-      >
-        {/* 위험도 구간 배경: 0~50 양호 · 50~75 주의 · 75~100 경고, lib/result.ts 임계값과 동일 */}
-        <rect
-          x={PLOT_LEFT}
-          y={yForPercent(100)}
-          width={PLOT_RIGHT - PLOT_LEFT}
-          height={yForPercent(75) - yForPercent(100)}
-          className="fill-red-500"
-          opacity="0.08"
-        />
-        <rect
-          x={PLOT_LEFT}
-          y={yForPercent(75)}
-          width={PLOT_RIGHT - PLOT_LEFT}
-          height={yForPercent(50) - yForPercent(75)}
-          className="fill-amber-500"
-          opacity="0.08"
-        />
-        <rect
-          x={PLOT_LEFT}
-          y={yForPercent(50)}
-          width={PLOT_RIGHT - PLOT_LEFT}
-          height={yForPercent(0) - yForPercent(50)}
-          className="fill-emerald-500"
-          opacity="0.08"
-        />
-
-        {gridPercents.map((percent) => (
-          <g key={percent}>
-            <line
-              x1={PLOT_LEFT}
-              x2={PLOT_RIGHT}
-              y1={yForPercent(percent)}
-              y2={yForPercent(percent)}
-              className="stroke-line"
-              strokeWidth={1}
-            />
-            <text
-              x={PLOT_LEFT - 6}
-              y={yForPercent(percent)}
-              textAnchor="end"
-              dominantBaseline="middle"
-              className="fill-ink-soft text-[9px]"
-            >
-              {percent}
-            </text>
-          </g>
-        ))}
-
-        {hasLine && (
-          <>
-            {/* 추이선 */}
-            <path
-              d={linePath}
-              fill="none"
-              className="stroke-ink-soft"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </>
-        )}
-
-        {/* 데이터 점, 판정 색으로 표시. 마우스를 올리면 퍼센트가 뜸 */}
-        {points.map((point, index) => (
-          <circle
-            key={point.time}
-            cx={xForIndex(index)}
-            cy={yForPercent(point.percent)}
-            r={hoverIndex === index ? 6 : 4}
-            className={`${RISK_FILL[point.risk]} stroke-white transition-[r]`}
-            strokeWidth={2}
-            onMouseEnter={() => setHoverIndex(index)}
-            onMouseLeave={() => setHoverIndex((current) => (current === index ? null : current))}
+    <div>
+      {/* 아래 범례까지 이 div 안에 있으면, 퍼센트 위치 계산 기준 높이가 svg보다
+          커져서 툴팁이 아래로 갈수록 어긋난다. svg만 따로 감싼다 */}
+      <div className="relative">
+        <svg
+          viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+          className="h-auto w-full overflow-visible"
+          role="img"
+          aria-label={
+            points.length > 0
+              ? `최근 ${points.length}개 기록의 이탈도 추이`
+              : "아직 표시할 기록이 없습니다"
+          }
+        >
+          {/* 위험도 구간 배경: 0~50 양호 · 50~75 주의 · 75~100 경고, lib/result.ts 임계값과 동일 */}
+          <rect
+            x={PLOT_LEFT}
+            y={yForPercent(100)}
+            width={PLOT_RIGHT - PLOT_LEFT}
+            height={yForPercent(75) - yForPercent(100)}
+            className="fill-red-500"
+            opacity="0.08"
           />
-        ))}
+          <rect
+            x={PLOT_LEFT}
+            y={yForPercent(75)}
+            width={PLOT_RIGHT - PLOT_LEFT}
+            height={yForPercent(50) - yForPercent(75)}
+            className="fill-amber-500"
+            opacity="0.08"
+          />
+          <rect
+            x={PLOT_LEFT}
+            y={yForPercent(50)}
+            width={PLOT_RIGHT - PLOT_LEFT}
+            height={yForPercent(0) - yForPercent(50)}
+            className="fill-emerald-500"
+            opacity="0.08"
+          />
 
-        {points.length > 0 && (
-          <>
-            <text
-              x={PLOT_LEFT}
-              y={VIEW_HEIGHT - 6}
-              textAnchor="start"
-              className="fill-ink-soft text-[9px]"
-            >
-              {points[0].shortDateLabel}
-            </text>
-            {points.length > 1 && (
+          {gridPercents.map((percent) => (
+            <g key={percent}>
+              <line
+                x1={PLOT_LEFT}
+                x2={PLOT_RIGHT}
+                y1={yForPercent(percent)}
+                y2={yForPercent(percent)}
+                className="stroke-line"
+                strokeWidth={1}
+              />
               <text
-                x={PLOT_RIGHT}
-                y={VIEW_HEIGHT - 6}
+                x={PLOT_LEFT - 6}
+                y={yForPercent(percent)}
                 textAnchor="end"
+                dominantBaseline="middle"
                 className="fill-ink-soft text-[9px]"
               >
-                {points[points.length - 1].shortDateLabel}
+                {percent}
               </text>
-            )}
-          </>
-        )}
-      </svg>
+            </g>
+          ))}
 
-      {hovered && hoverIndex !== null && (
-        <div
-          className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-lg bg-ink px-2.5 py-1.5 text-xs font-bold whitespace-nowrap text-steel shadow-lg"
-          style={{
-            left: `${(xForIndex(hoverIndex) / VIEW_WIDTH) * 100}%`,
-            top: `${(yForPercent(hovered.percent) / VIEW_HEIGHT) * 100}%`,
-            marginTop: "-10px",
-          }}
-        >
-          {hovered.fullDateLabel} · {Math.round(hovered.percent)}%
-        </div>
-      )}
+          {hasLine && (
+            <>
+              {/* 추이선 */}
+              <path
+                d={linePath}
+                fill="none"
+                className="stroke-ink-soft"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </>
+          )}
+
+          {/* 데이터 점, 판정 색으로 표시. 마우스를 올리면 퍼센트가 뜸 */}
+          {points.map((point, index) => (
+            <circle
+              key={point.time}
+              cx={xForIndex(index)}
+              cy={yForPercent(point.percent)}
+              r={hoverIndex === index ? 6 : 4}
+              className={`${RISK_FILL[point.risk]} stroke-white transition-[r]`}
+              strokeWidth={2}
+              onMouseEnter={() => setHoverIndex(index)}
+              onMouseLeave={() => setHoverIndex((current) => (current === index ? null : current))}
+            />
+          ))}
+
+          {points.length > 0 && (
+            <>
+              <text
+                x={PLOT_LEFT}
+                y={VIEW_HEIGHT - 6}
+                textAnchor="start"
+                className="fill-ink-soft text-[9px]"
+              >
+                {points[0].shortDateLabel}
+              </text>
+              {points.length > 1 && (
+                <text
+                  x={PLOT_RIGHT}
+                  y={VIEW_HEIGHT - 6}
+                  textAnchor="end"
+                  className="fill-ink-soft text-[9px]"
+                >
+                  {points[points.length - 1].shortDateLabel}
+                </text>
+              )}
+            </>
+          )}
+        </svg>
+
+        {hovered && hoverIndex !== null && (
+          <div
+            className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-lg bg-ink px-2.5 py-1.5 text-xs font-bold whitespace-nowrap text-steel shadow-lg"
+            style={{
+              left: `${(xForIndex(hoverIndex) / VIEW_WIDTH) * 100}%`,
+              top: `${(yForPercent(hovered.percent) / VIEW_HEIGHT) * 100}%`,
+              marginTop: "-10px",
+            }}
+          >
+            {hovered.fullDateLabel} · {Math.round(hovered.percent)}%
+          </div>
+        )}
+      </div>
 
       <ul className="mt-3 flex items-center justify-center gap-4 text-xs text-ink-soft">
         {(Object.keys(RISK_COPY) as RiskLevel[])

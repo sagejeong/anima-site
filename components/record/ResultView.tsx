@@ -7,7 +7,7 @@ import AppDownloadCta from "@/components/record/AppDownloadCta";
 import ResultBody from "@/components/record/ResultBody";
 import { LAST_RESULT_STORAGE_KEY, type StoredResult } from "@/lib/result";
 
-/** sessionStorage는 서버에 없어 서버 렌더링과 어긋나지 않게 읽습니다. */
+/** sessionStorage는 서버에 없어 서버 렌더링과 어긋나지 않게 읽는다. */
 const subscribeToNothing = () => () => undefined;
 
 function readStoredResult(): string | null {
@@ -26,7 +26,7 @@ export default function ResultView() {
     try {
       const parsed: unknown = JSON.parse(storedRaw);
       // 저장 형식이 바뀌기 전(예전 세션)에 쓰인 데이터가 남아있을 수 있어,
-      // 지금 기대하는 모양인지 확인한 뒤에만 씁니다. 아니면 "결과 없음"으로 취급합니다.
+      // 지금 기대하는 모양인지 확인한 뒤에만 쓴다. 아니면 "결과 없음"으로 취급한다.
       if (
         parsed &&
         typeof parsed === "object" &&

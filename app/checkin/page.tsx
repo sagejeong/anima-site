@@ -9,9 +9,9 @@ import type { CheckinSession, RosterWorker } from "@/lib/hub-roster";
 type Step = "loading" | "register" | "pick-session" | "recording" | "result";
 
 /**
- * 입소자가 본인 폰으로 여는 화면. 이름 등록(최초 1회) → 오전/오후 선택 →
- * 녹음 → 실제 분석 결과 확인, 순서로 진행됨. 관리자 로그인 없이 누구나 열 수
- * 있어서, 회사 내부에서만 이 링크를 공유하는 걸 전제로 함.
+ * 입소자가 본인 폰으로 여는 화면. 이름 등록(최초 1회), 오전/오후 선택, 녹음,
+ * 결과 확인 순으로 진행됨. 관리자 로그인 없이 누구나 열 수 있어서, 회사
+ * 내부에서만 이 링크를 공유하는 걸 전제로 함.
  */
 export default function CheckinPage() {
   const [step, setStep] = useState<Step>("loading");

@@ -25,7 +25,7 @@ export default async function RecordDetailPage({
   const { recordUuid } = await params;
   const userUuid = await readUserUuid();
 
-  // 서버에 "id로 한 건 조회" API가 따로 없어, 목록을 받아 그 안에서 찾습니다.
+  // 서버에 "id로 한 건 조회" API가 따로 없어, 목록을 받아 그 안에서 찾는다.
   const result = userUuid
     ? await callAnimaApi<RecordsListResponse>(
         animaUrl("/records", { user_uuid: userUuid }),

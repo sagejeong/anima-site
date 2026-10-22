@@ -21,9 +21,9 @@ export function classifyRisk(distance: number): RiskLevel {
   return "RISK";
 }
 
-// "건강한", "정상", "이상" 같은 의료적 판정으로 읽힐 수 있는 단어는 쓰지 않습니다.
+// "건강한", "정상", "이상" 같은 의료적 판정으로 읽힐 수 있는 단어는 쓰지 않는다.
 // ANiMA는 의료기기가 아니라 개인 참고용 음향 분석 도구이며, 여기서 말하는 기준은
-// 여러 사람의 기침 데이터로 만든 "기준 패턴"이지 의학적으로 확인된 건강 여부가 아닙니다.
+// 여러 사람의 기침 데이터로 만든 "기준 패턴"이지 의학적으로 확인된 건강 여부가 아니다.
 //
 // threshold는 화면 표시용 퍼센트(toDisplayPercent) 기준입니다. p50, p75가 정확히
 // 50%, 75%에 오도록 설계했기 때문에(위 toDisplayPercent 참고), 이 숫자는 raw distance와
@@ -75,10 +75,10 @@ export function toDisplayPercent(distance: number): number {
 
 /**
  * 서버(FastAPI)의 measured_at은 타임존 표기 없이 오는데, 실제 값은 이미 한국
- * 시각입니다(2026-10월 재확인: 녹음 직후 결과 화면엔 맞게 뜨다가, 같은 값을
- * 기록 목록에서 다시 보면 9시간 밀려 있었음 — UTC로 잘못 간주해 거기서 또
+ * 시각이다(2026-10월 재확인: 녹음 직후 결과 화면엔 맞게 뜨다가, 같은 값을
+ * 기록 목록에서 다시 보면 9시간 밀려 있었음. UTC로 잘못 간주해 거기서 또
  * +9시간을 더했기 때문). 타임존 표기가 없으면 이미 한국 시각이라고 보고
- * 그대로 읽습니다.
+ * 그대로 읽는다.
  */
 export function parseServerDate(value: string): Date {
   const hasTimezone = /(Z|[+-]\d{2}:\d{2})$/i.test(value);
@@ -89,8 +89,8 @@ export function parseServerDate(value: string): Date {
 }
 
 /**
- * "2026년 8월 16일 (일) 17:37" 형식으로 표시합니다.
- * 시각 정보가 없는 "YYYY-MM-DD" 형태(record_date)가 들어오면 시간은 붙이지 않습니다.
+ * "2026년 8월 16일 (일) 17:37" 형식으로 표시한다.
+ * 시각 정보가 없는 "YYYY-MM-DD" 형태(record_date)가 들어오면 시간은 붙이지 않는다.
  */
 export function formatMeasuredAt(value: string | Date): string {
   const hasTimeComponent = typeof value !== "string" || value.includes("T");
@@ -153,13 +153,13 @@ export type AnimaUploadResponse = {
 /**
  * GET /records 가 돌려주는 측정 기록 한 건.
  * MRRecord 테이블 컬럼을 그대로 따른다고 보고 다루되, 실제 응답 스키마가
- * 서버에 명세돼 있지 않아 모든 필드를 선택적으로 처리합니다.
+ * 서버에 명세돼 있지 않아 모든 필드를 선택적으로 처리한다.
  */
 export type MRRecordSummary = {
   record_uuid?: string;
   measured_at?: string;
   record_date?: string;
-  /** DB 스키마상 NOT NULL DEFAULT(datetime('now'))라 항상 채워져 있어야 하는 값. 날짜 표시의 최후 안전망입니다. */
+  /** DB 스키마상 NOT NULL DEFAULT(datetime('now'))라 항상 채워져 있어야 하는 값. 날짜 표시의 최후 안전망. */
   created_at?: string;
   source_device_type?: string;
   cough_detected?: number | boolean | null;
@@ -173,7 +173,7 @@ export type MRRecordSummary = {
   medication_name?: string | null;
 };
 
-/** measured_at → record_date → created_at 순으로 존재하는 값을 씁니다. */
+/** measured_at, record_date, created_at 순으로 존재하는 값을 쓴다. */
 export function pickRecordDate(record: MRRecordSummary): string | undefined {
   return record.measured_at || record.record_date || record.created_at || undefined;
 }
@@ -198,7 +198,7 @@ export type TrendPoint = {
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** 최근 7일 안에서, 분석이 완료된 기록만 골라 시간순으로 정리합니다. */
+/** 최근 7일 안에서, 분석이 완료된 기록만 골라 시간순으로 정리한다. */
 export function computeTrend(
   records: readonly MRRecordSummary[],
   maxPoints = 10,
@@ -231,7 +231,7 @@ export function computeTrend(
     .slice(-maxPoints);
 }
 
-/** 첫 기록과 마지막 기록 사이의 변화를 한 문장으로 요약합니다. 낮을수록 좋은 지표라 방향을 그대로 뒤집지 않습니다. */
+/** 첫 기록과 마지막 기록 사이의 변화를 한 문장으로 요약한다. 낮을수록 좋은 지표라 방향을 그대로 뒤집지 않는다. */
 export function describeTrendChange(points: readonly TrendPoint[]): string {
   if (points.length < 2) return "";
 

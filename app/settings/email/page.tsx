@@ -17,8 +17,8 @@ export default async function EmailSettingsPage() {
   const userId = await readDisplayUserId();
   const userUuid = await readUserUuid();
 
-  // TODO: 서버에 계정 정보 조회 API(GET /account/me 같은)가 아직 없습니다.
-  // 생기면 이 호출이 그대로 현재 이메일을 채워줍니다.
+  // TODO: 서버에 계정 정보 조회 API(GET /account/me 같은)가 아직 없음.
+  // 생기면 이 호출이 그대로 현재 이메일을 채워줌.
   const info = userUuid
     ? await callAnimaApi<AccountInfoResponse>(
         animaUrl("/account/me", { user_uuid: userUuid }),

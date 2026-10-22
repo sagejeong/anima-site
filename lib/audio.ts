@@ -36,9 +36,9 @@ export function fileExtensionFor(mimeType: string): string {
 }
 
 /**
- * 녹음한 Blob을 data URL 문자열로 바꿉니다.
+ * 녹음한 Blob을 data URL 문자열로 바꾼다.
  * blob: URL과 달리 문자열이라 sessionStorage에 저장할 수 있고,
- * 새로고침해도 재생이 깨지지 않습니다.
+ * 새로고침해도 재생이 깨지지 않는다.
  */
 export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {

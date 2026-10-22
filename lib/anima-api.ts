@@ -4,7 +4,7 @@ import { USER_UUID_COOKIE } from "@/proxy";
 export const ANIMA_API_BASE_URL =
   process.env.ANIMA_API_BASE_URL ?? "https://api.animawith.cloud";
 
-/** 서버 응답을 기다리는 최대 시간 (분석에 시간이 걸릴 수 있어 넉넉히 잡습니다) */
+/** 서버 응답을 기다리는 최대 시간 (분석에 시간이 걸릴 수 있어 넉넉히 잡음) */
 const REQUEST_TIMEOUT_MS = 60_000;
 
 /** 쿠키에 심어둔 방문자 UUID를 읽습니다. proxy.ts가 먼저 발급해 둡니다. */
@@ -68,8 +68,8 @@ export type AnimaApiResult<T> =
   | { ok: false; status: number; error: string };
 
 /**
- * ANiMA 서버를 호출합니다. 브라우저가 아니라 이 서버에서 부르기 때문에
- * CORS 설정이 필요 없고, 나중에 사이트를 https로 배포해도 막히지 않습니다.
+ * ANiMA 서버를 호출한다. 브라우저가 아니라 이 서버에서 부르기 때문에
+ * CORS 설정이 필요 없고, 나중에 사이트를 https로 배포해도 막히지 않는다.
  */
 export async function callAnimaApi<T>(
   url: string,

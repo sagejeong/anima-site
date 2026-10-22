@@ -12,17 +12,17 @@ import {
 } from "@/lib/result";
 
 type ResultBodyProps = {
-  /** 기침이 감지됐는지. 서버가 명시적으로 false를 준 경우만 "미감지"로 취급합니다. */
+  /** 기침이 감지됐는지. 서버가 명시적으로 false를 준 경우만 "미감지"로 취급한다. */
   isCough?: boolean | null;
-  /** 기준 패턴으로부터의 차이(raw distance). 이 값이 있어야 게이지를 그릴 수 있습니다. */
+  /** 기준 패턴으로부터의 차이(raw distance). 이 값이 있어야 게이지를 그릴 수 있다. */
   distance?: number | null;
   /** 녹음 품질 미달 사유 (TOO_SHORT, NOISY 등) */
   failReason?: string | null;
-  /** 서버가 준 안내 문장. 없으면 판정 등급의 기본 설명을 씁니다. */
+  /** 서버가 준 안내 문장. 없으면 판정 등급의 기본 설명을 쓴다. */
   message?: string | null;
   /** 녹음이 끝난 시각 (ISO 문자열) */
   measuredAt?: string | null;
-  /** 녹음한 소리를 재생할 수 있는 주소. 방금 올린 결과에만 존재합니다. */
+  /** 녹음한 소리를 재생할 수 있는 주소. 방금 올린 결과에만 존재한다. */
   audioUrl?: string | null;
   /** 분석 요청 전 복용 중인 약 확인 단계에서 "있음"으로 답했는지 */
   medicationTaken?: boolean | null;
@@ -41,7 +41,7 @@ export default function ResultBody({
   audioUrl,
   medicationTaken,
 }: ResultBodyProps) {
-  // 기침이 감지되지 않았거나 품질 기준에 못 미치면 게이지 자체를 보여주지 않습니다.
+  // 기침이 감지되지 않았거나 품질 기준에 못 미치면 게이지 자체를 보여주지 않는다.
   if (isCough === false || failReason) {
     return (
       <div className="w-full max-w-md rounded-2xl border border-gray-light bg-steel-surface p-8 text-center sm:p-8">
@@ -177,7 +177,7 @@ const GAUGE_HEIGHT_PX = 176;
 
 /**
  * 세로 막대 게이지. 색상 구간(초록 0~50% · 노랑 50~75% · 빨강 75~100%)과 점 위치는
- * 화면 표시용 퍼센트를 그대로 씁니다. 원거리(raw distance) 숫자는 노출하지 않습니다.
+ * 화면 표시용 퍼센트를 그대로 쓴다. 원거리(raw distance) 숫자는 노출하지 않는다.
  */
 function VerticalGauge({ percent, risk }: { percent: number; risk: RiskLevel }) {
   const clampedPercent = Math.min(100, Math.max(0, percent));
@@ -196,7 +196,7 @@ function VerticalGauge({ percent, risk }: { percent: number; risk: RiskLevel }) 
       aria-label={`기침 이탈도 ${clampedPercent}% · 판정 결과 ${RISK_COPY[risk].label}`}
     >
       <div className="absolute inset-0 overflow-hidden rounded-full">
-        {/* 위에서부터 경고(빨강 75~100%) → 주의(노랑 50~75%) → 양호(초록 0~50%) */}
+        {/* 위에서부터 경고(빨강 75~100%), 주의(노랑 50~75%), 양호(초록 0~50%) */}
         <div className="w-full bg-red-500/20" style={{ height: "25%" }} />
         <div className="w-full bg-amber-500/20" style={{ height: "25%" }} />
         <div className="w-full bg-emerald-500/20" style={{ height: "50%" }} />
@@ -216,7 +216,7 @@ const LEGEND_ITEMS: readonly { level: RiskLevel; dot: string }[] = [
   { level: "GOOD", dot: "bg-emerald-500" },
 ];
 
-// 색상·판정 이름·퍼센트 범례. 경고→주의→양호 순(위→아래)으로 게이지랑 나란히 둠.
+// 색상·판정 이름·퍼센트 범례. 경고, 주의, 양호 순으로 위에서 아래로 게이지랑 나란히 둠.
 // 퍼센트(50%/75%)는 화면 표시용이라 그대로 보여줘도 됨, raw distance는 안 보여줌
 function RiskLegend({ risk }: { risk: RiskLevel }) {
   return (

@@ -91,8 +91,8 @@ export default function DashboardOverviewPage() {
 
   const latestIdsRef = useRef<Map<string, string>>(new Map());
   // 최초 로드 때 이미 알고 있던 사람인지. 여기 없는 사람의 "첫 기록"은 옛날 기록을
-  // 그제서야 보는 것일 수 있어 알림을 안 띄우고, 있는 사람의 첫 기록(측정 전 →
-  // 측정 완료)은 지금 막 생긴 진짜 새 기록이라 알림을 띄워야 함
+  // 그제서야 보는 것일 수 있어 알림을 안 띄우고, 있는 사람의 첫 기록(측정 전에서
+  // 측정 완료로 바뀐 것)은 지금 막 생긴 진짜 새 기록이라 알림을 띄워야 함
   const seenIdsRef = useRef<Set<string>>(new Set());
   const alertSeqRef = useRef(0);
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());

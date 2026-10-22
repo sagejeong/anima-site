@@ -27,7 +27,7 @@ const CHECK_MESSAGES: Record<Exclude<CheckStatus, "idle">, { text: string; class
   error: { text: "확인하지 못했어요. 잠시 후 다시 시도해 주세요.", className: "text-red-600" },
 };
 
-/** 계정 정보 입력 (개인 식별 정보를 받지 않는 ID 기반). 참여 정보 저장 후 선택적으로 노출됩니다. */
+/** 계정 정보 입력 (개인 식별 정보를 받지 않는 ID 기반). 참여 정보 저장 후 선택적으로 노출된다. */
 export default function AccountStep({
   data,
   errors,

@@ -24,7 +24,7 @@ const ICON_SIZES: Record<RecordButtonSize, string> = {
 
 /**
  * 기침 녹음 CTA 버튼.
- * 녹음 자체는 로그인 없이 가능하고, 분석을 요청할 때만 계정이 필요합니다.
+ * 녹음 자체는 로그인 없이 가능하고, 분석을 요청할 때만 계정이 필요하다.
  */
 export default function RecordButton({
   size = "lg",

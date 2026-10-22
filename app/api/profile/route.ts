@@ -1,8 +1,8 @@
 import { animaUrl, callAnimaApi, readUserUuid } from "@/lib/anima-api";
 
 /**
- * 참여 정보(나이, 성별, 생활환경 등)를 ANiMA 서버의 POST /profile로 중계합니다.
- * user_uuid는 브라우저가 아니라 쿠키에서 읽어 서버가 직접 붙입니다.
+ * 참여 정보(나이, 성별, 생활환경 등)를 ANiMA 서버의 POST /profile로 중계한다.
+ * user_uuid는 브라우저가 아니라 쿠키에서 읽어 서버가 직접 붙인다.
  */
 export async function POST(request: Request) {
   const userUuid = await readUserUuid();

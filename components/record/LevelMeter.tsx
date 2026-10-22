@@ -29,7 +29,7 @@ export default function LevelMeter({ analyser }: LevelMeterProps) {
     }
 
     const buffer = new Uint8Array(analyser.fftSize);
-    // 막대마다 조금씩 다르게 반응해 파형처럼 보이도록 최근 값을 기억합니다.
+    // 막대마다 조금씩 다르게 반응해 파형처럼 보이도록 최근 값을 기억한다.
     const levels = new Array<number>(BAR_COUNT).fill(0.08);
 
     const draw = (): void => {

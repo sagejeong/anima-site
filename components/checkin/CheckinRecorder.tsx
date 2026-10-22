@@ -26,7 +26,7 @@ type CheckinRecorderProps = {
 
 /**
  * /checkin 전용 녹음기. CoughRecorder랑 녹음 방식은 같지만, 복용 약 질문 같은
- * 소비자 앱 단계는 빼고 녹음 → 업로드 → 결과 콜백까지만 함.
+ * 소비자 앱 단계는 빼고 녹음, 업로드, 결과 콜백까지만 함.
  */
 export default function CheckinRecorder({ session, onResult, onError }: CheckinRecorderProps) {
   const [status, setStatus] = useState<RecorderStatus>("idle");

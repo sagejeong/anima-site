@@ -44,8 +44,8 @@ export async function POST(request: Request) {
   outgoing.append("file", file, file.name);
   outgoing.append("user_uuid", userUuid);
 
-  // MRRecord의 medication_* 컬럼에 대응합니다. 서버가 아직 이 필드를 받지
-  // 않는다면 FastAPI가 조용히 무시하므로, 미리 보내둬도 안전합니다.
+  // MRRecord의 medication_* 컬럼에 대응한다. 서버가 아직 이 필드를 받지
+  // 않는다면 FastAPI가 조용히 무시하므로, 미리 보내둬도 안전하다.
   for (const field of ["medication_taken", "medication_category", "medication_name"]) {
     const value = incoming.get(field);
     if (typeof value === "string") {

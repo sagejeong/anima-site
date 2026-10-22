@@ -39,7 +39,7 @@ const RECORDING_TIPS: readonly string[] = [
   "3초 이상",
 ];
 
-/** 마이크 지원 여부는 브라우저에서만 알 수 있어, 서버 렌더링과 어긋나지 않게 읽습니다. */
+/** 마이크 지원 여부는 브라우저에서만 알 수 있어, 서버 렌더링과 어긋나지 않게 읽는다. */
 const subscribeToNothing = () => () => undefined;
 
 export default function CoughRecorder() {
@@ -56,7 +56,7 @@ export default function CoughRecorder() {
 
   const audioBlobRef = useRef<Blob | null>(null);
   const measuredAtRef = useRef<string>("");
-  /** 업로드가 성공(기침 감지)했을 때, 복용 약을 물어보는 동안 결과를 잠깐 들고 있습니다. */
+  /** 업로드가 성공(기침 감지)했을 때, 복용 약을 물어보는 동안 결과를 잠깐 들고 있음. */
   const pendingResponseRef = useRef<AnimaUploadResponse | null>(null);
   const pendingAudioDataUrlRef = useRef<string | undefined>(undefined);
   const streamRef = useRef<MediaStream | null>(null);
@@ -67,7 +67,7 @@ export default function CoughRecorder() {
   const startedAtRef = useRef<number>(0);
   const audioUrlRef = useRef<string | null>(null);
 
-  /** 마이크와 타이머를 정리합니다. 녹음이 끝나면 마이크 표시등도 꺼져야 합니다. */
+  /** 마이크와 타이머를 정리한다. 녹음이 끝나면 마이크 표시등도 꺼져야 한다. */
   const releaseMicrophone = useCallback((): void => {
     if (timerRef.current !== null) {
       window.clearInterval(timerRef.current);
@@ -249,7 +249,7 @@ export default function CoughRecorder() {
         return;
       }
 
-      // 기침이 제대로 감지된 경우에만 복용 약을 묻습니다.
+      // 기침이 제대로 감지된 경우에만 복용 약을 묻는다.
       pendingResponseRef.current = body;
       pendingAudioDataUrlRef.current = audioDataUrl;
       setStatus("medication-yesno");

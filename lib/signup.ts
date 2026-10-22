@@ -161,7 +161,7 @@ export const INITIAL_SIGNUP_FORM: SignupFormData = {
   note: "",
 };
 
-/** 필드 이름 → 오류 메시지 */
+/** 필드 이름별 오류 메시지 */
 export type FormErrors = Partial<Record<keyof SignupFormData, string>>;
 
 export const USER_ID_PATTERN = /^[a-zA-Z0-9]{4,20}$/;
@@ -242,19 +242,19 @@ export function validateBasicInfoStep(data: SignupFormData): FormErrors {
   return errors;
 }
 
-/** "yes"/"no"/"" → true/false/undefined. 서버는 boolean, 빈 값은 필드 자체를 생략합니다. */
+/** "yes"/"no"/""를 true/false/undefined로 바꾼다. 서버는 boolean, 빈 값은 필드 자체를 생략한다. */
 function yesNoToBoolean(value: string): boolean | undefined {
   if (value === "yes") return true;
   if (value === "no") return false;
   return undefined;
 }
 
-/** 빈 문자열은 "답하지 않음"이라 서버에 아예 보내지 않습니다. */
+/** 빈 문자열은 "답하지 않음"이라 서버에 아예 보내지 않는다. */
 function emptyToUndefined(value: string): string | undefined {
   return value === "" ? undefined : value;
 }
 
-/** 서버가 정의한 snake_case 필드명과 boolean 타입에 맞춰 변환합니다. */
+/** 서버가 정의한 snake_case 필드명과 boolean 타입에 맞춰 변환한다. */
 export function toProfilePayload(data: SignupFormData) {
   const age = Number(data.age);
 

@@ -48,9 +48,12 @@ export default function LineChart({
   const linePath = coords
     .map((c, i) => `${i === 0 ? "M" : "L"}${c.x.toFixed(1)},${c.y.toFixed(1)}`)
     .join(" ");
+  // 0% 선(yFor(0))에서 닫아야 아래 위험도 배경 구간과 같은 높이에서 끝남.
+  // 전에는 VIEW_HEIGHT(테두리)까지 채워서, 배경 구간 아래로 색이 삐져나와 보였음
+  const areaBottom = yFor(0);
   const areaPath =
     coords.length > 0
-      ? `${linePath} L${coords[coords.length - 1].x.toFixed(1)},${VIEW_HEIGHT} L${coords[0].x.toFixed(1)},${VIEW_HEIGHT} Z`
+      ? `${linePath} L${coords[coords.length - 1].x.toFixed(1)},${areaBottom} L${coords[0].x.toFixed(1)},${areaBottom} Z`
       : "";
   const last = coords[coords.length - 1];
   const hovered = hoverIndex !== null ? coords[hoverIndex] : null;
@@ -70,26 +73,15 @@ export default function LineChart({
         <rect x={PAD_LEFT} y={yFor(50)} width={VIEW_WIDTH - PAD_LEFT} height={yFor(0) - yFor(50)} fill="var(--color-good)" opacity="0.08" />
 
         {AXIS_PERCENTS.map((percent) => (
-          <g key={percent}>
-            <line
-              x1={PAD_LEFT}
-              x2={VIEW_WIDTH}
-              y1={yFor(percent)}
-              y2={yFor(percent)}
-              stroke="var(--color-line)"
-              strokeWidth="1"
-            />
-            <text
-              x={PAD_LEFT - 6}
-              y={yFor(percent)}
-              textAnchor="end"
-              dominantBaseline="middle"
-              fontSize="10"
-              fill="var(--color-ink-soft)"
-            >
-              {percent}
-            </text>
-          </g>
+          <line
+            key={percent}
+            x1={PAD_LEFT}
+            x2={VIEW_WIDTH}
+            y1={yFor(percent)}
+            y2={yFor(percent)}
+            stroke="var(--color-line)"
+            strokeWidth="1"
+          />
         ))}
 
         <path d={areaPath} fill={color} opacity="0.12" />
@@ -109,6 +101,24 @@ export default function LineChart({
         ))}
         {last && <circle cx={last.x} cy={last.y} r="7" fill={color} opacity="0.2" />}
       </svg>
+
+      {/* 축 숫자는 HTML로 따로 그림. svg가 preserveAspectRatio="none"이라 글자까지
+          가로세로 다르게 늘어나 찌그러져 보였음 */}
+      <div className="pointer-events-none absolute inset-0">
+        {AXIS_PERCENTS.map((percent) => (
+          <span
+            key={percent}
+            className="absolute -translate-y-1/2 text-right text-[10px] font-medium text-ink-soft"
+            style={{
+              top: `${(yFor(percent) / VIEW_HEIGHT) * 100}%`,
+              left: 0,
+              width: `${((PAD_LEFT - 6) / VIEW_WIDTH) * 100}%`,
+            }}
+          >
+            {percent}
+          </span>
+        ))}
+      </div>
 
       {hovered && hoverIndex !== null && (
         <div

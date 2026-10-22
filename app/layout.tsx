@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Calistoga, Geist, Geist_Mono, Gothic_A1, Inter, Noto_Sans_KR } from "next/font/google";
+import { Calistoga, Geist, Geist_Mono, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -13,30 +13,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// ANiMA 사이트 전용 서체 페어. 헤드라인은 Calistoga(한글은 Gothic A1로 대체),
-// 본문은 Inter(한글은 Noto Sans KR로 대체), 기존 앱 폰트랑 안 섞이게 --font-hub-*로만 씀
+// ANiMA 사이트 전용 서체 페어. 헤드라인은 Calistoga, 본문은 Inter. 둘 다 라틴 전용이라
+// 한글은 OS 기본 서체(system-ui)로 대체함. 구글 폰트로 구한 한글 폰트(Gothic A1,
+// Noto Sans KR)를 써봤다가 카카오톡 인앱 브라우저에서 글자가 깨지는 문제가 있어 뺐다.
+// 이 폰트들은 next/font가 자동 분할하는 유니코드 범위별 @font-face 규칙이 수백 개라
+// (Gothic A1 한 굵기만 397개), 일부 웹뷰가 범위를 잘못 매칭해 엉뚱한 글자를 그린다.
 const calistoga = Calistoga({
   variable: "--font-calistoga",
   subsets: ["latin"],
   weight: "400",
 });
 
-const gothicA1 = Gothic_A1({
-  variable: "--font-gothic-a1",
-  subsets: ["latin"],
-  weight: ["500", "700", "800", "900"],
-});
-
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
-});
-
-const notoSansKr = Noto_Sans_KR({
-  variable: "--font-noto-sans-kr",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 // 제목(h1~h3)용 나눔명조. 원본 ttf가 3MB라 scripts/subset-fonts.py로 뽑은 woff2 서브셋만 씀.
@@ -63,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ko"
-      className={`${geistSans.variable} ${geistMono.variable} ${nanumMyeongjo.variable} ${calistoga.variable} ${gothicA1.variable} ${inter.variable} ${notoSansKr.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${nanumMyeongjo.variable} ${calistoga.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

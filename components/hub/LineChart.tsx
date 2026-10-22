@@ -16,7 +16,6 @@ const VIEW_WIDTH = 480;
 const VIEW_HEIGHT = 160;
 const AXIS_PERCENTS = [0, 50, 75, 100] as const;
 const PAD_LEFT = 28;
-const PAD_RIGHT = 14;
 const PAD_Y = 16;
 const MAX_PERCENT = 100;
 
@@ -37,7 +36,9 @@ export default function LineChart({
 }: LineChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const step = points.length > 1 ? (VIEW_WIDTH - PAD_LEFT - PAD_RIGHT) / (points.length - 1) : 0;
+  // 마지막 점이 배경 구간·격자선·아래 날짜 라벨과 같은 오른쪽 끝(VIEW_WIDTH)에
+  // 오도록, 오른쪽에는 따로 여백을 두지 않는다
+  const step = points.length > 1 ? (VIEW_WIDTH - PAD_LEFT) / (points.length - 1) : 0;
 
   const coords = points.map((point, index) => ({
     x: PAD_LEFT + index * step,

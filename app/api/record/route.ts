@@ -44,13 +44,6 @@ export async function POST(request: Request) {
   outgoing.append("file", file, file.name);
   outgoing.append("user_uuid", userUuid);
 
-  // MRRecord의 medication_taken 컬럼에 대응한다. 서버가 아직 이 필드를 받지
-  // 않는다면 FastAPI가 조용히 무시하므로, 미리 보내둬도 안전하다.
-  const medicationTaken = incoming.get("medication_taken");
-  if (typeof medicationTaken === "string") {
-    outgoing.append("medication_taken", medicationTaken);
-  }
-
   const result = await callAnimaApi<unknown>(animaUrl("/upload"), {
     method: "POST",
     body: outgoing,

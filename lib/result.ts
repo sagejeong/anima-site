@@ -167,8 +167,6 @@ export type MRRecordSummary = {
   healthy_distance?: number | null;
   risk_level?: RiskLevel | string | null;
   quality_fail_reason?: string | null;
-  /** 서버가 아직 이 컬럼을 내려주지 않을 수 있어 선택적입니다. */
-  medication_taken?: number | boolean | null;
 };
 
 /** measured_at, record_date, created_at 순으로 존재하는 값을 쓴다. */
@@ -249,10 +247,6 @@ export type StoredResult = {
   response: AnimaUploadResponse;
   measuredAt: string;
   audioDataUrl?: string;
-  /** 분석 요청 직전 복용 중인 약 확인 단계에서 입력한 값 */
-  medication?: {
-    taken: boolean;
-  };
 };
 
 const QUALITY_FAIL_MESSAGES: Record<string, string> = {

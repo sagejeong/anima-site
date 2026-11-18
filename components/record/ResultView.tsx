@@ -57,7 +57,7 @@ export default function ResultView() {
     );
   }
 
-  const { response, measuredAt, audioDataUrl, medication } = stored;
+  const { response, measuredAt, audioDataUrl } = stored;
   const hasDistance = typeof response.prediction?.stage2?.distance === "number";
 
   return (
@@ -69,7 +69,6 @@ export default function ResultView() {
         message={response.final_prediction?.final_message}
         measuredAt={measuredAt}
         audioUrl={audioDataUrl}
-        medicationTaken={medication?.taken}
       />
 
       {hasDistance && (

@@ -30,11 +30,6 @@ const COLLECTED_ITEMS: readonly CollectedItem[] = [
     method: "앱 최초 실행 시 자동 생성, 기기 내부에 저장",
   },
   {
-    item: "복약 여부(녹음 직전)",
-    purpose: "분석 결과 해석에 참고하기 위함",
-    method: "녹음할 때마다 사용자가 직접 선택한 경우에만 수집",
-  },
-  {
     item: "분석 결과(이탈도, 판정 등)",
     purpose: "기록 추이 제공",
     method: "분석 완료 시 서버에 저장",

@@ -73,7 +73,6 @@ export default async function RecordDetailPage({
                   distance={record.healthy_distance}
                   failReason={record.quality_fail_reason}
                   measuredAt={pickRecordDate(record)}
-                  medicationTaken={Boolean(record.medication_taken)}
                 />
 
                 {/* 지난 기록에는 방금 녹음한 소리가 남아있지 않아 재생 기능은 없습니다. */}

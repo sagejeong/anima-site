@@ -24,8 +24,6 @@ type ResultBodyProps = {
   measuredAt?: string | null;
   /** 녹음한 소리를 재생할 수 있는 주소. 방금 올린 결과에만 존재한다. */
   audioUrl?: string | null;
-  /** 분석 요청 전 복용 중인 약 확인 단계에서 "있음"으로 답했는지 */
-  medicationTaken?: boolean | null;
 };
 
 /**
@@ -39,7 +37,6 @@ export default function ResultBody({
   message,
   measuredAt,
   audioUrl,
-  medicationTaken,
 }: ResultBodyProps) {
   // 기침이 감지되지 않았거나 품질 기준에 못 미치면 게이지 자체를 보여주지 않는다.
   if (isCough === false || failReason) {
@@ -93,12 +90,6 @@ export default function ResultBody({
 
       <div className="flex flex-wrap items-center justify-center gap-2">
         <RiskBadge risk={risk} />
-        {medicationTaken && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/5 px-3 py-1 text-xs font-medium text-ink-soft">
-            <span aria-hidden="true">💊</span>
-            약 복용 중
-          </span>
-        )}
       </div>
 
       <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-ink-soft">

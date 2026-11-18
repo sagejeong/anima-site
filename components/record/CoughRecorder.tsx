@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import LevelMeter from "@/components/record/LevelMeter";
-import MedicationYesNoStep from "@/components/record/MedicationYesNoStep";
 import {
   blobToDataUrl,
   fileExtensionFor,
@@ -27,7 +26,6 @@ type RecorderStatus =
   | "requesting"
   | "recording"
   | "recorded"
-  | "medication-yesno"
   | "denied"
   | "unsupported";
 
@@ -52,9 +50,6 @@ export default function CoughRecorder() {
 
   const audioBlobRef = useRef<Blob | null>(null);
   const measuredAtRef = useRef<string>("");
-  /** 업로드가 성공(기침 감지)했을 때, 복용 약을 물어보는 동안 결과를 잠깐 들고 있음. */
-  const pendingResponseRef = useRef<AnimaUploadResponse | null>(null);
-  const pendingAudioDataUrlRef = useRef<string | undefined>(undefined);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -178,28 +173,23 @@ export default function CoughRecorder() {
     setAudioUrl(null);
     setElapsedMs(0);
     setRecordedMs(0);
-    pendingResponseRef.current = null;
-    pendingAudioDataUrlRef.current = undefined;
     setStatus("idle");
   };
 
   const goToResult = (
     response: AnimaUploadResponse,
     audioDataUrl: string | undefined,
-    medication?: StoredResult["medication"],
   ): void => {
     const stored: StoredResult = {
       response,
       measuredAt: measuredAtRef.current || new Date().toISOString(),
       audioDataUrl,
-      medication,
     };
     sessionStorage.setItem(LAST_RESULT_STORAGE_KEY, JSON.stringify(stored));
     router.push("/result");
   };
 
-  // "분석 요청하기" 누르면 바로 업로드. 기침 미감지/실패면 복용 약 안 묻고 바로 실패 카드로,
-  // 감지 성공한 경우에만 복용 약 물어서 답 붙여 결과로 넘어감
+  // "분석 요청하기" 누르면 바로 업로드하고 결과로 넘어감
   const uploadRecording = async (): Promise<void> => {
     const blob = audioBlobRef.current;
     if (!blob) return;
@@ -233,33 +223,12 @@ export default function CoughRecorder() {
       }
 
       const body = (await response.json().catch(() => ({}))) as AnimaUploadResponse;
-
-      const isCough = body.prediction?.is_cough;
-      const distance = body.prediction?.stage2?.distance;
-      const failReason = body.quality?.quality_fail_reason;
-
-      if (isCough === false || failReason || typeof distance !== "number") {
-        goToResult(body, audioDataUrl);
-        return;
-      }
-
-      // 기침이 제대로 감지된 경우에만 복용 약을 묻는다.
-      pendingResponseRef.current = body;
-      pendingAudioDataUrlRef.current = audioDataUrl;
-      setStatus("medication-yesno");
+      goToResult(body, audioDataUrl);
     } catch {
       goToResult({ quality: { quality_fail_reason: "UPLOAD_FAILED" } }, audioDataUrl);
     } finally {
       setIsUploading(false);
     }
-  };
-
-  /** 복용 약 질문에 답한 뒤, 잠깐 들고 있던 분석 결과에 답을 붙여 결과로 넘어갑니다. */
-  const finalizeWithMedication = (taken: boolean): void => {
-    const response = pendingResponseRef.current;
-    if (!response) return;
-
-    goToResult(response, pendingAudioDataUrlRef.current, { taken });
   };
 
   if (!isSupported || status === "unsupported") {
@@ -269,17 +238,6 @@ export default function CoughRecorder() {
         <code className="rounded bg-black/5 px-1.5 py-0.5 text-sm">https://</code>{" "}
         로 시작하지 않으면 브라우저가 마이크를 열어주지 않습니다.
       </Notice>
-    );
-  }
-
-  if (status === "medication-yesno") {
-    return (
-      <MedicationYesNoStep
-        onYes={() => finalizeWithMedication(true)}
-        onNo={() => finalizeWithMedication(false)}
-        onBack={() => setStatus("recorded")}
-        isSubmitting={false}
-      />
     );
   }
 

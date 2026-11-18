@@ -4,26 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AccountStep from "@/components/signup/AccountStep";
-import BasicInfoStep from "@/components/signup/BasicInfoStep";
 import ConsentStep from "@/components/signup/ConsentStep";
-import HealthInfoStep from "@/components/signup/HealthInfoStep";
 import {
   INITIAL_SIGNUP_FORM,
   toProfilePayload,
   validateAccountStep,
-  validateBasicInfoStep,
   type FormErrors,
   type SignupFormData,
 } from "@/lib/signup";
 
-const STEP_LABELS = ["동의", "기본 정보", "건강 정보"] as const;
-
-type StepIndex = 0 | 1 | 2;
-
 export default function SignupFlow() {
-  const [step, setStep] = useState<StepIndex>(0);
   const [data, setData] = useState<SignupFormData>(INITIAL_SIGNUP_FORM);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [agreementError, setAgreementError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -33,24 +25,15 @@ export default function SignupFlow() {
     value: SignupFormData[K],
   ): void => {
     setData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
-  };
-
-  /** 현재 단계를 검증하고, 통과하면 빈 객체를 돌려줍니다. */
-  const validateCurrentStep = (): FormErrors => {
-    switch (step) {
-      case 0:
-        return data.agreedToResearch
-          ? {}
-          : { agreedToResearch: "동의하셔야 다음 단계로 넘어갈 수 있습니다." };
-      case 1:
-        return validateBasicInfoStep(data);
-      default:
-        return {}; // 건강 정보는 전부 선택 입력
-    }
+    if (field === "agreedToTerms") setAgreementError(undefined);
   };
 
   const submit = async (): Promise<void> => {
+    if (!data.agreedToTerms) {
+      setAgreementError("동의하셔야 다음 단계로 넘어갈 수 있습니다.");
+      return;
+    }
+    setAgreementError(undefined);
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -78,63 +61,17 @@ export default function SignupFlow() {
     }
   };
 
-  const goNext = (): void => {
-    const nextErrors = validateCurrentStep();
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
-      return;
-    }
-    setErrors({});
-
-    if (step < 2) {
-      setStep((prev) => (prev + 1) as StepIndex);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    void submit();
-  };
-
-  const goPrev = (): void => {
-    setErrors({});
-    setStep((prev) => Math.max(0, prev - 1) as StepIndex);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   if (isSubmitted) {
     return <SignupComplete data={data} onChange={updateField} />;
   }
 
   return (
     <div>
-      <StepIndicator currentStep={step} />
-
-      <div className="mt-10">
-        {step === 0 && (
-          <ConsentStep
-            agreed={data.agreedToResearch}
-            onAgreedChange={(agreed) => updateField("agreedToResearch", agreed)}
-            error={errors.agreedToResearch}
-          />
-        )}
-        {step === 1 && (
-          <BasicInfoStep
-            data={data}
-            errors={errors}
-            onChange={updateField}
-            onComplete={goNext}
-            onBack={goPrev}
-          />
-        )}
-        {step === 2 && (
-          <HealthInfoStep
-            data={data}
-            onChange={updateField}
-            onComplete={() => void submit()}
-            onBack={goPrev}
-          />
-        )}
-      </div>
+      <ConsentStep
+        agreed={data.agreedToTerms}
+        onAgreedChange={(agreed) => updateField("agreedToTerms", agreed)}
+        error={agreementError}
+      />
 
       {submitError && (
         <p
@@ -145,21 +82,18 @@ export default function SignupFlow() {
         </p>
       )}
 
-      {/* 기본 정보(step 1)·건강 정보(step 2)는 각자 질문마다 이전/다음을 자체 처리함 */}
-      {step === 0 && (
       <div className="mt-10 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <span className="hidden sm:block" />
 
         <button
           type="button"
-          onClick={goNext}
+          onClick={() => void submit()}
           disabled={isSubmitting}
           className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-accent disabled:opacity-60 sm:text-base"
         >
           {isSubmitting ? "저장하는 중..." : "다음"}
         </button>
       </div>
-      )}
 
       <p className="mt-8 text-center text-sm text-ink-soft">
         다른 기기에서 만든 계정이 있으신가요?{" "}
@@ -174,36 +108,6 @@ export default function SignupFlow() {
   );
 }
 
-function StepIndicator({ currentStep }: { currentStep: StepIndex }) {
-  return (
-    <ol className="flex items-center gap-2" aria-label="가입 진행 단계">
-      {STEP_LABELS.map((label, index) => {
-        const isDone = index < currentStep;
-        const isCurrent = index === currentStep;
-
-        return (
-          <li key={label} className="flex flex-1 flex-col gap-2">
-            <span
-              className={`h-1.5 rounded-full transition-colors ${
-                isDone || isCurrent ? "bg-primary" : "bg-gray-light"
-              }`}
-              aria-hidden="true"
-            />
-            <span
-              className={`text-xs font-medium sm:text-sm ${
-                isCurrent ? "text-primary" : "text-ink-soft"
-              }`}
-              aria-current={isCurrent ? "step" : undefined}
-            >
-              {label}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
 type SignupCompleteProps = {
   data: SignupFormData;
   onChange: <K extends keyof SignupFormData>(
@@ -214,7 +118,7 @@ type SignupCompleteProps = {
 
 type AccountLinkStatus = "idle" | "submitting" | "done";
 
-// 참여 정보 저장 끝난 뒤 화면. 계정은 완전 선택, 안 만들어도 기록은 이미 저장됨.
+// 서비스 이용 동의 끝난 뒤 화면. 계정은 완전 선택, 안 만들어도 기록은 이미 저장됨.
 // 다른 기기에서 이어보고 싶을 때만 아이디 만들면 됨
 function SignupComplete({ data, onChange }: SignupCompleteProps) {
   const router = useRouter();
@@ -284,10 +188,10 @@ function SignupComplete({ data, onChange }: SignupCompleteProps) {
       </div>
 
       <h2 className="mt-6 text-2xl font-bold text-ink">
-        참여해 주셔서 감사합니다
+        이용해 주셔서 감사합니다
       </h2>
       <p className="mt-3 text-base leading-relaxed text-ink-soft">
-        입력하신 내용이 저장되었습니다.
+        동의 내용이 저장되었습니다.
         <br />
         이제 첫 기침 녹음을 시작할 수 있습니다.
       </p>

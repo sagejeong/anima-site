@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Header from "@/components/Header";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ const COLLECTED_ITEMS: readonly CollectedItem[] = [
   {
     item: "녹음 음성(기침 소리)",
     purpose: "기침 여부 판별 및 건강 상태 분석(이탈도 계산)",
-    method: "사용자가 녹음 버튼을 눌렀을 때만 수집",
+    method: "분석 직후 폐기, 서버에 저장하지 않음(실시간 처리만)",
   },
   {
     item: "위치 정보(대략적 위치)",
@@ -29,9 +30,14 @@ const COLLECTED_ITEMS: readonly CollectedItem[] = [
     method: "앱 최초 실행 시 자동 생성, 기기 내부에 저장",
   },
   {
-    item: "복약 여부, 통증·증상 체감 점수",
-    purpose: "분석 리포트에 사용자 입력 맥락을 함께 기록하기 위함",
-    method: "사용자가 직접 입력한 경우에만 수집",
+    item: "복약 여부(녹음 직전)",
+    purpose: "분석 결과 해석에 참고하기 위함",
+    method: "녹음할 때마다 사용자가 직접 선택한 경우에만 수집",
+  },
+  {
+    item: "분석 결과(이탈도, 판정 등)",
+    purpose: "기록 추이 제공",
+    method: "분석 완료 시 서버에 저장",
   },
 ];
 
@@ -45,7 +51,7 @@ export default function PrivacyPage() {
           <h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             ANiMA 개인정보처리방침
           </h1>
-          <p className="mt-3 text-sm text-ink-soft">최종 수정일: 2026년 10월 7일</p>
+          <p className="mt-3 text-sm text-ink-soft">최종 수정일: 2026년 11월 18일</p>
 
           <p className="mt-8 text-pretty text-base leading-relaxed text-ink-soft sm:text-lg sm:leading-relaxed">
             ANiMA(이하 &ldquo;앱&rdquo;)는 사용자의 기침 소리를 녹음·분석하여 건강 관리에
@@ -84,8 +90,9 @@ export default function PrivacyPage() {
             <ul className="list-disc space-y-2 pl-5 marker:text-primary">
               <li>녹음 음성과 분석 결과는 우선 사용자 기기 내부(로컬 저장소)에 저장됩니다.</li>
               <li>
-                분석을 위해 녹음 음성이 ANiMA 자체 분석 서버로 전송되며, 서버는 음성을
-                분석해 결과만 기기로 반환합니다.
+                분석을 위해 녹음 음성이 ANiMA 자체 분석 서버로 전송되어 분석에 사용되며,
+                분석이 끝나면 서버에 저장하지 않고 즉시 폐기합니다. 서버는 분석 결과만
+                기기로 반환합니다.
               </li>
               <li>서버로 전송된 음성 파일은 분석 목적 외에 다른 용도로 사용되지 않습니다.</li>
             </ul>
@@ -105,9 +112,22 @@ export default function PrivacyPage() {
           <Section number={5} title="정보 보관 및 삭제">
             <ul className="list-disc space-y-2 pl-5 marker:text-primary">
               <li>분석 기록은 사용자가 앱을 삭제하면 기기 내 저장된 데이터와 함께 삭제됩니다.</li>
+              <li>서버에 저장된 데이터는 탈퇴 또는 삭제를 요청하시기 전까지 보관됩니다.</li>
               <li>
-                서버에 전송된 음성 파일의 삭제를 원하실 경우 아래 문의처로 요청하실 수
-                있습니다.
+                삭제(탈퇴) 즉시 서버 데이터가 삭제되며, 백업 데이터는 최대 30일 이내
+                완전히 삭제됩니다.
+              </li>
+              <li>이메일로 삭제를 요청하신 경우 요청일로부터 10일 이내 처리됩니다.</li>
+              <li>녹음 음성은 분석 직후 폐기되며 서버에 저장되지 않습니다.</li>
+              <li>
+                서버 데이터 삭제 방법은{" "}
+                <Link
+                  href="/delete-account"
+                  className="font-medium text-primary underline underline-offset-4"
+                >
+                  계정 및 데이터 삭제 페이지
+                </Link>
+                에서 자세히 안내합니다.
               </li>
             </ul>
           </Section>

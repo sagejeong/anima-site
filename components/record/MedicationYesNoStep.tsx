@@ -7,7 +7,7 @@ type MedicationYesNoStepProps = {
   isSubmitting: boolean;
 };
 
-// "아니오"면 바로 분석 요청, "예"면 MedicationCategoryStep으로
+// 어느 쪽을 눌러도 바로 분석 결과로 넘어감. 복용 여부만 기록하고 어떤 약인지는 안 물음
 export default function MedicationYesNoStep({
   onYes,
   onNo,

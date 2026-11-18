@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import LevelMeter from "@/components/record/LevelMeter";
-import MedicationCategoryStep from "@/components/record/MedicationCategoryStep";
 import MedicationYesNoStep from "@/components/record/MedicationYesNoStep";
 import {
   blobToDataUrl,
@@ -29,7 +28,6 @@ type RecorderStatus =
   | "recording"
   | "recorded"
   | "medication-yesno"
-  | "medication-categories"
   | "denied"
   | "unsupported";
 
@@ -51,8 +49,6 @@ export default function CoughRecorder() {
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [mimeType, setMimeType] = useState<string>("audio/webm");
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [medicationValues, setMedicationValues] = useState<string[]>([]);
-  const [medicationOther, setMedicationOther] = useState<string>("");
 
   const audioBlobRef = useRef<Blob | null>(null);
   const measuredAtRef = useRef<string>("");
@@ -182,8 +178,6 @@ export default function CoughRecorder() {
     setAudioUrl(null);
     setElapsedMs(0);
     setRecordedMs(0);
-    setMedicationValues([]);
-    setMedicationOther("");
     pendingResponseRef.current = null;
     pendingAudioDataUrlRef.current = undefined;
     setStatus("idle");
@@ -261,19 +255,11 @@ export default function CoughRecorder() {
   };
 
   /** 복용 약 질문에 답한 뒤, 잠깐 들고 있던 분석 결과에 답을 붙여 결과로 넘어갑니다. */
-  const finalizeWithMedication = (medication: {
-    taken: boolean;
-    categories: string[];
-    other: string;
-  }): void => {
+  const finalizeWithMedication = (taken: boolean): void => {
     const response = pendingResponseRef.current;
     if (!response) return;
 
-    goToResult(response, pendingAudioDataUrlRef.current, {
-      taken: medication.taken,
-      categories: medication.categories,
-      other: medication.other || undefined,
-    });
+    goToResult(response, pendingAudioDataUrlRef.current, { taken });
   };
 
   if (!isSupported || status === "unsupported") {
@@ -289,29 +275,9 @@ export default function CoughRecorder() {
   if (status === "medication-yesno") {
     return (
       <MedicationYesNoStep
-        onYes={() => setStatus("medication-categories")}
-        onNo={() => finalizeWithMedication({ taken: false, categories: [], other: "" })}
+        onYes={() => finalizeWithMedication(true)}
+        onNo={() => finalizeWithMedication(false)}
         onBack={() => setStatus("recorded")}
-        isSubmitting={false}
-      />
-    );
-  }
-
-  if (status === "medication-categories") {
-    return (
-      <MedicationCategoryStep
-        values={medicationValues}
-        onValuesChange={setMedicationValues}
-        other={medicationOther}
-        onOtherChange={setMedicationOther}
-        onConfirm={() =>
-          finalizeWithMedication({
-            taken: true,
-            categories: medicationValues,
-            other: medicationOther.trim(),
-          })
-        }
-        onBack={() => setStatus("medication-yesno")}
         isSubmitting={false}
       />
     );

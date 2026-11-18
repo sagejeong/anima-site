@@ -5,7 +5,7 @@ import RecordButton from "@/components/RecordButton";
 export const metadata: Metadata = {
   title: "ANiMA 소개 · 기침 소리로 살펴보는 내 기침의 변화",
   description:
-    "ANiMA는 스마트폰으로 녹음한 기침 소리를 건강한 사람들의 기침 기준 분포와 비교해, 얼마나 다른지 수치와 기록으로 보여주는 기침 자가 모니터링 연구 프로젝트입니다.",
+    "ANiMA는 스마트폰으로 녹음한 기침 소리를 건강한 사람들의 기침 기준 분포와 비교해, 얼마나 다른지 수치와 기록으로 보여주는 기침 변화 기록 서비스입니다.",
 };
 
 export default function AboutPage() {
@@ -147,7 +147,7 @@ export default function AboutPage() {
             </p>
           </Section>
 
-          <Section eyebrow="연구 배경" title="만성 기침, 기록하기 어려운 증상">
+          <Section eyebrow="시작하게 된 배경" title="만성 기침, 기록하기 어려운 증상">
             <div className="grid gap-3 sm:grid-cols-2">
               {BACKGROUND_STATS.map((stat) => (
                 <div
@@ -235,7 +235,7 @@ export default function AboutPage() {
             </p>
           </Section>
 
-          <Section eyebrow="녹음 안내" title="처음 참여하실 때 이렇게 진행됩니다">
+          <Section eyebrow="녹음 안내" title="처음 이용하실 때 이렇게 진행됩니다">
             <ul className="grid gap-3 sm:grid-cols-2">
               {RECORDING_TIPS.map((tip) => (
                 <li
@@ -249,9 +249,9 @@ export default function AboutPage() {
             </ul>
           </Section>
 
-          <Section eyebrow="개인정보" title="연구 참여는 언제나 자발적입니다">
+          <Section eyebrow="개인정보" title="서비스 이용은 언제나 자발적입니다">
             <ul className="list-disc space-y-2 pl-5 marker:text-primary">
-              <li>참여 여부는 전적으로 본인의 선택이며, 언제든 그만둘 수 있습니다.</li>
+              <li>이용 여부는 전적으로 본인의 선택이며, 언제든 그만둘 수 있습니다.</li>
               <li>
                 분석을 요청하지 않으시면 개인을 식별할 수 있는 정보는 포함되지
                 않습니다.
@@ -271,7 +271,7 @@ export default function AboutPage() {
             <p className="mt-3 text-sm leading-relaxed text-ink-soft sm:text-base sm:leading-relaxed">
               현재 ANiMA는 의료적 진단을 제공하지 않습니다. 지금 제공되는 것은 내
               기침이 기준 패턴과 얼마나 달라졌는지에 대한 참고 기록이며, 더
-              정교한 비교 도구는 연구가 진행된 뒤 추후 앱에 통합될 예정입니다.
+              정교한 비교 도구는 데이터가 쌓인 뒤 추후 앱에 통합될 예정입니다.
               양호·주의·경고는 기준 분포와 비교한 소리의 차이이며, 질병의 유무나
               심한 정도를 뜻하지 않습니다. 현재 기준은 해외 공개 데이터로 만든
               것이라, 국내 사용자에게 얼마나 잘 맞는지는 검증 중입니다. 증상이
@@ -283,12 +283,12 @@ export default function AboutPage() {
           {/* 문의 + CTA */}
           <div className="mt-14 flex flex-col items-center gap-5 rounded-3xl border border-gray-light/70 bg-steel-surface px-6 py-12 text-center">
             <h2 className="text-xl font-bold text-ink sm:text-2xl">
-              연구에 참여해 주시겠어요?
+              지금 시작해 보시겠어요?
             </h2>
             <p className="max-w-md text-pretty text-sm leading-relaxed text-ink-soft sm:text-base">
-              녹음에 참여하시면 국내 사용자에게 맞는 기준을 만드는 데 도움이
-              됩니다. 첫 녹음 전에 연구 목적과 데이터 이용에 대한 동의 안내를
-              한 번 더 보여드립니다.
+              녹음을 시작하시면 국내 사용자에게 맞는 기준을 만드는 데 도움이
+              됩니다. 첫 녹음 전에 서비스 이용 목적과 개인정보 수집·이용에
+              대한 동의 안내를 한 번 더 보여드립니다.
             </p>
             <RecordButton className="mt-2" />
             <p className="text-xs text-ink-soft sm:text-sm">

@@ -27,7 +27,7 @@ const CHECK_MESSAGES: Record<Exclude<CheckStatus, "idle">, { text: string; class
   error: { text: "확인하지 못했어요. 잠시 후 다시 시도해 주세요.", className: "text-red-600" },
 };
 
-/** 계정 정보 입력 (개인 식별 정보를 받지 않는 ID 기반). 참여 정보 저장 후 선택적으로 노출된다. */
+/** 계정 정보 입력 (개인 식별 정보를 받지 않는 ID 기반). 동의 처리 후 선택적으로 노출된다. */
 export default function AccountStep({
   data,
   errors,
@@ -67,7 +67,7 @@ export default function AccountStep({
         계정 만들기
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-        이름·연락처는 받지 않습니다. 여기서 만든 ID만 연구 데이터의 식별 번호로
+        이름·연락처는 받지 않습니다. 여기서 만든 ID만 기록 데이터의 식별 번호로
         사용됩니다.
       </p>
 
@@ -129,7 +129,7 @@ export default function AccountStep({
           value={data.recoveryEmail}
           onChange={(value) => onChange("recoveryEmail", value)}
           placeholder="example@email.com"
-          hint="비밀번호 재설정에만 사용하며, 연구 데이터와 분리해 보관합니다. 입력하지 않으셔도 됩니다."
+          hint="비밀번호 재설정에만 사용하며, 기록 데이터와 분리해 보관합니다. 입력하지 않으셔도 됩니다."
           autoComplete="email"
           error={errors.recoveryEmail}
         />

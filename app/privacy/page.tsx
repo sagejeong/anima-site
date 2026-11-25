@@ -13,6 +13,29 @@ type CollectedItem = {
   method: string;
 };
 
+const INSTITUTION_ITEMS: readonly CollectedItem[] = [
+  {
+    item: "입소자 이름",
+    purpose: "기관 관리자가 입소자별 기침 기록을 구분해 확인하기 위함",
+    method: "기관 관리자가 직접 입력",
+  },
+  {
+    item: "소속(병동 등)",
+    purpose: "기관 내 입소자 그룹 관리를 위함",
+    method: "기관 관리자가 직접 입력",
+  },
+  {
+    item: "체크인 기록(기침 분석 결과 포함)",
+    purpose: "입소자의 기침 변화를 기관 관리자가 확인하기 위함",
+    method: "입소자 본인이 체크인할 때 자동 생성",
+  },
+  {
+    item: "연동한 앱 UUID",
+    purpose: "입소자 본인의 앱 기록과 기관 대시보드를 연결하기 위함",
+    method: "기관 관리자가 직접 입력",
+  },
+];
+
 const COLLECTED_ITEMS: readonly CollectedItem[] = [
   {
     item: "녹음 음성(기침 소리)",
@@ -46,7 +69,7 @@ export default function PrivacyPage() {
           <h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             ANiMA 개인정보처리방침
           </h1>
-          <p className="mt-3 text-sm text-ink-soft">최종 수정일: 2026년 11월 18일</p>
+          <p className="mt-3 text-sm text-ink-soft">최종 수정일: 2026년 11월 25일</p>
 
           <p className="mt-8 text-pretty text-base leading-relaxed text-ink-soft sm:text-lg sm:leading-relaxed">
             ANiMA(이하 &ldquo;앱&rdquo;)는 사용자의 기침 소리를 녹음·분석하여 건강 관리에
@@ -76,12 +99,48 @@ export default function PrivacyPage() {
               </table>
             </div>
             <p className="mt-4 leading-relaxed">
-              앱은 이름, 전화번호, 이메일 등 사용자를 직접 식별할 수 있는 정보를 수집하지
-              않습니다.
+              일반(개인) 이용자의 경우, 이름·전화번호·이메일 등 사용자를 직접 식별할 수
+              있는 정보를 수집하지 않습니다. 다만 기관(요양시설) 대시보드를 통해
+              등록되는 입소자 정보는 아래와 같이 별도로 수집·관리됩니다.
             </p>
           </Section>
 
-          <Section number={2} title="정보의 저장 및 처리">
+          <Section number={2} title="기관 대시보드 이용 시 수집하는 정보 (시범 운영 중)">
+            <p>
+              ANiMA는 요양시설 등 기관에서 입소자의 기침 변화를 확인할 수 있도록 기관
+              대시보드 기능을 시범 운영하고 있습니다. 기관 대시보드는 기관 관리자
+              계정으로만 접근할 수 있으며, 다음 정보를 수집·저장합니다. 입소자 정보는
+              기관이 입소자(또는 보호자)의 동의를 받아 등록합니다.
+            </p>
+            <div className="overflow-x-auto rounded-2xl border border-gray-light">
+              <table className="w-full min-w-[560px] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-gray-light bg-steel-surface text-left text-xs font-bold uppercase tracking-wide text-ink-soft">
+                    <th className="px-4 py-3">항목</th>
+                    <th className="px-4 py-3">수집 목적</th>
+                    <th className="px-4 py-3">수집 방식</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-light">
+                  {INSTITUTION_ITEMS.map((row) => (
+                    <tr key={row.item} className="bg-steel-surface">
+                      <td className="px-4 py-3.5 font-semibold text-ink">{row.item}</td>
+                      <td className="px-4 py-3.5 leading-relaxed text-ink-soft">{row.purpose}</td>
+                      <td className="px-4 py-3.5 leading-relaxed text-ink-soft">{row.method}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="leading-relaxed">
+              위 정보는 기관 관리자가 대시보드에서 직접 삭제하거나, 삭제를 요청하시기
+              전까지 보관됩니다. 삭제는 기관 관리자 또는 입소자 본인이 요청할 수
+              있으며, 기관 관리자가 대시보드(입소자 관리 화면)에서 직접 처리하거나
+              아래 문의처로 이메일 요청할 수 있습니다.
+            </p>
+          </Section>
+
+          <Section number={3} title="정보의 저장 및 처리">
             <ul className="list-disc space-y-2 pl-5 marker:text-primary">
               <li>녹음 음성과 분석 결과는 우선 사용자 기기 내부(로컬 저장소)에 저장됩니다.</li>
               <li>
@@ -93,18 +152,18 @@ export default function PrivacyPage() {
             </ul>
           </Section>
 
-          <Section number={3} title="제3자 제공">
+          <Section number={4} title="제3자 제공">
             <p>
               수집된 정보는 ANiMA 자체 분석 서버 외의 제3자에게 제공되거나 판매되지
               않습니다.
             </p>
           </Section>
 
-          <Section number={4} title="광고">
+          <Section number={5} title="광고">
             <p>본 앱은 광고를 포함하지 않습니다.</p>
           </Section>
 
-          <Section number={5} title="정보 보관 및 삭제">
+          <Section number={6} title="정보 보관 및 삭제">
             <ul className="list-disc space-y-2 pl-5 marker:text-primary">
               <li>분석 기록은 사용자가 앱을 삭제하면 기기 내 저장된 데이터와 함께 삭제됩니다.</li>
               <li>서버에 저장된 데이터는 탈퇴 또는 삭제를 요청하시기 전까지 보관됩니다.</li>
@@ -127,7 +186,7 @@ export default function PrivacyPage() {
             </ul>
           </Section>
 
-          <Section number={6} title="문의처">
+          <Section number={7} title="문의처">
             <p>
               개인정보 관련 문의:{" "}
               <a
@@ -139,7 +198,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section number={7} title="방침의 변경">
+          <Section number={8} title="방침의 변경">
             <p>본 방침은 서비스 개선에 따라 변경될 수 있으며, 변경 시 본 페이지를 통해 공지합니다.</p>
           </Section>
         </div>

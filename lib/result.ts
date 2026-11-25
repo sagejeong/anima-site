@@ -42,7 +42,7 @@ export const RISK_COPY: Record<
   },
   RISK: {
     label: "경고",
-    threshold: "75% 초과",
+    threshold: "75% 이상",
   },
 };
 

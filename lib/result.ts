@@ -1,16 +1,16 @@
 /**
- * 분석 결과 화면에서 쓰는 타입과 판정 기준.
- * 임계값은 강민 님의 "DB 설계 및 저장로직 V8" 문서에 정의된
- * healthy_ref_final.json distance_quantiles를 그대로 따릅니다.
+- 분석 결과 화면에서 쓰는 타입과 판정 기준.
+- 임계값은 "DB 설계 및 저장로직 V8" 문서에 정의된
+- healthy_ref_final.json distance_quantiles를 그대로 따릅니다.
  */
 
 export const LAST_RESULT_STORAGE_KEY = "anima:last-result";
 
 /** healthy 분포 기준 마할라노비스 거리 분위값 */
 export const DISTANCE_QUANTILES = {
-  p50: 5.5149,
-  p75: 6.6988,
-  max: 13.912,
+  p50: 7.0413,
+  p75: 9.0137,
+  max: 13.88,
 } as const;
 
 export type RiskLevel = "GOOD" | "CAUTION" | "RISK";
@@ -54,12 +54,12 @@ export const MEDICAL_DISCLAIMER =
   "이 결과는 의료적 진단이 아니며, 개인 참고용입니다.";
 
 /**
- * 원거리(raw distance)를 화면 표시용 퍼센트(0~100)로 다시 매깁니다.
+- 원거리(raw distance)를 화면 표시용 퍼센트(0~100)로 다시 매깁니다.
  *
- * distance/maxDist*100 로 단순 환산하면 p50(5.5149)이 39.6%, p75(6.6988)가
- * 48.1%가 되어 "50% 미만 양호 / 50~75% 주의 / 75% 이상 경고"라는 판정 기준과
- * 화면 숫자가 어긋납니다. 앱은 p50을 정확히 50%, p75를 정확히 75%에 두는
- * 구간별 선형 환산을 씁니다. 이 함수는 그 방식을 그대로 따릅니다.
+- distance/maxDist*100 로 단순 환산하면 p50(5.5149)이 39.6%, p75(6.6988)가
+- 48.1%가 되어 "50% 미만 양호 / 50~75% 주의 / 75% 이상 경고"라는 판정 기준과
+- 화면 숫자가 어긋납니다. 앱은 p50을 정확히 50%, p75를 정확히 75%에 두는
+- 구간별 선형 환산을 씁니다. 이 함수는 그 방식을 그대로 따릅니다.
  */
 export function toDisplayPercent(distance: number): number {
   const { p50, p75, max } = DISTANCE_QUANTILES;
@@ -74,11 +74,11 @@ export function toDisplayPercent(distance: number): number {
 }
 
 /**
- * 서버(FastAPI)의 measured_at은 타임존 표기 없이 오는데, 실제 값은 이미 한국
- * 시각이다(2026-10월 재확인: 녹음 직후 결과 화면엔 맞게 뜨다가, 같은 값을
- * 기록 목록에서 다시 보면 9시간 밀려 있었음. UTC로 잘못 간주해 거기서 또
- * +9시간을 더했기 때문). 타임존 표기가 없으면 이미 한국 시각이라고 보고
- * 그대로 읽는다.
+- 서버(FastAPI)의 measured_at은 타임존 표기 없이 오는데, 실제 값은 이미 한국
+- 시각이다(2026-10월 재확인: 녹음 직후 결과 화면엔 맞게 뜨다가, 같은 값을
+- 기록 목록에서 다시 보면 9시간 밀려 있었음. UTC로 잘못 간주해 거기서 또
+- +9시간을 더했기 때문). 타임존 표기가 없으면 이미 한국 시각이라고 보고
+- 그대로 읽는다.
  */
 export function parseServerDate(value: string): Date {
   const hasTimezone = /(Z|[+-]\d{2}:\d{2})$/i.test(value);
@@ -89,8 +89,8 @@ export function parseServerDate(value: string): Date {
 }
 
 /**
- * "2026년 8월 16일 (일) 17:37" 형식으로 표시한다.
- * 시각 정보가 없는 "YYYY-MM-DD" 형태(record_date)가 들어오면 시간은 붙이지 않는다.
+- "2026년 8월 16일 (일) 17:37" 형식으로 표시한다.
+- 시각 정보가 없는 "YYYY-MM-DD" 형태(record_date)가 들어오면 시간은 붙이지 않는다.
  */
 export function formatMeasuredAt(value: string | Date): string {
   const hasTimeComponent = typeof value !== "string" || value.includes("T");
@@ -123,8 +123,8 @@ export function formatMeasuredAt(value: string | Date): string {
 }
 
 /**
- * 서버 응답 형식. /upload 응답 스키마가 서버에 아직 명세돼 있지 않아
- * 필드가 없거나 형식이 다를 수 있습니다. 화면은 모든 필드를 선택적으로 다룹니다.
+- 서버 응답 형식. /upload 응답 스키마가 서버에 아직 명세돼 있지 않아
+- 필드가 없거나 형식이 다를 수 있습니다. 화면은 모든 필드를 선택적으로 다룹니다.
  */
 export type AnimaUploadResponse = {
   prediction?: {
@@ -151,9 +151,9 @@ export type AnimaUploadResponse = {
 };
 
 /**
- * GET /records 가 돌려주는 측정 기록 한 건.
- * MRRecord 테이블 컬럼을 그대로 따른다고 보고 다루되, 실제 응답 스키마가
- * 서버에 명세돼 있지 않아 모든 필드를 선택적으로 처리한다.
+- GET /records 가 돌려주는 측정 기록 한 건.
+- MRRecord 테이블 컬럼을 그대로 따른다고 보고 다루되, 실제 응답 스키마가
+- 서버에 명세돼 있지 않아 모든 필드를 선택적으로 처리한다.
  */
 export type MRRecordSummary = {
   record_uuid?: string;
